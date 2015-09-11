@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
+#include "include\GL\glew.h"
 #include "Bitmap.h"
 
 class Texture {

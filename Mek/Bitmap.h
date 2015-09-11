@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <IL\il.h>
+#include "include\IL\il.h"
 
 /**
  A bitmap image (i.e. a grid of pixels).

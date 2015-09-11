@@ -1,5 +1,5 @@
 // third-party libraries
-#include "GL/glew.h"
+#include "include\GL\glew.h"
 #include "include\GL\glfw3.h"
 #include "lib\glm\glm.hpp"
 #include "lib\glm\gtc\matrix_transform.hpp"
@@ -119,7 +119,7 @@ static void LoadWoodenCrateAsset() {
     gWoodenCrate.drawStart = 0;
     gWoodenCrate.drawCount = 6*2*3;
 	
-    gWoodenCrate.texture = LoadTexture("C:/Users/100559437/Desktop/Mek/Debug/wooden-crate.jpg");
+    gWoodenCrate.texture = LoadTexture("wooden-crate.jpg");
     gWoodenCrate.shininess = 80.0;
     gWoodenCrate.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glGenBuffers(1, &gWoodenCrate.vbo);
@@ -397,10 +397,13 @@ void AppMain() {
     glfwSetScrollCallback(gWindow, OnScroll);
     glfwMakeContextCurrent(gWindow);
 
+	// required or we crash on VAO creation
+	glewExperimental = GL_TRUE;
     // initialise GLEW
-    glewExperimental = GL_TRUE; //stops glew crashing on OSX :-/
-    if(glewInit() != GLEW_OK)
+	if (glewInit() != GLEW_OK)
+	{
         throw std::runtime_error("glewInit failed");
+	}
 
     // GLEW throws some errors, so discard all the errors so far
     while(glGetError() != GL_NO_ERROR) {}
