@@ -188,4 +188,10 @@ void Program::setUniform(const GLchar* uniformName, const glm::vec4& v) {
     setUniform4v(uniformName, glm::value_ptr(v));
 }
 
+static Program* LoadShaders(const char* vertFilename, const char* fragFilename) {
+	std::vector<Shader> shaders;
+	shaders.push_back(Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
+	shaders.push_back(Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
+	return new Program(shaders);
+}
 

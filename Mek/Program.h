@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Shader.h"
 #include <vector>
 #include "lib\glm\glm.hpp"
 
+#include "Shader.h"
 /**
  Represents an OpenGL program made by linking shaders.
  */

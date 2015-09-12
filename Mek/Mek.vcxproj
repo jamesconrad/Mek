@@ -13,6 +13,8 @@
   <ItemGroup>
     <ClCompile Include="Bitmap.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ComponentGraphics.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -21,6 +23,9 @@
   <ItemGroup>
     <ClInclude Include="Bitmap.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="ComponentGraphics.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />

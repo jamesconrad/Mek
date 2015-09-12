@@ -2,6 +2,7 @@
 
 #include "include\GL\glew.h"
 #include <string>
+#include <vector>
 
 /**
  Represents a compiled OpenGL shader.

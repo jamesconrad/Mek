@@ -17,6 +17,7 @@
 #include "Program.h"
 #include "Texture.h"
 #include "Camera.h"
+#include "ComponentGraphics.h"
 
 /*
  Represents a textured geometry asset
@@ -52,6 +53,13 @@ struct ModelAsset {
         specularColor(1.0f, 1.0f, 1.0f)
     {}
 };
+
+static Program* LoadShaders(const char* vertFilename, const char* fragFilename) {
+	std::vector<Shader> shaders;
+	shaders.push_back(Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
+	shaders.push_back(Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
+	return new Program(shaders);
+}
 
 /*
  Represents an instance of an `ModelAsset`
@@ -91,16 +99,6 @@ ModelAsset gWoodenCrate;
 std::list<ModelInstance> gInstances;
 GLfloat gDegreesRotated = 0.0f;
 std::vector<Light> gLights;
-
-
-// returns a new Program created from the given vertex and fragment shader filenames
-static Program* LoadShaders(const char* vertFilename, const char* fragFilename) {
-    std::vector<Shader> shaders;
-    shaders.push_back(Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
-    shaders.push_back(Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
-    return new Program(shaders);
-}
-
 
 // returns a new Texture created from the given filename
 static Texture* LoadTexture(const char* filename) {
@@ -311,13 +309,13 @@ static void Render() {
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
     //rotate the first instance in `gInstances`
-    const GLfloat degreesPerSecond = 60.0f;
+    const GLfloat degreesPerSecond = 10.0f;
     gDegreesRotated += secondsElapsed * degreesPerSecond;
     while(gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
-    gInstances.front().transform = glm::rotate(glm::mat4(), glm::radians(gDegreesRotated), glm::vec3(0,1,0));
+    gInstances.front().transform = glm::rotate(glm::mat4(), gDegreesRotated, glm::vec3(0,1,0));
 
     //move position of camera based on WASD keys, and XZ keys for up and down
-    const float moveSpeed = 10.0; //units per second
+    const float moveSpeed = 4.0; //units per second
     if(glfwGetKey(gWindow, 'S')){
         gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
     } else if(glfwGetKey(gWindow, 'W')){
@@ -350,14 +348,14 @@ static void Update(float secondsElapsed) {
 
 
     //rotate camera based on mouse movement
-    const float mouseSensitivity = 0.1f;
+    const float mouseSensitivity = 0.001f;
     double mouseX, mouseY;
     glfwGetCursorPos(gWindow, &mouseX, &mouseY);
     gCamera.offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
     glfwSetCursorPos(gWindow, 0, 0); //reset the mouse, so it doesn't go out of the window
 
     //increase or decrease field of view based on mouse wheel
-    const float zoomSensitivity = -0.2f;
+    const float zoomSensitivity = -20.2f;
     float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
     if(fieldOfView < 5.0f) fieldOfView = 5.0f;
     if(fieldOfView > 130.0f) fieldOfView = 130.0f;
@@ -447,9 +445,9 @@ void AppMain() {
     CreateInstances();
 
     // setup gCamera
-    gCamera.setPosition(glm::vec3(0,0,10));
+    gCamera.setPosition(glm::vec3(0,0,100));
     gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-    gCamera.setNearAndFarPlanes(0.5f, 100000.0f);
+    gCamera.setNearAndFarPlanes(0.5f, 10000000.0f);
 
     // setup lights
     Light spotlight;
