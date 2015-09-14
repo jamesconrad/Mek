@@ -76,7 +76,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Win32\glew32.lib;glfw3vs2015.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3vs2015.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
