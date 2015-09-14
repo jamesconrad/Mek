@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include "lib\glm\glm.hpp"
 
 #include "Shader.h"
@@ -18,75 +19,84 @@ public:
 
 	 @see tdogl::Shader
 	 */
-	Program(const std::vector<Shader>& shaders);
-	~Program();
 
+	 /**
+	  @result The program's object ID, as returned from glCreateProgram
+	  */
+	GLuint object(char* name) const;
 
-	/**
-	 @result The program's object ID, as returned from glCreateProgram
-	 */
-	GLuint object() const;
+	void use(char* name) const;
 
-	void use() const;
+	bool isInUse(char* name) const;
 
-	bool isInUse() const;
+	void stopUsing(char* name) const;
 
-	void stopUsing() const;
+	void createShader(char* name, GLenum type, char* filepath);
 
 	/**
 	 @result The attribute index for the given name, as returned from glGetAttribLocation.
 	 */
-	GLint attrib(const GLchar* attribName) const;
+	GLint attrib(char* shaderName, const GLchar* attribName) const;
 
 
 	/**
 	 @result The uniform index for the given name, as returned from glGetUniformLocation.
 	 */
-	GLint uniform(const GLchar* uniformName) const;
+	GLint uniform(char* shaderName, const GLchar* uniformName) const;
 
 	/**
 	 Setters for attribute and uniform variables.
 
 	 These are convenience methods for the glVertexAttrib* and glUniform* functions.
 	 */
-#define _TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(OGL_TYPE) \
-        void setAttrib(const GLchar* attribName, OGL_TYPE v0); \
-        void setAttrib(const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1); \
-        void setAttrib(const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2); \
-        void setAttrib(const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2, OGL_TYPE v3); \
+#define _TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(SHADER_NAME, OGL_TYPE) \
+        void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0); \
+        void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1); \
+        void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2); \
+        void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2, OGL_TYPE v3); \
 \
-        void setAttrib1v(const GLchar* attribName, const OGL_TYPE* v); \
-        void setAttrib2v(const GLchar* attribName, const OGL_TYPE* v); \
-        void setAttrib3v(const GLchar* attribName, const OGL_TYPE* v); \
-        void setAttrib4v(const GLchar* attribName, const OGL_TYPE* v); \
+        void setAttrib1v(char*, const GLchar* attribName, const OGL_TYPE* v); \
+        void setAttrib2v(char*, const GLchar* attribName, const OGL_TYPE* v); \
+        void setAttrib3v(char*, const GLchar* attribName, const OGL_TYPE* v); \
+        void setAttrib4v(char*, const GLchar* attribName, const OGL_TYPE* v); \
 \
-        void setUniform(const GLchar* uniformName, OGL_TYPE v0); \
-        void setUniform(const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1); \
-        void setUniform(const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2); \
-        void setUniform(const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2, OGL_TYPE v3); \
+        void setUniform(char*, const GLchar* uniformName, OGL_TYPE v0); \
+        void setUniform(char*, const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1); \
+        void setUniform(char*, const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2); \
+        void setUniform(char*, const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2, OGL_TYPE v3); \
 \
-        void setUniform1v(const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
-        void setUniform2v(const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
-        void setUniform3v(const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
-        void setUniform4v(const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
+        void setUniform1v(char*, const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
+        void setUniform2v(char*, const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
+        void setUniform3v(char*, const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
+        void setUniform4v(char*, const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
 
-	_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(GLfloat)
-		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(GLdouble)
-		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(GLint)
-		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(GLuint)
+	_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(char*, GLfloat)
+		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(char*, GLdouble)
+		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(char*, GLint)
+		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(char*, GLuint)
 
-		void setUniformMatrix2(const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniformMatrix3(const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniformMatrix4(const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniform(const GLchar* uniformName, const glm::mat2& m, GLboolean transpose = GL_FALSE);
-	void setUniform(const GLchar* uniformName, const glm::mat3& m, GLboolean transpose = GL_FALSE);
-	void setUniform(const GLchar* uniformName, const glm::mat4& m, GLboolean transpose = GL_FALSE);
-	void setUniform(const GLchar* uniformName, const glm::vec3& v);
-	void setUniform(const GLchar* uniformName, const glm::vec4& v);
+		void setUniformMatrix2(char* shaderName, const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniformMatrix3(char* shaderName, const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniformMatrix4(char* shaderName, const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniform(char* shaderName, const GLchar* uniformName, const glm::mat2& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* shaderName, const GLchar* uniformName, const glm::mat3& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* shaderName, const GLchar* uniformName, const glm::mat4& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* shaderName, const GLchar* uniformName, const glm::vec3& v);
+	void setUniform(char* shaderName, const GLchar* uniformName, const glm::vec4& v);
 
+
+	static Program& getInstance()
+	{
+		static Program instance;
+		return instance;
+	}
 
 private:
-	GLuint _object;
+
+	Program() {};
+
+	// 3 spooky 5 me
+	std::map<char*, std::pair<std::map<GLenum, Shader>, GLuint>> _shaderMap;
 
 	//copying disabled
 	Program(const Program&);

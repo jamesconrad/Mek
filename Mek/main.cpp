@@ -31,7 +31,6 @@
   - the parameters to glDrawArrays (drawType, drawStart, drawCount)
  */
 struct ModelAsset {
-    Program* shaders;
     Texture* texture;
     GLuint vbo;
     GLuint vao;
@@ -42,7 +41,6 @@ struct ModelAsset {
     glm::vec3 specularColor;
 
     ModelAsset() :
-        shaders(NULL),
         texture(NULL),
         vbo(0),
         vao(0),
@@ -54,11 +52,10 @@ struct ModelAsset {
     {}
 };
 
-static Program* LoadShaders(const char* vertFilename, const char* fragFilename) {
-	std::vector<Shader> shaders;
-	shaders.push_back(Shader::shaderFromFile(vertFilename, GL_VERTEX_SHADER));
-	shaders.push_back(Shader::shaderFromFile(fragFilename, GL_FRAGMENT_SHADER));
-	return new Program(shaders);
+void LoadShaders(char* vertFilename, char* fragFilename) 
+{
+	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
+	Program::getInstance().createShader("standard", GL_FRAGMENT_SHADER, fragFilename);
 }
 
 /*
@@ -94,7 +91,6 @@ const glm::vec2 SCREEN_SIZE(1920, 1080);
 // globals
 GLFWwindow* gWindow = NULL;
 double gScrollY = 0.0;
-Camera gCamera;
 ModelAsset gWoodenCrate;
 std::list<ModelInstance> gInstances;
 GLfloat gDegreesRotated = 0.0f;
@@ -112,7 +108,7 @@ static Texture* LoadTexture(const char* filename) {
 // initialises the gWoodenCrate global
 static void LoadWoodenCrateAsset() {
     // set all the elements of gWoodenCrate
-    gWoodenCrate.shaders = LoadShaders("vertex-shader.txt", "fragment-shader.txt");
+    LoadShaders("vertex-shader.txt", "fragment-shader.txt");
     gWoodenCrate.drawType = GL_TRIANGLES;
     gWoodenCrate.drawStart = 0;
     gWoodenCrate.drawCount = 6*2*3;
@@ -183,16 +179,16 @@ static void LoadWoodenCrateAsset() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
     // connect the xyz to the "vert" attribute of the vertex shader
-    glEnableVertexAttribArray(gWoodenCrate.shaders->attrib("vert"));
-    glVertexAttribPointer(gWoodenCrate.shaders->attrib("vert"), 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), NULL);
+    glEnableVertexAttribArray(Program::getInstance().attrib("standard", "vert"));
+    glVertexAttribPointer(Program::getInstance().attrib("standard", "vert"), 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), NULL);
 
     // connect the uv coords to the "vertTexCoord" attribute of the vertex shader
-    glEnableVertexAttribArray(gWoodenCrate.shaders->attrib("vertTexCoord"));
-    glVertexAttribPointer(gWoodenCrate.shaders->attrib("vertTexCoord"), 2, GL_FLOAT, GL_TRUE,  8*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(Program::getInstance().attrib("standard", "vertTexCoord"));
+    glVertexAttribPointer(Program::getInstance().attrib("standard", "vertTexCoord"), 2, GL_FLOAT, GL_TRUE,  8*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 
     // connect the normal to the "vertNormal" attribute of the vertex shader
-    glEnableVertexAttribArray(gWoodenCrate.shaders->attrib("vertNormal"));
-    glVertexAttribPointer(gWoodenCrate.shaders->attrib("vertNormal"), 3, GL_FLOAT, GL_TRUE,  8*sizeof(GLfloat), (const GLvoid*)(5 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(Program::getInstance().attrib("standard", "vertNormal"));
+    glVertexAttribPointer(Program::getInstance().attrib("standard", "vertNormal"), 3, GL_FLOAT, GL_TRUE,  8*sizeof(GLfloat), (const GLvoid*)(5 * sizeof(GLfloat)));
 
     // unbind the VAO
     glBindVertexArray(0);
@@ -240,38 +236,37 @@ static void CreateInstances() {
 }
 
 template <typename T>
-void SetLightUniform(Program* shaders, const char* propertyName, size_t lightIndex, const T& value) {
+void SetLightUniform(char* shaderName, const char* propertyName, size_t lightIndex, const T& value) {
     std::ostringstream ss;
     ss << "allLights[" << lightIndex << "]." << propertyName;
     std::string uniformName = ss.str();
 
-    shaders->setUniform(uniformName.c_str(), value);
+    Program::getInstance().setUniform("standard", uniformName.c_str(), value);
 }
 
 //renders a single `ModelInstance`
 static void RenderInstance(const ModelInstance& inst) {
     ModelAsset* asset = inst.asset;
-    Program* shaders = asset->shaders;
 
     //bind the shaders
-    shaders->use();
+    Program::getInstance().use("standard");
 
     //set the shader uniforms
-    shaders->setUniform("camera", gCamera.matrix());
-    shaders->setUniform("model", inst.transform);
-    shaders->setUniform("materialTex", 0); //set to 0 because the texture will be bound to GL_TEXTURE0
-    shaders->setUniform("materialShininess", asset->shininess);
-    shaders->setUniform("materialSpecularColor", asset->specularColor);
-    shaders->setUniform("cameraPosition", gCamera.position());
-    shaders->setUniform("numLights", (int)gLights.size());
+    Program::getInstance().setUniform("standard", "camera", Camera::getInstance().matrix());
+    Program::getInstance().setUniform("standard", "model", inst.transform);
+    Program::getInstance().setUniform("standard", "materialTex", 0); //set to 0 because the texture will be bound to GL_TEXTURE0
+    Program::getInstance().setUniform("standard", "materialShininess", asset->shininess);
+    Program::getInstance().setUniform("standard", "materialSpecularColor", asset->specularColor);
+    Program::getInstance().setUniform("standard", "cameraPosition", Camera::getInstance().position());
+    Program::getInstance().setUniform("standard", "numLights", (int)gLights.size());
 
     for(size_t i = 0; i < gLights.size(); ++i){
-        SetLightUniform(shaders, "position", i, gLights[i].position);
-        SetLightUniform(shaders, "intensities", i, gLights[i].intensities);
-        SetLightUniform(shaders, "attenuation", i, gLights[i].attenuation);
-        SetLightUniform(shaders, "ambientCoefficient", i, gLights[i].ambientCoefficient);
-        SetLightUniform(shaders, "coneAngle", i, gLights[i].coneAngle);
-        SetLightUniform(shaders, "coneDirection", i, gLights[i].coneDirection);
+        SetLightUniform("standard", "position", i, gLights[i].position);
+        SetLightUniform("standard", "intensities", i, gLights[i].intensities);
+        SetLightUniform("standard", "attenuation", i, gLights[i].attenuation);
+        SetLightUniform("standard", "ambientCoefficient", i, gLights[i].ambientCoefficient);
+        SetLightUniform("standard", "coneAngle", i, gLights[i].coneAngle);
+        SetLightUniform("standard", "coneDirection", i, gLights[i].coneDirection);
     }
 
     //bind the texture
@@ -285,7 +280,7 @@ static void RenderInstance(const ModelInstance& inst) {
     //unbind everything
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-    shaders->stopUsing();
+    Program::getInstance().stopUsing("standard");
 }
 
 
@@ -317,25 +312,25 @@ static void Update(float secondsElapsed) {
     //move position of camera based on WASD keys, and XZ keys for up and down
     const float moveSpeed = 4.0; //units per second
     if(glfwGetKey(gWindow, 'S')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * -Camera::getInstance().forward());
     } else if(glfwGetKey(gWindow, 'W')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * Camera::getInstance().forward());
     }
     if(glfwGetKey(gWindow, 'A')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.right());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * -Camera::getInstance().right());
     } else if(glfwGetKey(gWindow, 'D')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * Camera::getInstance().right());
     }
     if(glfwGetKey(gWindow, 'Z')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
     } else if(glfwGetKey(gWindow, 'X')){
-        gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
     }
 	
     //move light
     if(glfwGetKey(gWindow, '1')){
-        gLights[0].position = glm::vec4(gCamera.position(), 1.0);
-        gLights[0].coneDirection = gCamera.forward();
+        gLights[0].position = glm::vec4(Camera::getInstance().position(), 1.0);
+        gLights[0].coneDirection = Camera::getInstance().forward();
     }
 
     // change light color
@@ -351,15 +346,15 @@ static void Update(float secondsElapsed) {
     const float mouseSensitivity = 0.001f;
     double mouseX, mouseY;
     glfwGetCursorPos(gWindow, &mouseX, &mouseY);
-    gCamera.offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
+    Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
     glfwSetCursorPos(gWindow, 0, 0); //reset the mouse, so it doesn't go out of the window
 
     //increase or decrease field of view based on mouse wheel
     const float zoomSensitivity = -20.2f;
-    float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
+    float fieldOfView = Camera::getInstance().fieldOfView() + zoomSensitivity * (float)gScrollY;
     if(fieldOfView < 5.0f) fieldOfView = 5.0f;
     if(fieldOfView > 130.0f) fieldOfView = 130.0f;
-    gCamera.setFieldOfView(fieldOfView);
+    Camera::getInstance().setFieldOfView(fieldOfView);
     gScrollY = 0;
 }
 
@@ -385,7 +380,7 @@ void AppMain() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", glfwGetPrimaryMonitor(), NULL);
+    gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
     if(!gWindow)
         throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.2?");
 
@@ -444,10 +439,10 @@ void AppMain() {
     // create all the instances in the 3D scene based on the gWoodenCrate asset
     CreateInstances();
 
-    // setup gCamera
-    gCamera.setPosition(glm::vec3(0,0,100));
-    gCamera.setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-    gCamera.setNearAndFarPlanes(0.5f, 10000000.0f);
+    // setup Camera::getInstance()
+    Camera::getInstance().setPosition(glm::vec3(0,0,100));
+    Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
+    Camera::getInstance().setNearAndFarPlanes(0.5f, 10000000.0f);
 
     // setup lights
     Light spotlight;

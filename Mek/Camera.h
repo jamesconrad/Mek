@@ -12,8 +12,6 @@
  */
 class Camera {
 public:
-	Camera();
-
 	/**
 	 The position of the camera.
 	 */
@@ -124,7 +122,16 @@ public:
 	 */
 	glm::mat4 view() const;
 
+	static Camera& getInstance()
+	{
+		static Camera instance;
+		return instance;
+	}
+
 private:
+
+	Camera();
+
 	glm::vec3 _position;
 	float _horizontalAngle;
 	float _verticalAngle;
