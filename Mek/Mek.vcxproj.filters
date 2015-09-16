@@ -65,6 +65,9 @@
     <ClInclude Include="ComponentGraphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LightComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="vertex-shader.txt">

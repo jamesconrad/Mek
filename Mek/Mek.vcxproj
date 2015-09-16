@@ -26,6 +26,7 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentGraphics.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="LightComponent.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
@@ -42,7 +43,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -76,7 +77,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3vs2015.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>

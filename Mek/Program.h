@@ -5,6 +5,7 @@
 #include "lib\glm\glm.hpp"
 
 #include "Shader.h"
+#include "LightComponent.h"
 /**
  Represents an OpenGL program made by linking shaders.
  */
@@ -97,6 +98,8 @@ private:
 
 	// 3 spooky 5 me
 	std::map<char*, std::pair<std::map<GLenum, Shader>, GLuint>> _shaderMap;
+
+	std::vector<LightComponent*> _lightMap;
 
 	//copying disabled
 	Program(const Program&);
