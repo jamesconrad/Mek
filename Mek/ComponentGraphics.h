@@ -28,6 +28,10 @@ public:
 	void update();
 	void loadModel(char* model);
 	void render();
+
+
+	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms);
+
 private:
 	// skeleton structs
 #define NUM_BONES_PER_VEREX 4
@@ -79,6 +83,14 @@ private:
 		unsigned int MaterialIndex;
 	};
 
+	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	unsigned int FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	unsigned int FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	unsigned int FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const std::string NodeName);
+	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
 	// model loader functions
 	void initFromScene(const aiScene* scene, const char* filepath);
 	void initMesh(unsigned int MeshIndex,
