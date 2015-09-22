@@ -20,6 +20,11 @@
 #include <stdexcept>
 #include "lib\glm\gtc\type_ptr.hpp"
 
+void Program::addLightSource(LightComponent* l)
+{
+	_lightMap.push_back(l);
+}
+
 void Program::createShader(char* name, GLenum type, char* filepath)
 {
 	//std::map<char*, std::pair<std::map<GLenum, Shader*>, GLuint>> _shaderMap;

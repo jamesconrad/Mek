@@ -1,6 +1,6 @@
 #pragma once
 // engine includes
-#include "Component.h"
+#include "GameObject.h"
 #include "Texture.h"
 
 // assimp includes

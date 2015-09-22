@@ -11,18 +11,8 @@
  */
 class Program {
 public:
-	/**
-	 Creates a program by linking a list of tdogl::Shader objects
-
-	 @param shaders  The shaders to link together to make the program
-
-	 @throws std::exception if an error occurs.
-
-	 @see tdogl::Shader
-	 */
-
 	 /**
-	  @result The program's object ID, as returned from glCreateProgram
+	 The program's object ID, as returned from glCreateProgram
 	  */
 	GLuint object(char* name) const;
 
@@ -35,15 +25,19 @@ public:
 	void createShader(char* name, GLenum type, char* filepath);
 
 	/**
-	 @result The attribute index for the given name, as returned from glGetAttribLocation.
+	The attribute index for the given name, as returned from glGetAttribLocation.
 	 */
 	GLint attrib(char* shaderName, const GLchar* attribName) const;
 
 
 	/**
-	 @result The uniform index for the given name, as returned from glGetUniformLocation.
+	 The uniform index for the given name, as returned from glGetUniformLocation.
 	 */
 	GLint uniform(char* shaderName, const GLchar* uniformName) const;
+
+	//NO DELETE FUNCTION YET TODO:: DELETE FUNCTION ON LIGHTCOMPONENT DECONSTRUCTOR ALSO ADD THE LIGHTSOURCE ON CONSTRUCTOR
+	void addLightSource(LightComponent*);
+
 
 	/**
 	 Setters for attribute and uniform variables.

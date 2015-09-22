@@ -96,6 +96,8 @@ std::list<ModelInstance> gInstances;
 GLfloat gDegreesRotated = 0.0f;
 std::vector<Light> gLights;
 
+GameObject* model;
+
 // returns a new Texture created from the given filename
 static Texture* LoadTexture(const char* filename) {
 	Bitmap bmp;
@@ -460,6 +462,17 @@ void AppMain() {
 
     gLights.push_back(spotlight);
     gLights.push_back(directionalLight);
+
+	//MODEL INITS
+
+	ComponentGraphics* gModel = new ComponentGraphics();
+	gModel->setOwner(model);
+	gModel->loadModel("models/mech.dae");
+	Component* gp = gModel;
+	model = new GameObject(1);
+	model->AddComponent(GRAPHICS, gp);
+
+	//END MODEL INITS
 
 
     // run while the window is open
