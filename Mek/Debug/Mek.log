@@ -1,8 +1,27 @@
-﻿Build started 9/21/2015 3:22:18 PM.
-     1>Project "D:\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
-     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.Cpp.Platform.targets(57,5): error MSB8020: The build tools for v120 (Platform Toolset = 'v120') cannot be found. To build using the v120 build tools, please install v120 build tools.  Alternatively, you may upgrade to the current Visual Studio tools by selecting the Project menu or right-click the solution, and then selecting "Retarget solution".
-     1>Done Building Project "D:\Mek\Mek\Mek.vcxproj" (Build target(s)) -- FAILED.
+﻿Build started 9/22/2015 12:53:19 PM.
+     1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
+     1>PreBuildEvent:
+         echo C:\Users\100559437\Documents\Mek\Mek\
+         :VCEnd
+         C:\Users\100559437\Documents\Mek\Mek\
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Program.cpp main.cpp
+         Program.cpp
+     1>c:\users\100559437\documents\mek\mek\lightcomponent.h(26): error C2653: 'Program' : is not a class or namespace name
+     1>c:\users\100559437\documents\mek\mek\lightcomponent.h(26): error C3861: 'addLightSource': identifier not found
+     1>c:\users\100559437\documents\mek\mek\program.cpp(25): error C2228: left of '.push_back' must have class/struct/union
+         Generating Code...
+         Compiling...
+         main.cpp
+     1>c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY' : macro redefinition
+                 c:\users\100559437\documents\mek\mek\include\gl\glfw3.h(85) : see previous definition of 'APIENTRY'
+     1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\crtdbg.h(586): warning C4005: '_malloca' : macro redefinition
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\malloc.h(224) : see previous definition of '_malloca'
+     1>c:\users\100559437\documents\mek\mek\lightcomponent.h(26): error C2653: 'Program' : is not a class or namespace name
+     1>c:\users\100559437\documents\mek\mek\lightcomponent.h(26): error C3861: 'addLightSource': identifier not found
+         Generating Code...
+     1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)) -- FAILED.
 
 Build FAILED.
 
-Time Elapsed 00:00:00.00
+Time Elapsed 00:00:02.03

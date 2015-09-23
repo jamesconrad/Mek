@@ -39,7 +39,7 @@
     <ClCompile Include="ComponentGraphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Visual Studio 2013\Projects\The ACTUAL real TRUE MEK INPUT\The ACTUAL real TRUE MEK INPUT\Input.cpp">
+    <ClCompile Include="Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,7 +71,7 @@
     <ClInclude Include="LightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Visual Studio 2013\Projects\The ACTUAL real TRUE MEK INPUT\The ACTUAL real TRUE MEK INPUT\Input.h">
+    <ClInclude Include="Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
