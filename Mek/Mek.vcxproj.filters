@@ -83,4 +83,12 @@
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="skinning.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="skinning.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

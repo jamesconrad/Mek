@@ -37,6 +37,10 @@
     <Text Include="fragment-shader.txt" />
     <Text Include="vertex-shader.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="skinning.fs" />
+    <None Include="skinning.vs" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{222737CC-70B8-41BB-A92B-095192302DFF}</ProjectGuid>
     <RootNamespace>Mek</RootNamespace>
