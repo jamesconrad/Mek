@@ -23,7 +23,7 @@ public:
 	float _ambientCoefficient;
 	float _coneAngle;
 
-	LightComponent(LightType l) { _type = l; }
+	LightComponent(LightType l) { _type = l; Program::addLightSource(this); }
 
 	void SetVars(LightType l, glm::vec3 pos, glm::vec3 dir, glm::vec3 color, float attenuation, float ambient, float coneAngle)
 	{
