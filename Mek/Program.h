@@ -5,7 +5,9 @@
 #include "lib\glm\glm.hpp"
 
 #include "Shader.h"
-#include "LightComponent.h"
+
+class LightComponent;
+
 /**
  Represents an OpenGL program made by linking shaders.
  */
@@ -36,7 +38,8 @@ public:
 	GLint uniform(char* shaderName, const GLchar* uniformName) const;
 
 	//NO DELETE FUNCTION YET TODO:: DELETE FUNCTION ON LIGHTCOMPONENT DECONSTRUCTOR ALSO ADD THE LIGHTSOURCE ON CONSTRUCTOR
-	void addLightSource(LightComponent*);
+	int addLightSource(LightComponent*);
+	void delLightSource(int);
 
 
 	/**

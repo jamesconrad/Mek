@@ -20,9 +20,16 @@
 #include <stdexcept>
 #include "lib\glm\gtc\type_ptr.hpp"
 
-void Program::addLightSource(LightComponent* l)
+int Program::addLightSource(LightComponent* l)
 {
 	_lightMap.push_back(l);
+	return _lightMap.size();
+}
+
+void Program::delLightSource(int index)
+{
+	_lightMap.erase(_lightMap.begin() + index);
+	_lightMap.shrink_to_fit();
 }
 
 void Program::createShader(char* name, GLenum type, char* filepath)

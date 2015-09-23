@@ -38,8 +38,8 @@
     <Text Include="vertex-shader.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="skinning.fs" />
-    <None Include="skinning.vs" />
+    <None Include="skinning.frags" />
+    <None Include="skinning.verts" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{222737CC-70B8-41BB-A92B-095192302DFF}</ProjectGuid>
