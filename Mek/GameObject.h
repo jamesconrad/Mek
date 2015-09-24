@@ -17,7 +17,10 @@ class Component
 {
 public:
 	virtual void update() = 0;
-	void setOwner(GameObject* owner) { _owner = owner; }
+	void setOwner(GameObject* owner) 
+	{ 
+		_owner = owner;
+	}
 	GameObject* getOwner() { return _owner; }
 private:
 	GameObject* _owner;

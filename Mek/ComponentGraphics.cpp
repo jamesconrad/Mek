@@ -1,4 +1,6 @@
 #include "ComponentGraphics.h"
+#include "Program.h"
+#include "lib\glm\gtc\type_ptr.hpp"
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
 // helper to determine proper VBO index
@@ -45,6 +47,7 @@ void ComponentGraphics::VertexBoneData::AddBoneData(unsigned int BoneID, float W
 void ComponentGraphics::loadModel(char* filepath)
 {
 	// Create the VAO
+	glGenBuffers(1, &_vbo);
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vbo);
 
@@ -172,6 +175,17 @@ void ComponentGraphics::initMesh(unsigned int MeshIndex,
 	}
 }
 
+GLint GetUniformLocation(const char* pUniformName)
+{
+
+	GLuint Location = glGetUniformLocation(Program::getInstance().object("skinning"), pUniformName);
+
+	if (Location == 0xffffffff) {
+		fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", pUniformName);
+	}
+
+	return Location;
+}
 
 void ComponentGraphics::loadBones(unsigned int MeshIndex, const aiMesh* pMesh, std::vector<VertexBoneData>& Bones)
 {
@@ -202,6 +216,13 @@ void ComponentGraphics::loadBones(unsigned int MeshIndex, const aiMesh* pMesh, s
 			Bones[VertexID].AddBoneData(BoneIndex, Weight);
 		}
 	}
+	// init the gBones array requriments for the shader
+	for (unsigned int i = 0; i < ARRAY_SIZE_IN_ELEMENTS(_boneLocation); i++) {
+		char Name[128];
+		memset(Name, 0, sizeof(Name));
+		_snprintf_s(Name, sizeof(Name), "gBones[%d]", i);
+		_boneLocation[i] = GetUniformLocation(Name);
+	}
 }
 
 
@@ -223,18 +244,35 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 				std::string p(Path.data);
 
 				Bitmap bmp;
-				bmp.bitmapFromFile(p);
+				//bmp.bitmapFromFile(p);
+				bmp.bitmapFromFile("wooden-crate.jpg");
 				bmp.flipVertically();
 				_textures[i] = new Texture(bmp);
 			}
+		}
+		else
+		{
+			std::string p("wooden-crate.jpg");
+
+			Bitmap bmp;
+			bmp.bitmapFromFile(p);
+			bmp.flipVertically();
+			_textures[i] = new Texture(bmp);
 		}
 	}
 }
 
 void ComponentGraphics::render()
 {
-	glBindVertexArray(_vao);
+	//
 
+	Program::getInstance().use("skinning");
+	Program::getInstance().updateSkinning();
+	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
+		glUniformMatrix4fv(_boneLocation[i], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(_frameBoneTransforms[i]));
+	GLenum error = glGetError();
+	//
+	glBindVertexArray(_vao);
 	for (unsigned int i = 0; i < _entries.size(); i++)
 	{
 		const unsigned int MaterialIndex = _entries[i].MaterialIndex;
@@ -244,9 +282,10 @@ void ComponentGraphics::render()
 		if (_textures[MaterialIndex])
 		{
 			glActiveTexture(GL_TEXTURE0);
+			error = glGetError();
 			glBindTexture(GL_TEXTURE0, _textures[MaterialIndex]->object());
+			error = glGetError();
 		}
-
 		glDrawElementsBaseVertex(GL_TRIANGLES,
 			_entries[i].NumIndices,
 			GL_UNSIGNED_INT,
@@ -256,6 +295,7 @@ void ComponentGraphics::render()
 
 	// Make sure the VAO is not changed from the outside    
 	glBindVertexArray(0);
+	Program::getInstance().stopUsing("skinning");
 }
 
 unsigned int ComponentGraphics::FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
@@ -432,6 +472,8 @@ void ComponentGraphics::BoneTransform(float TimeInSeconds, std::vector<glm::mat4
 	{
 		Transforms[i] = _boneInfo[i].FinalTransformation;
 	}
+
+	_frameBoneTransforms = Transforms;
 }
 
 

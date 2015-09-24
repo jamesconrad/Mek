@@ -5,6 +5,7 @@
 #include "lib\glm\glm.hpp"
 
 #include "Shader.h"
+#include "Camera.h"
 
 class LightComponent;
 
@@ -40,6 +41,8 @@ public:
 	//NO DELETE FUNCTION YET TODO:: DELETE FUNCTION ON LIGHTCOMPONENT DECONSTRUCTOR ALSO ADD THE LIGHTSOURCE ON CONSTRUCTOR
 	int addLightSource(LightComponent*);
 	void delLightSource(int);
+
+	void updateSkinning();
 
 
 	/**
@@ -81,8 +84,7 @@ public:
 	void setUniform(char* shaderName, const GLchar* uniformName, const glm::mat4& m, GLboolean transpose = GL_FALSE);
 	void setUniform(char* shaderName, const GLchar* uniformName, const glm::vec3& v);
 	void setUniform(char* shaderName, const GLchar* uniformName, const glm::vec4& v);
-
-
+	
 	static Program& getInstance()
 	{
 		static Program instance;

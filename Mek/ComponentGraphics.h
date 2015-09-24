@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 
+#define MAX_BONES 100
 
 class ComponentGraphics : public Component
 {
@@ -106,8 +107,6 @@ private:
 	// model loader vars
 	const aiScene* _scene;
 	Assimp::Importer _importer;
-	std::map<std::string, GLuint*> _textureIdMap;
-	GLuint* _textureIds;
 
 	// model rendering vars
 	GLuint _vbo;
@@ -119,4 +118,6 @@ private:
 	std::vector<MeshEntry> _entries;
 	std::vector<Texture*> _textures;
 	glm::mat4 _transform;
+	std::vector<glm::mat4> _frameBoneTransforms;
+	GLint _boneLocation[MAX_BONES];
 };

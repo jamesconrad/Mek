@@ -28,12 +28,12 @@ _originalHeight((GLfloat)bitmap.height())
 	//_originalHeight = ilGetInteger(IL_IMAGE_HEIGHT);
 
 	glGenTextures(1, &_object);
-	glBindTexture(GL_TEXTURE_2D, _object);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minMagFiler);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, minMagFiler);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
-	glTexImage2D(GL_TEXTURE_2D,
+	glBindTexture(GL_TEXTURE0, _object);
+	glTexParameteri(GL_TEXTURE0, GL_TEXTURE_MIN_FILTER, minMagFiler);
+	glTexParameteri(GL_TEXTURE0, GL_TEXTURE_MAG_FILTER, minMagFiler);
+	glTexParameteri(GL_TEXTURE0, GL_TEXTURE_WRAP_S, wrapMode);
+	glTexParameteri(GL_TEXTURE0, GL_TEXTURE_WRAP_T, wrapMode);
+	glTexImage2D(GL_TEXTURE0,
 		0,
 		TextureFormatForBitmapFormat(bitmap.format(), true),
 		(GLsizei)bitmap.width(),
@@ -42,7 +42,7 @@ _originalHeight((GLfloat)bitmap.height())
 		TextureFormatForBitmapFormat(bitmap.format(), false),
 		GL_UNSIGNED_BYTE,
 		bitmap.pixelBuffer());
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE0, 0);
 }
 
 Texture::~Texture()

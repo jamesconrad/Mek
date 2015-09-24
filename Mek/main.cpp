@@ -56,6 +56,10 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 {
 	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
 	Program::getInstance().createShader("standard", GL_FRAGMENT_SHADER, fragFilename);
+
+	// load skinning shaders
+	Program::getInstance().createShader("skinning", GL_VERTEX_SHADER, "skinning.verts");
+	Program::getInstance().createShader("skinning", GL_FRAGMENT_SHADER, "skinning.frags");
 }
 
 /*
@@ -97,6 +101,7 @@ GLfloat gDegreesRotated = 0.0f;
 std::vector<Light> gLights;
 
 GameObject* model;
+ComponentGraphics* gModel;
 
 // returns a new Texture created from the given filename
 static Texture* LoadTexture(const char* filename) {
@@ -292,11 +297,13 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	gModel->render();
     // render all the instances
     std::list<ModelInstance>::const_iterator it;
     for(it = gInstances.begin(); it != gInstances.end(); ++it){
-        RenderInstance(*it);
+      //  RenderInstance(*it);
     }
+
 
     // swap the display buffers (displays what was just drawn)
     glfwSwapBuffers(gWindow);
@@ -381,6 +388,7 @@ void AppMain() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
     if(!gWindow)
@@ -442,7 +450,7 @@ void AppMain() {
     CreateInstances();
 
     // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(0,0,100));
+    Camera::getInstance().setPosition(glm::vec3(0,0,1));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
     Camera::getInstance().setNearAndFarPlanes(0.5f, 10000000.0f);
 
@@ -465,13 +473,14 @@ void AppMain() {
 
 	//MODEL INITS
 
-	ComponentGraphics* gModel = new ComponentGraphics();
-	gModel->setOwner(model);
-	gModel->loadModel("models/mech.dae");
-	Component* gp = gModel;
 	model = new GameObject(1);
+	gModel = new ComponentGraphics();
+	gModel->setOwner(model);
+	gModel->loadModel("C:/Users/100559437/Documents/Mek/Debug/models/ArmyPilot.dae");
+	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 
+	gModel->render();
 	//END MODEL INITS
 
 
