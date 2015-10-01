@@ -49,7 +49,7 @@ void ComponentGraphics::loadModel(char* filepath)
 	// Create the VAO
 	glGenBuffers(1, &_vbo);
 	glGenVertexArrays(1, &_vao);
-	glBindVertexArray(_vbo);
+	glBindVertexArray(_vao);
 
 	// Create the buffers for the vertices attributes
 	glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(_buffers), _buffers);
@@ -113,6 +113,8 @@ void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath
 
 	initMaterials(scene);
 
+	Program::getInstance().use("skinning");
+	
 	// Generate and populate the buffers with vertex attributes and the indices
 	glBindBuffer(GL_ARRAY_BUFFER, _buffers[POS_VB]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Positions[0]) * Positions.size(), &Positions[0], GL_STATIC_DRAW);
@@ -138,6 +140,8 @@ void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffers[INDEX_BUFFER]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices[0]) * Indices.size(), &Indices[0], GL_STATIC_DRAW);
+
+	Program::getInstance().stopUsing("skinning");
 }
 
 void ComponentGraphics::initMesh(unsigned int MeshIndex,
@@ -173,6 +177,8 @@ void ComponentGraphics::initMesh(unsigned int MeshIndex,
 		Indices.push_back(Face.mIndices[1]);
 		Indices.push_back(Face.mIndices[2]);
 	}
+
+	_indices = Indices;
 }
 
 GLint GetUniformLocation(const char* pUniformName)
@@ -244,20 +250,13 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 				std::string p(Path.data);
 
 				Bitmap bmp;
-				//bmp.bitmapFromFile(p);
-				bmp.bitmapFromFile("wooden-crate.jpg");
-				bmp.flipVertically();
-				_textures[i] = new Texture(bmp);
+				_textures[i] = new Texture("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
 			}
 		}
 		else
 		{
-			std::string p("wooden-crate.jpg");
-
-			Bitmap bmp;
-			bmp.bitmapFromFile(p);
-			bmp.flipVertically();
-			_textures[i] = new Texture(bmp);
+			std::string p("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
+			_textures[i] = new Texture((char*)p.c_str());
 		}
 	}
 }
@@ -265,12 +264,10 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 void ComponentGraphics::render()
 {
 	//
-
 	Program::getInstance().use("skinning");
-	Program::getInstance().updateSkinning();
+	updateShader();
 	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
 		glUniformMatrix4fv(_boneLocation[i], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(_frameBoneTransforms[i]));
-	GLenum error = glGetError();
 	//
 	glBindVertexArray(_vao);
 	for (unsigned int i = 0; i < _entries.size(); i++)
@@ -282,18 +279,20 @@ void ComponentGraphics::render()
 		if (_textures[MaterialIndex])
 		{
 			glActiveTexture(GL_TEXTURE0);
-			error = glGetError();
-			glBindTexture(GL_TEXTURE0, _textures[MaterialIndex]->object());
-			error = glGetError();
+			glBindTexture(GL_TEXTURE_2D, _textures[MaterialIndex]->object());
 		}
 		glDrawElementsBaseVertex(GL_TRIANGLES,
 			_entries[i].NumIndices,
 			GL_UNSIGNED_INT,
-			(void*)(sizeof(unsigned int) * _entries[i].BaseIndex),
+			(void*)(sizeof(unsigned int)* _entries[i].BaseIndex),
 			_entries[i].BaseVertex);
+
+		//glDrawArrays(GL_TRIANGLES,
+		//	_entries[i].NumIndices,
+		//	_entries[i].BaseVertex);
 	}
 
-	// Make sure the VAO is not changed from the outside    
+	// Make sure the VAO is not changed from the outside
 	glBindVertexArray(0);
 	Program::getInstance().stopUsing("skinning");
 }
@@ -488,4 +487,21 @@ const aiNodeAnim* ComponentGraphics::FindNodeAnim(const aiAnimation* pAnimation,
 	}
 
 	return NULL;
+}
+
+void ComponentGraphics::updateShader()
+{
+	glm::mat4 W;
+	glm::translate(W, _owner->GetPos());
+	//glm::rotate(W, _owner->GetRot());
+	//glm::scale(W, _owner->GetScale());
+	glm::scale(W, glm::vec3(0.1, 0.1, 0.1));
+
+	glm::mat4 VP;
+	VP = Camera::getInstance().matrix();
+
+	glm::mat4 WVP = VP * W;
+	
+	Program::getInstance().setUniform("skinning", "gWVP", WVP);
+	Program::getInstance().setUniform("skinning", "gWorld", W);
 }

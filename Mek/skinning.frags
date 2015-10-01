@@ -135,5 +135,6 @@ void main()
         TotalLight += CalcSpotLight(gSpotLights[i], In);                                
     }                                                                                       
                                                                                             
-    FragColor = texture(gColorMap, In.TexCoord.xy) * TotalLight;
+    //FragColor = texture(gColorMap, In.TexCoord.xy) * TotalLight;
+	FragColor = texture(gColorMap, In.TexCoord.xy);
 }

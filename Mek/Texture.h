@@ -16,7 +16,7 @@ public:
 	 @param minMagFiler  GL_NEAREST or GL_LINEAR
 	 @param wrapMode GL_REPEAT, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE, or GL_CLAMP_TO_BORDER
 	 */
-	Texture(const Bitmap& bitmap,
+	Texture(char* file,
 		GLint minMagFiler = GL_LINEAR,
 		GLint wrapMode = GL_CLAMP_TO_EDGE);
 

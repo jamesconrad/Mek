@@ -103,12 +103,14 @@ std::vector<Light> gLights;
 GameObject* model;
 ComponentGraphics* gModel;
 
+float tElap = 0;
+
 // returns a new Texture created from the given filename
-static Texture* LoadTexture(const char* filename) {
+static Texture* LoadTexture(char* filename) {
 	Bitmap bmp;
 	bmp.bitmapFromFile(filename);
     bmp.flipVertically();
-    return new Texture(bmp);
+    return new Texture(filename);
 }
 
 
@@ -120,7 +122,7 @@ static void LoadWoodenCrateAsset() {
     gWoodenCrate.drawStart = 0;
     gWoodenCrate.drawCount = 6*2*3;
 	
-    gWoodenCrate.texture = LoadTexture("wooden-crate.jpg");
+	gWoodenCrate.texture = LoadTexture("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
     gWoodenCrate.shininess = 80.0;
     gWoodenCrate.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glGenBuffers(1, &gWoodenCrate.vbo);
@@ -296,12 +298,12 @@ static void Render() {
     // clear everything
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 	gModel->render();
     // render all the instances
     std::list<ModelInstance>::const_iterator it;
     for(it = gInstances.begin(); it != gInstances.end(); ++it){
-      //  RenderInstance(*it);
+    //	RenderInstance(*it);
     }
 
 
@@ -321,9 +323,9 @@ static void Update(float secondsElapsed) {
     //move position of camera based on WASD keys, and XZ keys for up and down
     const float moveSpeed = 4.0; //units per second
     if(glfwGetKey(gWindow, 'S')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * -Camera::getInstance().forward());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 10.f * -Camera::getInstance().forward());
     } else if(glfwGetKey(gWindow, 'W')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * Camera::getInstance().forward());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 10.f * Camera::getInstance().forward());
     }
     if(glfwGetKey(gWindow, 'A')){
         Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * -Camera::getInstance().right());
@@ -365,6 +367,10 @@ static void Update(float secondsElapsed) {
     if(fieldOfView > 130.0f) fieldOfView = 130.0f;
     Camera::getInstance().setFieldOfView(fieldOfView);
     gScrollY = 0;
+
+	std::vector<glm::mat4> trans;
+	tElap += secondsElapsed;
+	gModel->BoneTransform(tElap, trans);
 }
 
 // records how far the y axis has been scrolled
@@ -450,7 +456,7 @@ void AppMain() {
     CreateInstances();
 
     // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(0,0,1));
+    Camera::getInstance().setPosition(glm::vec3(0,0,100));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
     Camera::getInstance().setNearAndFarPlanes(0.5f, 10000000.0f);
 

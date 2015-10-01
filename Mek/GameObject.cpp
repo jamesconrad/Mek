@@ -35,6 +35,9 @@ it->second = Component*
 GameObject::GameObject(int h)
 {
 	_handle = h;
+	pos = glm::vec3(0, 0, 0);
+	scale = glm::vec3(0, 0, 0);
+	rot = glm::vec3(0, 0, 0);
 }
 
 void GameObject::AddComponent(ComponentId ctype, Component *comp)
@@ -53,6 +56,8 @@ bool GameObject::HasComponent(ComponentId ctype)
 	{
 		return true;
 	}
+	else
+		return false;
 }
 
 Component* GameObject::GetComponent(ComponentId ctype)
@@ -70,4 +75,17 @@ void GameObject::UpdateAll()
 			local_it->second->update();
 		}
 	}
+}
+
+glm::vec3 GameObject::GetPos()
+{
+	return pos;
+}
+glm::vec3 GameObject::GetScale()
+{
+	return scale;
+}
+glm::vec3 GameObject::GetRot()
+{
+	return rot;
 }

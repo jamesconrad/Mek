@@ -29,6 +29,7 @@ public:
 	void update();
 	void loadModel(char* model);
 	void render();
+	void updateShader();
 
 
 	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms);
@@ -120,4 +121,9 @@ private:
 	glm::mat4 _transform;
 	std::vector<glm::mat4> _frameBoneTransforms;
 	GLint _boneLocation[MAX_BONES];
+
+
+
+
+	std::vector<unsigned int> _indices;
 };
