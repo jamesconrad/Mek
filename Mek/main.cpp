@@ -34,8 +34,10 @@
 
 //Text Rendering Test
 void TextRendering::renderText(){
-	initText2D("wooden-crate.jpg");
+	initText2D("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
 	printText2D("Zeta Psi Til I Die", 600, 800, 4);
+
+
 }	
 
 
@@ -114,13 +116,8 @@ ComponentGraphics* gModel;
 
 float tElap = 0;
 
-// returns a new Texture created from the given filename
-static Texture* LoadTexture(char* filename) {
-	Bitmap bmp;
-	bmp.bitmapFromFile(filename);
-    bmp.flipVertically();
-    return new Texture(filename);
-}
+
+
 
 
 // initialises the gWoodenCrate global
@@ -131,7 +128,7 @@ static void LoadWoodenCrateAsset() {
     gWoodenCrate.drawStart = 0;
     gWoodenCrate.drawCount = 6*2*3;
 	
-	gWoodenCrate.texture = LoadTexture("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
+	gWoodenCrate.texture = new Texture("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
     gWoodenCrate.shininess = 80.0;
     gWoodenCrate.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glGenBuffers(1, &gWoodenCrate.vbo);
@@ -497,6 +494,8 @@ void AppMain() {
 
 	gModel->render();
 	//END MODEL INITS
+
+	//Render Text
 
 
     // run while the window is open

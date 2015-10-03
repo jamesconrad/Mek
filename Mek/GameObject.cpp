@@ -35,9 +35,9 @@ it->second = Component*
 GameObject::GameObject(int h)
 {
 	_handle = h;
-	pos = glm::vec3(0, 0, 0);
-	scale = glm::vec3(0, 0, 0);
-	rot = glm::vec3(0, 0, 0);
+	//pos = glm::vec3(0, 0, 0);
+	//scale = glm::vec3(0, 0, 0);
+	//rot = glm::vec3(0, 0, 0);
 }
 
 void GameObject::AddComponent(ComponentId ctype, Component *comp)

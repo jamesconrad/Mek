@@ -1,23 +1,22 @@
-﻿Build started 10/2/2015 10:08:20 PM.
+﻿Build started 10/3/2015 3:57:27 PM.
      1>Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
      1>PreBuildEvent:
          echo C:\Users\100550931\Documents\Mek\Mek\Mek\
          :VCEnd
          C:\Users\100550931\Documents\Mek\Mek\Mek\
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Input.cpp main.cpp Program.cpp
-         Program.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt TextRendering.cpp main.cpp
          main.cpp
      1>c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY' : macro redefinition
                  c:\users\100550931\documents\mek\mek\mek\include\gl\glfw3.h(85) : see previous definition of 'APIENTRY'
      1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\crtdbg.h(586): warning C4005: '_malloca' : macro redefinition
                  c:\program files (x86)\microsoft visual studio 12.0\vc\include\malloc.h(224) : see previous definition of '_malloca'
          GLM: rotate function taking degrees as a parameter is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
-         Input.cpp
-     1>c:\users\100550931\documents\mek\mek\mek\input.cpp(33): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
          Generating Code...
+         Skipping... (no relevant changes detected)
+         TextRendering.cpp
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\100550931\Documents\Mek\Mek\Mek\\lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.lib" /MACHINE:X86 Debug\Bitmap.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\100550931\Documents\Mek\Mek\Mek\\lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib opengl32.lib ILUT.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.lib" /MACHINE:X86 Debug\Bitmap.obj
          Debug\Camera.obj
          Debug\ComponentGraphics.obj
          Debug\GameObject.obj
@@ -28,16 +27,9 @@
          Debug\TextRendering.obj
          Debug\TextRenderingShader.obj
          Debug\Texture.obj
-         LINK : C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.exe not found or not built by the last incremental link; performing full link
-     1>LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-     1>main.obj : error LNK2019: unresolved external symbol "public: __thiscall Texture::Texture(char *,int,int)" (??0Texture@@QAE@PADHH@Z) referenced in function "class Texture * __cdecl LoadTexture(char *)" (?LoadTexture@@YAPAVTexture@@PAD@Z)
-     1>TextRendering.obj : error LNK2001: unresolved external symbol "public: __thiscall Texture::Texture(char *,int,int)" (??0Texture@@QAE@PADHH@Z)
-     1>main.obj : error LNK2019: unresolved external symbol "public: __thiscall GameObject::GameObject(int)" (??0GameObject@@QAE@H@Z) referenced in function "void __cdecl AppMain(void)" (?AppMain@@YAXXZ)
-     1>main.obj : error LNK2019: unresolved external symbol "public: void __thiscall GameObject::AddComponent(enum ComponentId,class Component *)" (?AddComponent@GameObject@@QAEXW4ComponentId@@PAVComponent@@@Z) referenced in function "void __cdecl AppMain(void)" (?AppMain@@YAXXZ)
-     1>main.obj : error LNK2019: unresolved external symbol "public: void __thiscall ComponentGraphics::BoneTransform(float,class std::vector<struct glm::detail::tmat4x4<float,0>,class std::allocator<struct glm::detail::tmat4x4<float,0> > > &)" (?BoneTransform@ComponentGraphics@@QAEXMAAV?$vector@U?$tmat4x4@M$0A@@detail@glm@@V?$allocator@U?$tmat4x4@M$0A@@detail@glm@@@std@@@std@@@Z) referenced in function "void __cdecl Update(float)" (?Update@@YAXM@Z)
-     1>C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.exe : fatal error LNK1120: 4 unresolved externals
-     1>Done Building Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" (Build target(s)) -- FAILED.
+         Mek.vcxproj -> C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.exe
+     1>Done Building Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" (Build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:05.57
+Time Elapsed 00:00:10.19

@@ -10,8 +10,10 @@ public:
 
 	//constructor
 	TextRendering();
-	TextRendering(const char * filename)
-	{ }
+	TextRendering(char * filename)
+	{
+		initText2D(filename);
+	}
 
 	//Destructor
 	~TextRendering();
@@ -24,4 +26,5 @@ public:
 
 private:
 	Texture * textureID;
+	
 };

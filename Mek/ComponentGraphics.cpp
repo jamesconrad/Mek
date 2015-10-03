@@ -249,7 +249,7 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 			{
 				std::string p(Path.data);
 
-				Bitmap bmp;
+
 				_textures[i] = new Texture("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
 			}
 		}
@@ -492,7 +492,8 @@ const aiNodeAnim* ComponentGraphics::FindNodeAnim(const aiAnimation* pAnimation,
 void ComponentGraphics::updateShader()
 {
 	glm::mat4 W;
-	glm::translate(W, _owner->GetPos());
+	//glm::translate(W, _owner->GetPos());
+	glm::translate(W, glm::vec3(0, 0, 0));
 	//glm::rotate(W, _owner->GetRot());
 	//glm::scale(W, _owner->GetScale());
 	glm::scale(W, glm::vec3(0.1, 0.1, 0.1));

@@ -22,16 +22,16 @@ Texture::Texture(char* filepath, GLint minMagFiler, GLint wrapMode)
 	_originalHeight = bmp.height();
 	_originalWidth = bmp.width();
 
-	GLenum err = glGetError();
+
 
 	glGenTextures(1, &_object);
 	glBindTexture(GL_TEXTURE_2D, _object);
-	err = glGetError();
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minMagFiler);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, minMagFiler);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
-	err = glGetError();
+
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
 		GL_RGB,
