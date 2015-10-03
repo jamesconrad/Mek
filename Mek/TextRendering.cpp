@@ -8,7 +8,7 @@
 #include "lib\glm\glm.hpp"
 #include "lib\glm\gtc\matrix_transform.hpp"
 
-unsigned int Text2DTextureID;
+Texture * Text2DTextureID;
 unsigned int Text2DVertexBufferID;
 unsigned int Text2DUVBufferID;
 unsigned int Text2DShaderID;
@@ -18,7 +18,7 @@ void TextRendering::initText2D(const char * texturePath){
 
 		TextRendering(texturePath);
         // Initialize texture
-        Text2DTextureID = textureID->object();
+		Text2DTextureID = new Texture(texturePath);
 
         // Initialize VBO
         glGenBuffers(1, &Text2DVertexBufferID);

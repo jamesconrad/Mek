@@ -1,15 +1,18 @@
-﻿Build started 9/28/2015 10:53:36 AM.
-     1>Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
-     1>PreBuildEvent:
-         echo C:\Users\100550931\Documents\Mek\Mek\Mek\
-         :VCEnd
-         C:\Users\100550931\Documents\Mek\Mek\Mek\
-       ClCompile:
+﻿Build started 10/2/2015 9:43:38 PM.
+     1>Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" on node 2 (ClCompile target(s)).
+     1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt TextRendering.cpp
          TextRendering.cpp
      1>c:\users\100550931\documents\mek\mek\mek\textrendering.cpp(19): error C2082: redefinition of formal parameter 'texturePath'
-     1>Done Building Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" (Build target(s)) -- FAILED.
+     1>c:\users\100550931\documents\mek\mek\mek\textrendering.cpp(21): error C2664: 'Texture::Texture(const Texture &)' : cannot convert argument 1 from 'const char *' to 'const Bitmap &'
+                 Reason: cannot convert from 'const char *' to 'const Bitmap'
+                 No constructor could take the source type, or constructor overload resolution was ambiguous
+     1>c:\users\100550931\documents\mek\mek\mek\textrendering.cpp(83): error C2664: 'void glBindTexture(GLenum,GLuint)' : cannot convert argument 2 from 'Texture *' to 'GLuint'
+                 There is no context in which this conversion is possible
+     1>c:\users\100550931\documents\mek\mek\mek\textrendering.cpp(117): error C2664: 'void glDeleteTextures(GLsizei,const GLuint *)' : cannot convert argument 2 from 'Texture **' to 'const GLuint *'
+                 Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+     1>Done Building Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" (ClCompile target(s)) -- FAILED.
 
 Build FAILED.
 
-Time Elapsed 00:00:00.62
+Time Elapsed 00:00:04.55

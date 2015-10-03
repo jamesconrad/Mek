@@ -10,12 +10,8 @@ public:
 
 	//constructor
 	TextRendering();
-	TextRendering(const char * filename){
-			Bitmap bmp;
-			bmp.bitmapFromFile(filename);
-			bmp.flipVertically();
-			textureID = new Texture(bmp);
-	}
+	TextRendering(const char * filename)
+	{ }
 
 	//Destructor
 	~TextRendering();
