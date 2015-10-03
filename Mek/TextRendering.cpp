@@ -2,7 +2,7 @@
 #include <cstring>
 #include "TextRendering.h"
 
-#include "Shader.h"
+#include "TextRenderShader.h"
 #include "Texture.h"
 
 #include "lib\glm\glm.hpp"
@@ -14,10 +14,11 @@ unsigned int Text2DUVBufferID;
 unsigned int Text2DShaderID;
 unsigned int Text2DUniformID;
 
-void initText2D(const char * texturePath){
+void TextRendering::initText2D(const char * texturePath){
 
+		TextRendering(texturePath);
         // Initialize texture
-        Text2DTextureID = loadDDS(texturePath);
+        Text2DTextureID = textureID->object();
 
         // Initialize VBO
         glGenBuffers(1, &Text2DVertexBufferID);
@@ -31,7 +32,7 @@ void initText2D(const char * texturePath){
 
 }
 
-void printText2D(const char * text, int x, int y, int size){
+void TextRendering::printText2D(const char * text, int x, int y, int size){
 
         unsigned int length = strlen(text);
 
@@ -106,7 +107,7 @@ void printText2D(const char * text, int x, int y, int size){
 
 }
 
-void cleanupText2D(){
+void TextRendering::cleanupText2D(){
 
         // Delete buffers
         glDeleteBuffers(1, &Text2DVertexBufferID);

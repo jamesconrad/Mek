@@ -18,6 +18,7 @@
 #include "Texture.h"
 #include "Camera.h"
 #include "ComponentGraphics.h"
+#include "TextRendering.h"
 
 /*
  Represents a textured geometry asset
@@ -30,6 +31,14 @@
   - a VAO
   - the parameters to glDrawArrays (drawType, drawStart, drawCount)
  */
+
+//Text Rendering Test
+void TextRendering::renderText(){
+	initText2D("wooden-crate.jpg");
+	printText2D("Zeta Psi Til I Die", 600, 800, 4);
+}	
+
+
 struct ModelAsset {
     Texture* texture;
     GLuint vbo;
