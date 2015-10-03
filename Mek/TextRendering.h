@@ -17,7 +17,7 @@ public:
 	~TextRendering();
 
 	//Member Functions
-	void initText2D(const char * texturePath);
+	void initText2D( char * texturePath);
 	void printText2D(const char * text, int x, int y, int size);
 	void cleanupText2D();
 	void renderText();

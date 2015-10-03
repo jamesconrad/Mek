@@ -5,24 +5,17 @@
 #include "lib\glm\glm.hpp"
 
 #include "Shader.h"
-#include "LightComponent.h"
+#include "Camera.h"
+
+class LightComponent;
+
 /**
  Represents an OpenGL program made by linking shaders.
  */
 class Program {
 public:
-	/**
-	 Creates a program by linking a list of tdogl::Shader objects
-
-	 @param shaders  The shaders to link together to make the program
-
-	 @throws std::exception if an error occurs.
-
-	 @see tdogl::Shader
-	 */
-
 	 /**
-	  @result The program's object ID, as returned from glCreateProgram
+	 The program's object ID, as returned from glCreateProgram
 	  */
 	GLuint object(char* name) const;
 
@@ -35,15 +28,22 @@ public:
 	void createShader(char* name, GLenum type, char* filepath);
 
 	/**
-	 @result The attribute index for the given name, as returned from glGetAttribLocation.
+	The attribute index for the given name, as returned from glGetAttribLocation.
 	 */
 	GLint attrib(char* shaderName, const GLchar* attribName) const;
 
 
 	/**
-	 @result The uniform index for the given name, as returned from glGetUniformLocation.
+	 The uniform index for the given name, as returned from glGetUniformLocation.
 	 */
 	GLint uniform(char* shaderName, const GLchar* uniformName) const;
+
+	//NO DELETE FUNCTION YET TODO:: DELETE FUNCTION ON LIGHTCOMPONENT DECONSTRUCTOR ALSO ADD THE LIGHTSOURCE ON CONSTRUCTOR
+	int addLightSource(LightComponent*);
+	void delLightSource(int);
+
+	void updateSkinning();
+
 
 	/**
 	 Setters for attribute and uniform variables.
@@ -84,8 +84,7 @@ public:
 	void setUniform(char* shaderName, const GLchar* uniformName, const glm::mat4& m, GLboolean transpose = GL_FALSE);
 	void setUniform(char* shaderName, const GLchar* uniformName, const glm::vec3& v);
 	void setUniform(char* shaderName, const GLchar* uniformName, const glm::vec4& v);
-
-
+	
 	static Program& getInstance()
 	{
 		static Program instance;

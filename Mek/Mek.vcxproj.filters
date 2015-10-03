@@ -39,7 +39,7 @@
     <ClCompile Include="ComponentGraphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Visual Studio 2013\Projects\The ACTUAL real TRUE MEK INPUT\The ACTUAL real TRUE MEK INPUT\Input.cpp">
+    <ClCompile Include="Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextRendering.cpp">
@@ -77,7 +77,7 @@
     <ClInclude Include="LightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Visual Studio 2013\Projects\The ACTUAL real TRUE MEK INPUT\The ACTUAL real TRUE MEK INPUT\Input.h">
+    <ClInclude Include="Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TextRendering.h">
@@ -94,5 +94,13 @@
     <Text Include="fragment-shader.txt">
       <Filter>Resource Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="skinning.frags">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="skinning.verts">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

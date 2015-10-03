@@ -19,6 +19,26 @@
 #include "Program.h"
 #include <stdexcept>
 #include "lib\glm\gtc\type_ptr.hpp"
+#include "lib\glm\gtc\matrix_transform.hpp"
+
+int Program::addLightSource(LightComponent* l)
+{
+	_lightMap.push_back(l);
+	return _lightMap.size();
+}
+
+void Program::delLightSource(int index)
+{
+	_lightMap.erase(_lightMap.begin() + index);
+	_lightMap.shrink_to_fit();
+}
+
+void Program::updateSkinning()
+{
+	setUniform("skinning", "gWVP", Camera::getInstance().matrix());
+	setUniform("skinning", "gWorld", glm::translate(glm::mat4(), glm::vec3(0, 0, 0)));
+
+}
 
 void Program::createShader(char* name, GLenum type, char* filepath)
 {

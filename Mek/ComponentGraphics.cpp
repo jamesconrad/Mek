@@ -1,4 +1,6 @@
 #include "ComponentGraphics.h"
+#include "Program.h"
+#include "lib\glm\gtc\type_ptr.hpp"
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
 // helper to determine proper VBO index
@@ -45,8 +47,9 @@ void ComponentGraphics::VertexBoneData::AddBoneData(unsigned int BoneID, float W
 void ComponentGraphics::loadModel(char* filepath)
 {
 	// Create the VAO
+	glGenBuffers(1, &_vbo);
 	glGenVertexArrays(1, &_vao);
-	glBindVertexArray(_vbo);
+	glBindVertexArray(_vao);
 
 	// Create the buffers for the vertices attributes
 	glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(_buffers), _buffers);
@@ -110,6 +113,8 @@ void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath
 
 	initMaterials(scene);
 
+	Program::getInstance().use("skinning");
+	
 	// Generate and populate the buffers with vertex attributes and the indices
 	glBindBuffer(GL_ARRAY_BUFFER, _buffers[POS_VB]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Positions[0]) * Positions.size(), &Positions[0], GL_STATIC_DRAW);
@@ -135,6 +140,8 @@ void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffers[INDEX_BUFFER]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices[0]) * Indices.size(), &Indices[0], GL_STATIC_DRAW);
+
+	Program::getInstance().stopUsing("skinning");
 }
 
 void ComponentGraphics::initMesh(unsigned int MeshIndex,
@@ -170,8 +177,21 @@ void ComponentGraphics::initMesh(unsigned int MeshIndex,
 		Indices.push_back(Face.mIndices[1]);
 		Indices.push_back(Face.mIndices[2]);
 	}
+
+	_indices = Indices;
 }
 
+GLint GetUniformLocation(const char* pUniformName)
+{
+
+	GLuint Location = glGetUniformLocation(Program::getInstance().object("skinning"), pUniformName);
+
+	if (Location == 0xffffffff) {
+		fprintf(stderr, "Warning! Unable to get the location of uniform '%s'\n", pUniformName);
+	}
+
+	return Location;
+}
 
 void ComponentGraphics::loadBones(unsigned int MeshIndex, const aiMesh* pMesh, std::vector<VertexBoneData>& Bones)
 {
@@ -202,6 +222,13 @@ void ComponentGraphics::loadBones(unsigned int MeshIndex, const aiMesh* pMesh, s
 			Bones[VertexID].AddBoneData(BoneIndex, Weight);
 		}
 	}
+	// init the gBones array requriments for the shader
+	for (unsigned int i = 0; i < ARRAY_SIZE_IN_ELEMENTS(_boneLocation); i++) {
+		char Name[128];
+		memset(Name, 0, sizeof(Name));
+		_snprintf_s(Name, sizeof(Name), "gBones[%d]", i);
+		_boneLocation[i] = GetUniformLocation(Name);
+	}
 }
 
 
@@ -223,18 +250,26 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 				std::string p(Path.data);
 
 				Bitmap bmp;
-				bmp.bitmapFromFile(p);
-				bmp.flipVertically();
-				_textures[i] = new Texture(bmp);
+				_textures[i] = new Texture("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
 			}
+		}
+		else
+		{
+			std::string p("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
+			_textures[i] = new Texture((char*)p.c_str());
 		}
 	}
 }
 
 void ComponentGraphics::render()
 {
+	//
+	Program::getInstance().use("skinning");
+	updateShader();
+	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
+		glUniformMatrix4fv(_boneLocation[i], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(_frameBoneTransforms[i]));
+	//
 	glBindVertexArray(_vao);
-
 	for (unsigned int i = 0; i < _entries.size(); i++)
 	{
 		const unsigned int MaterialIndex = _entries[i].MaterialIndex;
@@ -244,16 +279,229 @@ void ComponentGraphics::render()
 		if (_textures[MaterialIndex])
 		{
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE0, _textures[MaterialIndex]->object());
+			glBindTexture(GL_TEXTURE_2D, _textures[MaterialIndex]->object());
 		}
-
 		glDrawElementsBaseVertex(GL_TRIANGLES,
 			_entries[i].NumIndices,
 			GL_UNSIGNED_INT,
-			(void*)(sizeof(unsigned int) * _entries[i].BaseIndex),
+			(void*)(sizeof(unsigned int)* _entries[i].BaseIndex),
 			_entries[i].BaseVertex);
+
+		//glDrawArrays(GL_TRIANGLES,
+		//	_entries[i].NumIndices,
+		//	_entries[i].BaseVertex);
 	}
 
-	// Make sure the VAO is not changed from the outside    
+	// Make sure the VAO is not changed from the outside
 	glBindVertexArray(0);
+	Program::getInstance().stopUsing("skinning");
+}
+
+unsigned int ComponentGraphics::FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	for (unsigned int i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+
+unsigned int ComponentGraphics::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	assert(pNodeAnim->mNumRotationKeys > 0);
+
+	for (unsigned int i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+
+unsigned int ComponentGraphics::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	assert(pNodeAnim->mNumScalingKeys > 0);
+
+	for (unsigned int i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+
+void ComponentGraphics::CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	if (pNodeAnim->mNumPositionKeys == 1)
+	{
+		Out = pNodeAnim->mPositionKeys[0].mValue;
+		return;
+	}
+
+	unsigned int PositionIndex = FindPosition(AnimationTime, pNodeAnim);
+	unsigned int NextPositionIndex = (PositionIndex + 1);
+	assert(NextPositionIndex < pNodeAnim->mNumPositionKeys);
+	float DeltaTime = (float)(pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
+	assert(Factor >= 0.0f && Factor <= 1.0f);
+	const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
+	const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
+	aiVector3D Delta = End - Start;
+	Out = Start + Factor * Delta;
+}
+
+
+void ComponentGraphics::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	// we need at least two values to interpolate...
+	if (pNodeAnim->mNumRotationKeys == 1)
+	{
+		Out = pNodeAnim->mRotationKeys[0].mValue;
+		return;
+	}
+
+	unsigned int RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+	unsigned int NextRotationIndex = (RotationIndex + 1);
+	assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
+	float DeltaTime = (float)(pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+	assert(Factor >= 0.0f && Factor <= 1.0f);
+	const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+	const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+	aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+	Out = Out.Normalize();
+}
+
+
+void ComponentGraphics::CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	if (pNodeAnim->mNumScalingKeys == 1)
+	{
+		Out = pNodeAnim->mScalingKeys[0].mValue;
+		return;
+	}
+
+	unsigned int ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+	unsigned int NextScalingIndex = (ScalingIndex + 1);
+	assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
+	float DeltaTime = (float)(pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+	assert(Factor >= 0.0f && Factor <= 1.0f);
+	const aiVector3D& Start = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
+	const aiVector3D& End = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
+	aiVector3D Delta = End - Start;
+	Out = Start + Factor * Delta;
+}
+
+
+void ComponentGraphics::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform)
+{
+	std::string NodeName(pNode->mName.data);
+
+	const aiAnimation* pAnimation = _scene->mAnimations[0];
+
+	glm::mat4 NodeTransformation;
+	CopyaiMat(&pNode->mTransformation, NodeTransformation);
+
+	const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
+
+	if (pNodeAnim) {
+		// Interpolate scaling and generate scaling transformation matrix
+		aiVector3D Scaling;
+		CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
+		glm::mat4 ScalingM;
+		glm::scale(ScalingM, glm::vec3(Scaling.x, Scaling.y, Scaling.z));
+
+		// Interpolate rotation and generate rotation transformation matrix
+		aiQuaternion RotationQ;
+		CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
+		glm::mat4 RotationM;
+		CopyaiMat(&aiMatrix4x4(RotationQ.GetMatrix()),RotationM);
+
+		// Interpolate translation and generate translation transformation matrix
+		aiVector3D Translation;
+		CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
+		glm::mat4 TranslationM;
+		glm::translate(TranslationM, glm::vec3(Translation.x, Translation.y, Translation.z));
+		// Combine the above transformations
+		NodeTransformation = TranslationM * RotationM * ScalingM;
+	}
+
+	glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;
+
+	if (_boneMapping.find(NodeName) != _boneMapping.end())
+	{
+		unsigned int BoneIndex = _boneMapping[NodeName];
+		_boneInfo[BoneIndex].FinalTransformation = _transform * GlobalTransformation * _boneInfo[BoneIndex].BoneOffset;
+	}
+
+	for (unsigned int i = 0; i < pNode->mNumChildren; i++)
+	{
+		ReadNodeHeirarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
+	}
+}
+
+
+void ComponentGraphics::BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms)
+{
+	glm::mat4 Identity;
+
+	float TicksPerSecond = (float)(_scene->mAnimations[0]->mTicksPerSecond != 0 ? _scene->mAnimations[0]->mTicksPerSecond : 25.0f);
+	float TimeInTicks = TimeInSeconds * TicksPerSecond;
+	float AnimationTime = fmod(TimeInTicks, (float)_scene->mAnimations[0]->mDuration);
+
+	ReadNodeHeirarchy(AnimationTime, _scene->mRootNode, Identity);
+
+	Transforms.resize(_numBones);
+
+	for (unsigned int i = 0; i < _numBones; i++)
+	{
+		Transforms[i] = _boneInfo[i].FinalTransformation;
+	}
+
+	_frameBoneTransforms = Transforms;
+}
+
+
+const aiNodeAnim* ComponentGraphics::FindNodeAnim(const aiAnimation* pAnimation, const std::string NodeName)
+{
+	for (unsigned int i = 0; i < pAnimation->mNumChannels; i++)
+	{
+		const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+
+		if (std::string(pNodeAnim->mNodeName.data) == NodeName)
+			return pNodeAnim;
+	}
+
+	return NULL;
+}
+
+void ComponentGraphics::updateShader()
+{
+	glm::mat4 W;
+	glm::translate(W, _owner->GetPos());
+	//glm::rotate(W, _owner->GetRot());
+	//glm::scale(W, _owner->GetScale());
+	glm::scale(W, glm::vec3(0.1, 0.1, 0.1));
+
+	glm::mat4 VP;
+	VP = Camera::getInstance().matrix();
+
+	glm::mat4 WVP = VP * W;
+	
+	Program::getInstance().setUniform("skinning", "gWVP", WVP);
+	Program::getInstance().setUniform("skinning", "gWorld", W);
 }

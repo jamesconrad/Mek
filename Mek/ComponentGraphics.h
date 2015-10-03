@@ -1,6 +1,6 @@
 #pragma once
 // engine includes
-#include "Component.h"
+#include "GameObject.h"
 #include "Texture.h"
 
 // assimp includes
@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 
+#define MAX_BONES 100
 
 class ComponentGraphics : public Component
 {
@@ -28,6 +29,11 @@ public:
 	void update();
 	void loadModel(char* model);
 	void render();
+	void updateShader();
+
+
+	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms);
+
 private:
 	// skeleton structs
 #define NUM_BONES_PER_VEREX 4
@@ -79,6 +85,14 @@ private:
 		unsigned int MaterialIndex;
 	};
 
+	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	unsigned int FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	unsigned int FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	unsigned int FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const std::string NodeName);
+	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
 	// model loader functions
 	void initFromScene(const aiScene* scene, const char* filepath);
 	void initMesh(unsigned int MeshIndex,
@@ -94,8 +108,6 @@ private:
 	// model loader vars
 	const aiScene* _scene;
 	Assimp::Importer _importer;
-	std::map<std::string, GLuint*> _textureIdMap;
-	GLuint* _textureIds;
 
 	// model rendering vars
 	GLuint _vbo;
@@ -107,4 +119,11 @@ private:
 	std::vector<MeshEntry> _entries;
 	std::vector<Texture*> _textures;
 	glm::mat4 _transform;
+	std::vector<glm::mat4> _frameBoneTransforms;
+	GLint _boneLocation[MAX_BONES];
+
+
+
+
+	std::vector<unsigned int> _indices;
 };

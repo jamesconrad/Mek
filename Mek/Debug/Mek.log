@@ -1,18 +1,43 @@
-﻿Build started 10/2/2015 9:43:38 PM.
-     1>Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" on node 2 (ClCompile target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt TextRendering.cpp
-         TextRendering.cpp
-     1>c:\users\100550931\documents\mek\mek\mek\textrendering.cpp(19): error C2082: redefinition of formal parameter 'texturePath'
-     1>c:\users\100550931\documents\mek\mek\mek\textrendering.cpp(21): error C2664: 'Texture::Texture(const Texture &)' : cannot convert argument 1 from 'const char *' to 'const Bitmap &'
-                 Reason: cannot convert from 'const char *' to 'const Bitmap'
-                 No constructor could take the source type, or constructor overload resolution was ambiguous
-     1>c:\users\100550931\documents\mek\mek\mek\textrendering.cpp(83): error C2664: 'void glBindTexture(GLenum,GLuint)' : cannot convert argument 2 from 'Texture *' to 'GLuint'
-                 There is no context in which this conversion is possible
-     1>c:\users\100550931\documents\mek\mek\mek\textrendering.cpp(117): error C2664: 'void glDeleteTextures(GLsizei,const GLuint *)' : cannot convert argument 2 from 'Texture **' to 'const GLuint *'
-                 Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
-     1>Done Building Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" (ClCompile target(s)) -- FAILED.
+﻿Build started 10/2/2015 10:08:20 PM.
+     1>Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
+     1>PreBuildEvent:
+         echo C:\Users\100550931\Documents\Mek\Mek\Mek\
+         :VCEnd
+         C:\Users\100550931\Documents\Mek\Mek\Mek\
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Input.cpp main.cpp Program.cpp
+         Program.cpp
+         main.cpp
+     1>c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY' : macro redefinition
+                 c:\users\100550931\documents\mek\mek\mek\include\gl\glfw3.h(85) : see previous definition of 'APIENTRY'
+     1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\crtdbg.h(586): warning C4005: '_malloca' : macro redefinition
+                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\malloc.h(224) : see previous definition of '_malloca'
+         GLM: rotate function taking degrees as a parameter is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
+         Input.cpp
+     1>c:\users\100550931\documents\mek\mek\mek\input.cpp(33): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\100550931\Documents\Mek\Mek\Mek\\lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.lib" /MACHINE:X86 Debug\Bitmap.obj
+         Debug\Camera.obj
+         Debug\ComponentGraphics.obj
+         Debug\GameObject.obj
+         Debug\Input.obj
+         Debug\main.obj
+         Debug\Program.obj
+         Debug\Shader.obj
+         Debug\TextRendering.obj
+         Debug\TextRenderingShader.obj
+         Debug\Texture.obj
+         LINK : C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.exe not found or not built by the last incremental link; performing full link
+     1>LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+     1>main.obj : error LNK2019: unresolved external symbol "public: __thiscall Texture::Texture(char *,int,int)" (??0Texture@@QAE@PADHH@Z) referenced in function "class Texture * __cdecl LoadTexture(char *)" (?LoadTexture@@YAPAVTexture@@PAD@Z)
+     1>TextRendering.obj : error LNK2001: unresolved external symbol "public: __thiscall Texture::Texture(char *,int,int)" (??0Texture@@QAE@PADHH@Z)
+     1>main.obj : error LNK2019: unresolved external symbol "public: __thiscall GameObject::GameObject(int)" (??0GameObject@@QAE@H@Z) referenced in function "void __cdecl AppMain(void)" (?AppMain@@YAXXZ)
+     1>main.obj : error LNK2019: unresolved external symbol "public: void __thiscall GameObject::AddComponent(enum ComponentId,class Component *)" (?AddComponent@GameObject@@QAEXW4ComponentId@@PAVComponent@@@Z) referenced in function "void __cdecl AppMain(void)" (?AppMain@@YAXXZ)
+     1>main.obj : error LNK2019: unresolved external symbol "public: void __thiscall ComponentGraphics::BoneTransform(float,class std::vector<struct glm::detail::tmat4x4<float,0>,class std::allocator<struct glm::detail::tmat4x4<float,0> > > &)" (?BoneTransform@ComponentGraphics@@QAEXMAAV?$vector@U?$tmat4x4@M$0A@@detail@glm@@V?$allocator@U?$tmat4x4@M$0A@@detail@glm@@@std@@@std@@@Z) referenced in function "void __cdecl Update(float)" (?Update@@YAXM@Z)
+     1>C:\Users\100550931\Documents\Mek\Mek\Debug\Mek.exe : fatal error LNK1120: 4 unresolved externals
+     1>Done Building Project "C:\Users\100550931\Documents\Mek\Mek\Mek\Mek.vcxproj" (Build target(s)) -- FAILED.
 
 Build FAILED.
 
-Time Elapsed 00:00:04.55
+Time Elapsed 00:00:05.57

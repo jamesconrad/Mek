@@ -1,55 +1,47 @@
 #pragma once
 
+#include "lib\glm\common.hpp"
 #include "Component.h"
 #include <unordered_map>
 
-enum ComponentType
+class GameObject;
+
+enum ComponentId
 {
-	Graphics,
-	LightSource,
-	Physics
+	CONTROLLER,
+	PHYSICS,
+	GRAPHICS,
+	LIGHT
 };
 
+class Component
+{
+public:
+	virtual void update() = 0;
+	void setOwner(GameObject* owner) 
+	{ 
+		_owner = owner;
+	}
+	GameObject* getOwner() { return _owner; }
+protected:
+	GameObject* _owner;
+};
 
 class GameObject
 {
 public:
 	GameObject(int handle);
-	void AddComponent(Component *comp);
+	void AddComponent(ComponentId ctype, Component *comp);
 	bool HasComponent(ComponentId);
 	Component* GetComponent(ComponentId);
+	void UpdateAll();
+	glm::vec3 GetPos();
+	glm::vec3 GetScale();
+	glm::vec3 GetRot();
 
 private:
+	glm::vec3 pos, scale, rot;
 	int _handle;
 	std::string _objStr;
-	std::unordered_multimap<ComponentType, Component*> _components;
+	std::unordered_multimap<ComponentId, Component*> _components;
 };
-
-// overall component notes
-/*
-
-Shader and Camera become Singletons
-
-ComponentGraphics hooks into Shader to render without recompiling shaders for every object
-
-Shader requires an update every frame to resync the Camera matrix
-
-Shader contains a std::map<std::string, int> where the string refers to the shader name, and the int refers to program
--ComponentGraphics asks for the program variable by the string
-
-*/
-
-
-// to check inside the map:
-/*
-
- v--is the variable name assoicaited with the enum passed
-auto its = map.equal_range(LightSource);
-for (auto it = its.first; it != its.second; ++it)
-{
-// it needs to be cast into a Light component in this example
-it->first = ComponentType
-it->second = Component*
-}
-
-*/
