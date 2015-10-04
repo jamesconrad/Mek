@@ -54,6 +54,7 @@ void ComponentGraphics::loadModel(char* filepath)
 	// Create the buffers for the vertices attributes
 	glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(_buffers), _buffers);
 
+	_importer.GetIOHandler();
 	_scene = _importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 
 	if (_scene)
@@ -250,12 +251,12 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 				std::string p(Path.data);
 
 				Bitmap bmp;
-				_textures[i] = new Texture("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
+				_textures[i] = new Texture("../Debug/wooden-crate.jpg");
 			}
 		}
 		else
 		{
-			std::string p("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
+			std::string p("../Debug/wooden-crate.jpg");
 			_textures[i] = new Texture((char*)p.c_str());
 		}
 	}

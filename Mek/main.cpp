@@ -122,7 +122,7 @@ static void LoadWoodenCrateAsset() {
     gWoodenCrate.drawStart = 0;
     gWoodenCrate.drawCount = 6*2*3;
 	
-	gWoodenCrate.texture = LoadTexture("C:/Users/100559437/Documents/Mek/Debug/wooden-crate.jpg");
+	gWoodenCrate.texture = LoadTexture("../Debug/wooden-crate.jpg");
     gWoodenCrate.shininess = 80.0;
     gWoodenCrate.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glGenBuffers(1, &gWoodenCrate.vbo);
@@ -482,7 +482,7 @@ void AppMain() {
 	model = new GameObject(1);
 	gModel = new ComponentGraphics();
 	gModel->setOwner(model);
-	gModel->loadModel("C:/Users/100559437/Documents/Mek/Debug/models/ArmyPilot.dae");
+	gModel->loadModel("../Debug/models/ArmyPilot.dae");
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 
