@@ -84,10 +84,10 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="skinning.frags">
+    <None Include="skinning.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="skinning.verts">
+    <None Include="skinning.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

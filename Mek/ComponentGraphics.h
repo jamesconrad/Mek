@@ -110,7 +110,6 @@ private:
 	Assimp::Importer _importer;
 
 	// model rendering vars
-	GLuint _vbo;
 	GLuint _vao;
 	GLuint _buffers[NUM_VBs];
 	unsigned int _numBones;

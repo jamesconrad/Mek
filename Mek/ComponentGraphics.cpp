@@ -47,7 +47,6 @@ void ComponentGraphics::VertexBoneData::AddBoneData(unsigned int BoneID, float W
 void ComponentGraphics::loadModel(char* filepath)
 {
 	// Create the VAO
-	glGenBuffers(1, &_vbo);
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
 
@@ -268,7 +267,7 @@ void ComponentGraphics::render()
 	Program::getInstance().use("skinning");
 	updateShader();
 	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
-		glUniformMatrix4fv(_boneLocation[i], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(_frameBoneTransforms[i]));
+		glUniformMatrix4fv(_boneLocation[i], 1, GL_TRUE, (const GLfloat*)&_frameBoneTransforms[i]);
 	//
 	glBindVertexArray(_vao);
 	for (unsigned int i = 0; i < _entries.size(); i++)

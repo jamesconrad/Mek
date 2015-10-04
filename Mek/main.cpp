@@ -58,8 +58,8 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	Program::getInstance().createShader("standard", GL_FRAGMENT_SHADER, fragFilename);
 
 	// load skinning shaders
-	Program::getInstance().createShader("skinning", GL_VERTEX_SHADER, "skinning.verts");
-	Program::getInstance().createShader("skinning", GL_FRAGMENT_SHADER, "skinning.frags");
+	Program::getInstance().createShader("skinning", GL_VERTEX_SHADER, "skinning.vert");
+	Program::getInstance().createShader("skinning", GL_FRAGMENT_SHADER, "skinning.frag");
 }
 
 /*
