@@ -34,8 +34,8 @@
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="fragment-shader.txt" />
-    <Text Include="vertex-shader.txt" />
+    <Text Include="fragment-shader.frag" />
+    <Text Include="vertex-shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <None Include="skinning.frag" />
@@ -50,7 +50,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -84,7 +84,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3vs2015.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>

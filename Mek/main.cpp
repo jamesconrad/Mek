@@ -117,7 +117,7 @@ static Texture* LoadTexture(char* filename) {
 // initialises the gWoodenCrate global
 static void LoadWoodenCrateAsset() {
     // set all the elements of gWoodenCrate
-    LoadShaders("vertex-shader.txt", "fragment-shader.txt");
+    LoadShaders("vertex-shader.vert", "fragment-shader.frag");
     gWoodenCrate.drawType = GL_TRIANGLES;
     gWoodenCrate.drawStart = 0;
     gWoodenCrate.drawCount = 6*2*3;
@@ -242,6 +242,11 @@ static void CreateInstances() {
     hMid.asset = &gWoodenCrate;
     hMid.transform = translate(-6,0,0) * scale(2,1,0.8f);
     gInstances.push_back(hMid);
+
+	ModelInstance floor;
+	floor.asset = &gWoodenCrate;
+	floor.transform = translate(0, 0, 0) * scale(10, 0.1, 10);
+	gInstances.push_back(floor);
 }
 
 template <typename T>
@@ -267,8 +272,8 @@ static void RenderInstance(const ModelInstance& inst) {
     Program::getInstance().setUniform("standard", "materialShininess", asset->shininess);
     Program::getInstance().setUniform("standard", "materialSpecularColor", asset->specularColor);
     Program::getInstance().setUniform("standard", "cameraPosition", Camera::getInstance().position());
-    Program::getInstance().setUniform("standard", "numLights", (int)gLights.size());
-
+    
+	Program::getInstance().setUniform("standard", "numLights", (int)gLights.size());
     for(size_t i = 0; i < gLights.size(); ++i){
         SetLightUniform("standard", "position", i, gLights[i].position);
         SetLightUniform("standard", "intensities", i, gLights[i].intensities);
@@ -303,7 +308,7 @@ static void Render() {
     // render all the instances
     std::list<ModelInstance>::const_iterator it;
     for(it = gInstances.begin(); it != gInstances.end(); ++it){
-    //	RenderInstance(*it);
+    	//RenderInstance(*it);
     }
 
 

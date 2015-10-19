@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include "lib\glm\gtc\type_ptr.hpp"
 #include "lib\glm\gtc\matrix_transform.hpp"
+#include "LightComponent.h"
 
 int Program::addLightSource(LightComponent* l)
 {
@@ -38,6 +39,30 @@ void Program::updateSkinning()
 	setUniform("skinning", "gWVP", Camera::getInstance().matrix());
 	setUniform("skinning", "gWorld", glm::translate(glm::mat4(), glm::vec3(0, 0, 0)));
 
+}
+//helper function
+template <typename T>
+void SetLightUniform(char* shaderName, const char* propertyName, size_t lightIndex, const T& value)
+{
+	char tmp[128];
+	sprintf_s(tmp, "allLights[%i].%s", lightIndex, propertyName);
+	std::string uniformName(tmp);
+
+	Program::getInstance().setUniform("standard", uniformName.c_str(), value);
+}
+
+void Program::updateLighting(char* shadername)
+{
+
+	Program::getInstance().setUniform(shadername, "numLights", (int)_lightMap.size());
+	for (size_t i = 0; i < _lightMap.size(); ++i){
+		SetLightUniform(shadername, "position", i, _lightMap[i]->_pos);
+		SetLightUniform(shadername, "intensities", i, _lightMap[i]->_col);
+		SetLightUniform(shadername, "attenuation", i, _lightMap[i]->_attenuation);
+		SetLightUniform(shadername, "ambientCoefficient", i, _lightMap[i]->_ambientCoefficient);
+		SetLightUniform(shadername, "coneAngle", i, _lightMap[i]->_coneAngle);
+		SetLightUniform(shadername, "coneDirection", i, _lightMap[i]->_dir);
+	}
 }
 
 void Program::createShader(char* name, GLenum type, char* filepath)

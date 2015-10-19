@@ -44,6 +44,7 @@ public:
 
 	void updateSkinning();
 
+	void updateLighting(char* shadername);
 
 	/**
 	 Setters for attribute and uniform variables.

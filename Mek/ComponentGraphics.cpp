@@ -113,7 +113,7 @@ void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath
 
 	initMaterials(scene);
 
-	Program::getInstance().use("skinning");
+	//Program::getInstance().use("skinning");
 	
 	// Generate and populate the buffers with vertex attributes and the indices
 	glBindBuffer(GL_ARRAY_BUFFER, _buffers[POS_VB]);
@@ -141,7 +141,7 @@ void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffers[INDEX_BUFFER]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices[0]) * Indices.size(), &Indices[0], GL_STATIC_DRAW);
 
-	Program::getInstance().stopUsing("skinning");
+	//Program::getInstance().stopUsing("skinning");
 }
 
 void ComponentGraphics::initMesh(unsigned int MeshIndex,
@@ -492,10 +492,10 @@ const aiNodeAnim* ComponentGraphics::FindNodeAnim(const aiAnimation* pAnimation,
 void ComponentGraphics::updateShader()
 {
 	glm::mat4 W;
-	glm::translate(W, _owner->GetPos());
-	//glm::rotate(W, _owner->GetRot());
-	//glm::scale(W, _owner->GetScale());
-	glm::scale(W, glm::vec3(0.1, 0.1, 0.1));
+	W = glm::translate(W, _owner->GetPos());
+	//W = glm::rotate(W, _owner->GetRot());
+	//W = glm::scale(W, _owner->GetScale());
+	W = glm::scale(W, glm::vec3(0.01, 0.01, 0.01));
 
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
@@ -504,4 +504,6 @@ void ComponentGraphics::updateShader()
 	
 	Program::getInstance().setUniform("skinning", "gWVP", WVP);
 	Program::getInstance().setUniform("skinning", "gWorld", W);
+	Program::getInstance().setUniform("skinning", "cameraPosition", Camera::getInstance().position());
+	Program::getInstance().updateLighting("skinning");
 }
