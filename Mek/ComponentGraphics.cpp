@@ -227,6 +227,9 @@ void ComponentGraphics::loadBones(unsigned int MeshIndex, const aiMesh* pMesh, s
 		char Name[128];
 		memset(Name, 0, sizeof(Name));
 		_snprintf_s(Name, sizeof(Name), "gBones[%d]", i);
+		//This line is actualy needed for the skeletal animation however since
+		//the code to do so was dropped from the shader it was causing issue
+		//due to gpu driver optimization dropping the variable
 		_boneLocation[i] = GetUniformLocation(Name);
 	}
 }
@@ -492,10 +495,10 @@ const aiNodeAnim* ComponentGraphics::FindNodeAnim(const aiAnimation* pAnimation,
 void ComponentGraphics::updateShader()
 {
 	glm::mat4 W;
-	W = glm::translate(W, _owner->GetPos());
-	//W = glm::rotate(W, _owner->GetRot());
-	//W = glm::scale(W, _owner->GetScale());
-	W = glm::scale(W, glm::vec3(0.01, 0.01, 0.01));
+	W = glm::translate(W, _owner->pos);
+	//W = glm::rotate(W, _owner->rot);
+	//W = glm::scale(W, _owner->scale);
+	W = glm::scale(W, glm::vec3(1, 1, 1));
 
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
@@ -504,6 +507,6 @@ void ComponentGraphics::updateShader()
 	
 	Program::getInstance().setUniform("skinning", "gWVP", WVP);
 	Program::getInstance().setUniform("skinning", "gWorld", W);
-	Program::getInstance().setUniform("skinning", "cameraPosition", Camera::getInstance().position());
+	//Program::getInstance().setUniform("skinning", "cameraPosition", Camera::getInstance().position());
 	Program::getInstance().updateLighting("skinning");
 }

@@ -34,6 +34,8 @@ public:
 
 	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms);
 
+	const aiScene* getScene() { return _scene; }
+
 private:
 	// skeleton structs
 #define NUM_BONES_PER_VEREX 4

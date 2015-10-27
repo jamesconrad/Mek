@@ -18,7 +18,7 @@ class LightComponent : public Component
 {
 public:
 	LightType _type;
-	glm::vec3 _pos;
+	glm::vec4 _pos;
 	glm::vec3 _dir;
 	glm::vec3 _col;
 	float _attenuation;
@@ -28,7 +28,7 @@ public:
 	LightComponent(LightType l) { _type = l; _handle = Program::getInstance().addLightSource(this); }
 	~LightComponent() { Program::getInstance().delLightSource(_handle); }
 
-	void SetVars(LightType l, glm::vec3 pos, glm::vec3 dir, glm::vec3 color, float attenuation, float ambient, float coneAngle)
+	void SetVars(LightType l, glm::vec4 pos, glm::vec3 dir, glm::vec3 color, float attenuation, float ambient, float coneAngle)
 	{
 		_type = l;
 		_pos = pos;
@@ -38,6 +38,8 @@ public:
 		_ambientCoefficient = ambient;
 		_coneAngle = coneAngle;
 	}
+
+	void update() {}
 private:
 	int _handle;
 };

@@ -1,26 +1,38 @@
-﻿Build started 10/13/2015 9:10:17 AM.
+﻿Build started 10/27/2015 11:32:07 AM.
      1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
      1>PreBuildEvent:
          echo C:\Users\100559437\Documents\Mek\Mek\
          :VCEnd
          C:\Users\100559437\Documents\Mek\Mek\
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Program.cpp main.cpp
-         main.cpp
-     1>c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY' : macro redefinition
-                 c:\users\100559437\documents\mek\mek\include\gl\glfw3.h(85) : see previous definition of 'APIENTRY'
-     1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\crtdbg.h(586): warning C4005: '_malloca' : macro redefinition
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\malloc.h(224) : see previous definition of '_malloca'
-     1>c:\users\100559437\documents\mek\mek\main.cpp(248): warning C4305: 'argument' : truncation from 'double' to 'GLfloat'
-         GLM: rotate function taking degrees as a parameter is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
-         Program.cpp
-         Generating Code...
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ComponentCollision.cpp
+         ComponentCollision.cpp
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(147): warning C4800: 'unsigned int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(220): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(221): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(275): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(285): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(286): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(294): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(295): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(303): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(304): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(315): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(320): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(321): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(336): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(340): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(341): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(354): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(358): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(359): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\100559437\Documents\Mek\Debug\Mek.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\100559437\Documents\Mek\Mek\\lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\100559437\Documents\Mek\Debug\Mek.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\100559437\Documents\Mek\Debug\Mek.lib" /MACHINE:X86 Debug\Bitmap.obj
          Debug\Camera.obj
+         Debug\ComponentCollision.obj
          Debug\ComponentGraphics.obj
          Debug\GameObject.obj
-         Debug\Input.obj
+         Debug\ComponentInput.obj
          Debug\main.obj
          Debug\Program.obj
          Debug\Shader.obj
@@ -30,4 +42,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.73
+Time Elapsed 00:00:01.12

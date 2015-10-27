@@ -65,15 +65,15 @@ void main() {
     vec3 normal = normalize(transpose(inverse(mat3(model))) * fragNormal);
     vec3 surfacePos = vec3(model * vec4(fragVert, 1));
     vec4 surfaceColor = texture(materialTex, fragTexCoord);
-    vec3 surfaceToCamera = normalize(cameraPosition - surfacePos);
-
-    //combine color from all the lights
-    vec3 linearColor = vec3(0);
-    for(int i = 0; i < numLights; ++i){
-        linearColor += ApplyLight(allLights[i], surfaceColor.rgb, normal, surfacePos, surfaceToCamera);
-    }
-    
+    //vec3 surfaceToCamera = normalize(cameraPosition - surfacePos);
+	//
+    ////combine color from all the lights
+    //vec3 linearColor = vec3(0);
+    //for(int i = 0; i < numLights; ++i){
+    //    linearColor += ApplyLight(allLights[i], surfaceColor.rgb, normal, surfacePos, surfaceToCamera);
+    //}
+    //
     //final color (after gamma correction)
     vec3 gamma = vec3(1.0/2.2);
-    finalColor = vec4(pow(linearColor, gamma), surfaceColor.a);
+    finalColor = surfaceColor;
 }

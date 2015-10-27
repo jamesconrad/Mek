@@ -36,7 +36,15 @@ void Program::delLightSource(int index)
 
 void Program::updateSkinning()
 {
+	//
+	//uniform float materialShininess;
+	//uniform vec3 materialSpecularColor;
+	//
+	//setUniform("skinning", "materialShininess", 0.5f);
+	//setUniform("skinning", "meterialSpecularColor", glm::vec3(0.5,0.5,0.5));
+
 	setUniform("skinning", "gWVP", Camera::getInstance().matrix());
+	//setUniform("skinning", "cameraPosition", Camera::getInstance().position());
 	setUniform("skinning", "gWorld", glm::translate(glm::mat4(), glm::vec3(0, 0, 0)));
 
 }
@@ -54,7 +62,7 @@ void SetLightUniform(char* shaderName, const char* propertyName, size_t lightInd
 void Program::updateLighting(char* shadername)
 {
 
-	Program::getInstance().setUniform(shadername, "numLights", (int)_lightMap.size());
+	/*Program::getInstance().setUniform(shadername, "numLights", (int)_lightMap.size());
 	for (size_t i = 0; i < _lightMap.size(); ++i){
 		SetLightUniform(shadername, "position", i, _lightMap[i]->_pos);
 		SetLightUniform(shadername, "intensities", i, _lightMap[i]->_col);
@@ -62,7 +70,7 @@ void Program::updateLighting(char* shadername)
 		SetLightUniform(shadername, "ambientCoefficient", i, _lightMap[i]->_ambientCoefficient);
 		SetLightUniform(shadername, "coneAngle", i, _lightMap[i]->_coneAngle);
 		SetLightUniform(shadername, "coneDirection", i, _lightMap[i]->_dir);
-	}
+	}*/
 }
 
 void Program::createShader(char* name, GLenum type, char* filepath)

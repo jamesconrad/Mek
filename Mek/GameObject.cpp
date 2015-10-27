@@ -34,19 +34,24 @@ it->second = Component*
 
 GameObject::GameObject(int h)
 {
-	_handle = h;
+	handle = ObjectManager::instance().addObject(this);
+	_n = "NOT_SET";
 	pos = glm::vec3(0, 0, 0);
-	scale = glm::vec3(0, 0, 0);
+	scale = glm::vec3(1, 1, 1);
 	rot = glm::vec3(0, 0, 0);
+	vel = glm::vec3(0, 0, 0);
 }
 
 void GameObject::AddComponent(ComponentId ctype, Component *comp)
 {
 	if (_components.find(ctype) != _components.end())
 	{
-		printf("WARN Component type %i already exists for Object handle %i\nAdding component anyways, this may cause unintended results.", ctype, _handle);
-
+		printf("WARN: Component type %i already exists for Object handle %i\nAdding component anyways, this may cause unintended results.", ctype, handle);
 	}
+	
+	ObjectManager::instance().addToMap(ctype, handle);
+
+	comp->setOwner(this);
 	_components.emplace(ctype, comp);
 }
 
@@ -58,6 +63,11 @@ bool GameObject::HasComponent(ComponentId ctype)
 	}
 	else
 		return false;
+}
+
+glm::vec3 Component::getPos() 
+{ 
+	return _owner->pos;
 }
 
 Component* GameObject::GetComponent(ComponentId ctype)
@@ -77,15 +87,19 @@ void GameObject::UpdateAll()
 	}
 }
 
-glm::vec3 GameObject::GetPos()
+int ObjectManager::addObject(GameObject* o) 
 {
-	return pos;
+	gMap.push_back(o);
+	return gMap.size() - 1;
 }
-glm::vec3 GameObject::GetScale()
+
+void ObjectManager::addComponent(ComponentId ctype, Component* c, int handle)
 {
-	return scale;
+	gMap[handle]->AddComponent(ctype, c);
 }
-glm::vec3 GameObject::GetRot()
+
+void ObjectManager::addToMap(ComponentId ctype, int handle)
 {
-	return rot;
+	if (ctype == PHYSICS)
+		colMap.push_back(handle);
 }
