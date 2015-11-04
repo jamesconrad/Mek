@@ -20,18 +20,112 @@
 #include <stdexcept>
 #include "lib\glm\gtc\type_ptr.hpp"
 #include "lib\glm\gtc\matrix_transform.hpp"
-#include "LightComponent.h"
+#include "ComponentLight.h"
 
 int Program::addLightSource(LightComponent* l)
 {
 	_lightMap.push_back(l);
+	if (l->type == lSPOT)
+	{
+		numSpotLights++;
+	}
+	else if (l->type == lPOINT)
+	{
+		numPointLights++;
+	}
+
+	updateLightLocations("skinning");
+
 	return _lightMap.size();
 }
 
 void Program::delLightSource(int index)
 {
+	if (_lightMap[index]->type == lSPOT)
+		numSpotLights--;
+	else if (_lightMap[index]->type == lPOINT)
+		numPointLights--;
 	_lightMap.erase(_lightMap.begin() + index);
 	_lightMap.shrink_to_fit();
+	_vlightMapLoc.erase(_vlightMapLoc.begin() + index);
+	_vlightMapLoc.shrink_to_fit();
+}
+
+void Program::updateLightLocations(char* shadername)
+{
+	GLint shader = object(shadername);
+	char Name[128];
+	memset(Name, 0, sizeof(Name));
+	for (int i = 0, s = _lightMap.size(); i < s; i++)
+	{
+		if (_lightMap[i]->type == lPOINT)
+		{
+			LocPointLight* loc = new LocPointLight;
+			_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.Color", i);
+			loc->Base.Color = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.AmbientIntensity", i);
+			loc->Base.AmbientIntensity = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Position", i);
+			loc->Position = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.DiffuseIntensity", i);
+			loc->Base.DiffuseIntensity = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Constant", i);
+			loc->Atten.Constant = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Linear", i);
+			loc->Atten.Linear = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Exp", i);
+			loc->Atten.Exp = glGetUniformLocation(shader, Name);
+
+			_vlightMapLoc.push_back(loc);
+		}
+		else if (_lightMap[i]->type == lSPOT)
+		{
+			LocSpotLight* loc = new LocSpotLight;
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Base.Color", i);
+			loc->Base.Base.Color = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Base.AmbientIntensity", i);
+			loc->Base.Base.AmbientIntensity = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Base.DiffuseIntensity", i);
+			loc->Base.Base.DiffuseIntensity = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Position", i);
+			loc->Base.Position = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Direction", i);
+			loc->Direction = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Cutoff", i);
+			loc->Cutoff = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Atten.Constant", i);
+			loc->Base.Atten.Constant = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Atten.Linear", i);
+			loc->Base.Atten.Linear = glGetUniformLocation(shader, Name);
+
+			_snprintf_s(Name, sizeof(Name), "gSpotLights[%d].Base.Atten.Exp", i);
+			loc->Base.Atten.Exp = glGetUniformLocation(shader, Name);
+
+			_vlightMapLoc.push_back(loc);
+		}
+	}
+	//now that we have our light sources done, lets do the other variables
+	_vlightVarLoc.push_back(glGetUniformLocation(shader, "gNumPointLights"));
+	_vlightVarLoc.push_back(glGetUniformLocation(shader, "gNumSpotLights"));
+	_vlightVarLoc.push_back(glGetUniformLocation(shader, "gDirectionalLight.Base.Color"));
+	_vlightVarLoc.push_back(glGetUniformLocation(shader, "gDirectionalLight.Direction"));
+	_vlightVarLoc.push_back(glGetUniformLocation(shader, "gDirectionalLight.Base.AmbientIntensity"));
+	_vlightVarLoc.push_back(glGetUniformLocation(shader, "gDirectionalLight.Base.DiffuseIntensity"));
+	_vlightVarLoc.push_back(glGetUniformLocation(shader, "gMatSpecularIntensity"));
+	_vlightVarLoc.push_back(glGetUniformLocation(shader, "gSpecularPower"));
 }
 
 void Program::updateSkinning()
@@ -61,16 +155,52 @@ void SetLightUniform(char* shaderName, const char* propertyName, size_t lightInd
 
 void Program::updateLighting(char* shadername)
 {
+	//MODEL SETS : //currently set as 0.5 by shader
+	//uniform float gMatSpecularIntensity;
+	//uniform float gSpecularPower;
 
-	/*Program::getInstance().setUniform(shadername, "numLights", (int)_lightMap.size());
-	for (size_t i = 0; i < _lightMap.size(); ++i){
-		SetLightUniform(shadername, "position", i, _lightMap[i]->_pos);
-		SetLightUniform(shadername, "intensities", i, _lightMap[i]->_col);
-		SetLightUniform(shadername, "attenuation", i, _lightMap[i]->_attenuation);
-		SetLightUniform(shadername, "ambientCoefficient", i, _lightMap[i]->_ambientCoefficient);
-		SetLightUniform(shadername, "coneAngle", i, _lightMap[i]->_coneAngle);
-		SetLightUniform(shadername, "coneDirection", i, _lightMap[i]->_dir);
-	}*/
+	glUniform1i(_vlightVarLoc[gNumPointLights], numPointLights);
+	glUniform1i(_vlightVarLoc[gNumSpotLights], numSpotLights);
+	glUniform3f(_vlightVarLoc[gDirectionalLightBaseColor], 1.0f, 1.0f, 1.0f);
+	glUniform3f(_vlightVarLoc[gDirectionalLightDirection], -1.0f, -1.0f, -1.0f);
+	glUniform1f(_vlightVarLoc[gDirectionalLightBaseAmbientIntensity], 0.55f);
+	glUniform1f(_vlightVarLoc[gDirectionalLightBaseDiffuseIntensity], 0.9f);
+	glUniform1f(_vlightVarLoc[gMatSpecularIntensity], 0.5f);
+	glUniform1f(_vlightVarLoc[gSpecularPower], 0.5f);
+	
+	//set the variables
+	//index in lightmap are relative to indicies in vlightMapLoc
+	for (int i = 0, s = _lightMap.size(); i < s; i++)
+	{
+		if (_lightMap[i]->type == lPOINT)
+		{
+			LocPointLight* loc = static_cast<LocPointLight*>(_vlightMapLoc[i]);
+			PointLight* l = static_cast<PointLight*>(_lightMap[i]->lightSource);
+
+			glUniform1f(loc->Atten.Constant, l->Atten.Constant);
+			glUniform1f(loc->Atten.Linear, l->Atten.Linear);
+			glUniform1f(loc->Atten.Exp, l->Atten.Exp);
+			glUniform3f(loc->Base.Color, l->Base.Color.x, l->Base.Color.y, l->Base.Color.z);
+			glUniform1f(loc->Base.AmbientIntensity, l->Base.AmbientIntensity);
+			glUniform1f(loc->Base.DiffuseIntensity, l->Base.DiffuseIntensity);
+			glUniform3f(loc->Position, l->Position.x, l->Position.y, l->Position.z);
+		}
+		else if (_lightMap[i]->type == lSPOT)
+		{
+			LocSpotLight* loc = static_cast<LocSpotLight*>(_vlightMapLoc[i]);
+			SpotLight* l = static_cast<SpotLight*>(_lightMap[i]->lightSource);
+
+			glUniform1f(loc->Base.Atten.Constant, l->Base.Atten.Constant);
+			glUniform1f(loc->Base.Atten.Linear, l->Base.Atten.Linear);
+			glUniform1f(loc->Base.Atten.Exp, l->Base.Atten.Exp);
+			glUniform3f(loc->Base.Base.Color, l->Base.Base.Color.x, l->Base.Base.Color.y, l->Base.Base.Color.z);
+			glUniform1f(loc->Base.Base.AmbientIntensity, l->Base.Base.AmbientIntensity);
+			glUniform1f(loc->Base.Base.DiffuseIntensity, l->Base.Base.DiffuseIntensity);
+			glUniform3f(loc->Base.Position, l->Base.Position.x, l->Base.Position.y, l->Base.Position.z);
+			glUniform3f(loc->Direction, l->Direction.x, l->Direction.y, l->Direction.z);
+			glUniform1f(loc->Cutoff, l->Cutoff);
+		}
+	}
 }
 
 void Program::createShader(char* name, GLenum type, char* filepath)
@@ -78,10 +208,10 @@ void Program::createShader(char* name, GLenum type, char* filepath)
 	//std::map<char*, std::pair<std::map<GLenum, Shader*>, GLuint>> _shaderMap;
 	if (_shaderMap.find(name) == _shaderMap.end())
 	{
-		std::pair<std::map<GLenum, Shader>, GLuint> tmp;
+		std::pair<std::map<GLenum, Shader*>, GLuint> tmp;
 		_shaderMap.emplace(name, tmp);
 	}
-	std::map<GLenum, Shader> &tmpMap = _shaderMap.at(name).first;
+	std::map<GLenum, Shader*> &tmpMap = _shaderMap.at(name).first;
 	tmpMap.emplace(type, Shader::shaderFromFile(filepath, type));
 
 	GLuint _object = _shaderMap.at(name).second;
@@ -94,15 +224,15 @@ void Program::createShader(char* name, GLenum type, char* filepath)
 	//How to scan through all shaders in a _shaderMap : for (std::map<GLenum, Shader>::iterator iter = _shaderMap.at(name).first.begin(); iter != _shaderMap.at(name).first.end(); ++iter)
 	
 	//attach all the shaders
-	for (std::map<GLenum, Shader>::iterator iter = _shaderMap.at(name).first.begin(); iter != _shaderMap.at(name).first.end(); ++iter)
-		glAttachShader(_object, iter->second.object());
+	for (std::map<GLenum, Shader*>::iterator iter = _shaderMap.at(name).first.begin(); iter != _shaderMap.at(name).first.end(); ++iter)
+		glAttachShader(_object, iter->second->object());
 
 	//link the shaders together
 	glLinkProgram(_object);
 
 	//detach all the shaders
-	for (std::map<GLenum, Shader>::iterator iter = _shaderMap.at(name).first.begin(); iter != _shaderMap.at(name).first.end(); ++iter)
-		glDetachShader(_object, iter->second.object());
+	for (std::map<GLenum, Shader*>::iterator iter = _shaderMap.at(name).first.begin(); iter != _shaderMap.at(name).first.end(); ++iter)
+		glDetachShader(_object, iter->second->object());
 
 	//throw exception if linking failed
 	GLint status;
@@ -153,13 +283,17 @@ GLint Program::attrib(char* name, const GLchar* attribName) const {
     return attrib;
 }
 
-GLint Program::uniform(char* name, const GLchar* uniformName) const {
+GLint Program::uniform(char* shadername, const GLchar* uniformName) const {
     if(!uniformName)
         throw std::runtime_error("uniformName was NULL");
     
-    GLint uniform = glGetUniformLocation(object(name), uniformName);
-    if(uniform == -1)
-        throw std::runtime_error(std::string("Program uniform not found: ") + uniformName);
+    GLint uniform = glGetUniformLocation(object(shadername), uniformName);
+	if (uniform == -1)
+	{
+		uniform = glGetUniformLocation(_shaderMap.at(shadername).first.at(GL_FRAGMENT_SHADER)->object(), uniformName);
+		if (uniform = -1)
+			throw std::runtime_error(std::string("Program uniform not found: ") + uniformName);
+	}
     
     return uniform;
 }

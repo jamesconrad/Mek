@@ -30,7 +30,7 @@
     <ClInclude Include="ComponentGraphics.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="ComponentInput.h" />
-    <ClInclude Include="LightComponent.h" />
+    <ClInclude Include="ComponentLight.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />

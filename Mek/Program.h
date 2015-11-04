@@ -8,10 +8,58 @@
 #include "Camera.h"
 
 class LightComponent;
-
+struct PointLight;
 /**
  Represents an OpenGL program made by linking shaders.
  */
+
+//the light locations
+struct LocBaseLight
+{
+	GLint Color;
+	GLint AmbientIntensity;
+	GLint DiffuseIntensity;
+};
+
+struct LocDirectionalLight
+{
+	LocBaseLight Base;
+	GLint Direction;
+};
+
+struct LocAttenuation
+{
+	GLint Constant;
+	GLint Linear;
+	GLint Exp;
+};
+
+struct LocPointLight
+{
+	LocBaseLight Base;
+	GLint Position;
+	LocAttenuation Atten;
+};
+
+struct LocSpotLight
+{
+	LocPointLight Base;
+	GLint Direction;
+	GLint Cutoff;
+};
+
+enum SkinningShaderIndex
+{
+	gNumPointLights = 0,
+	gNumSpotLights = 1,
+	gDirectionalLightBaseColor = 2,
+	gDirectionalLightDirection = 3,
+	gDirectionalLightBaseAmbientIntensity = 4,
+	gDirectionalLightBaseDiffuseIntensity = 5,
+	gMatSpecularIntensity = 6,
+	gSpecularPower = 7
+};
+
 class Program {
 public:
 	 /**
@@ -97,9 +145,17 @@ private:
 	Program() {};
 
 	// 3 spooky 5 me
-	std::map<char*, std::pair<std::map<GLenum, Shader>, GLuint>> _shaderMap;
+	std::map<char*, std::pair<std::map<GLenum, Shader*>, GLuint>> _shaderMap;
 
 	std::vector<LightComponent*> _lightMap;
+	std::vector<void *> _vlightMapLoc;
+	std::vector<int> _vlightVarLoc;
+	
+	unsigned int numPointLights;
+	unsigned int numSpotLights;
+	
+	void setPointLight(PointLight* l, char* shadername, std::string &base);
+	void updateLightLocations(char* shadername);
 
 	//copying disabled
 	Program(const Program&);

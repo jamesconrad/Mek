@@ -271,6 +271,7 @@ void ComponentGraphics::render()
 	updateShader();
 	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
 		glUniformMatrix4fv(_boneLocation[i], 1, GL_TRUE, (const GLfloat*)&_frameBoneTransforms[i]);
+	Program::getInstance().updateLighting("skinning");
 	//
 	glBindVertexArray(_vao);
 	for (unsigned int i = 0; i < _entries.size(); i++)

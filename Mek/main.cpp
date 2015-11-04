@@ -15,7 +15,7 @@
 
 // classes
 #include "Program.h"
-#include "LightComponent.h"
+#include "ComponentLight.h"
 #include "Texture.h"
 #include "Camera.h"
 #include "ComponentGraphics.h"
@@ -576,6 +576,18 @@ void AppMain() {
 	qtmodel->AddComponent(ComponentId::PHYSICS, gp);
 	qtmodel->pos = glm::vec3(5, 0, 0);
 
+	LightComponent* light = new LightComponent(lPOINT);
+	PointLight* lc = new PointLight;
+	lc->Atten.Constant = 1;
+	lc->Atten.Exp = 1;
+	lc->Atten.Linear = 1;
+	lc->Base.AmbientIntensity = 1;
+	lc->Base.Color = glm::vec3(1, 1, 1);
+	lc->Base.DiffuseIntensity = 1;
+	lc->Position = glm::vec3(0, 0, 100);
+
+	light->SetVars(lPOINT, lc);
+
 	tModel->render();
 	//gModel->render();
 	qtModel->render();
@@ -600,7 +612,7 @@ void AppMain() {
         GLenum error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
-			std::cerr << "OpenGL Error " << error << std::endl;
+			std::cerr << "OpenGL Error " << error << " - " << glewGetErrorString(error) << std::endl;
 		}
 
         //exit program if escape key is pressed
@@ -617,7 +629,7 @@ int main(int argc, char *argv[]) {
     try {
         AppMain();
     } catch (const std::exception& e){
-        std::cerr << "ERROR: " << e.what() << std::endl;
+		std::cerr << "ERROR: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 

@@ -10,7 +10,7 @@
 class Shader {
 public:
 
-	static Shader shaderFromFile(const std::string& filePath, GLenum shaderType);
+	static Shader* shaderFromFile(const std::string& filePath, GLenum shaderType);
 	Shader(const std::string& shaderCode, GLenum shaderType);
 	GLuint object() const;
 	Shader(const Shader& other);

@@ -71,13 +71,13 @@
     <ClInclude Include="ComponentGraphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LightComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ComponentCollision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ComponentInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

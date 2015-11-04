@@ -84,7 +84,7 @@ Shader& Shader::operator = (const Shader& other) {
     return *this;
 }
 
-Shader Shader::shaderFromFile(const std::string& filePath, GLenum shaderType) {
+Shader* Shader::shaderFromFile(const std::string& filePath, GLenum shaderType) {
     //open file
     std::ifstream f;
     f.open(filePath.c_str(), std::ios::in | std::ios::binary);
@@ -97,7 +97,7 @@ Shader Shader::shaderFromFile(const std::string& filePath, GLenum shaderType) {
     buffer << f.rdbuf();
 
     //return new shader
-    Shader shader(buffer.str(), shaderType);
+    Shader* shader = new Shader(buffer.str(), shaderType);
     return shader;
 }
 

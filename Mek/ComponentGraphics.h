@@ -124,7 +124,5 @@ private:
 	GLint _boneLocation[MAX_BONES];
 
 
-
-
 	std::vector<unsigned int> _indices;
 };
