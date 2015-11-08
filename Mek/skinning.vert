@@ -11,6 +11,7 @@ out vec3 Normal0;
 out vec3 WorldPos0;
 
 out vec4 Debug0;
+out ivec4 Debug1;
 
 const int MAX_BONES = 100;
 
@@ -26,10 +27,11 @@ void main()
     BoneTransform     += gBones[BoneIDs[3]] * Weights[3];
 
 	Debug0 = Weights;
+	Debug1 = BoneIDs;
 
     vec4 PosL    = BoneTransform * vec4(Position, 1.0);
-    //gl_Position  = gWVP * PosL;
-    gl_Position  = gWVP * vec4(Position, 1.0);
+    gl_Position  = gWVP * PosL;
+    //gl_Position  = gWVP * vec4(Position, 1.0);
 	TexCoord0    = TexCoord;
     vec4 NormalL = BoneTransform * vec4(Normal, 0.0);
     Normal0      = (gWorld * NormalL).xyz;

@@ -123,6 +123,5 @@ private:
 	std::vector<glm::mat4> _frameBoneTransforms;
 	GLint _boneLocation[MAX_BONES];
 
-
 	std::vector<unsigned int> _indices;
 };

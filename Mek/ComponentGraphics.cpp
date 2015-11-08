@@ -227,9 +227,6 @@ void ComponentGraphics::loadBones(unsigned int MeshIndex, const aiMesh* pMesh, s
 		char Name[128];
 		memset(Name, 0, sizeof(Name));
 		_snprintf_s(Name, sizeof(Name), "gBones[%d]", i);
-		//This line is actualy needed for the skeletal animation however since
-		//the code to do so was dropped from the shader it was causing issue
-		//due to gpu driver optimization dropping the variable
 		_boneLocation[i] = GetUniformLocation(Name);
 	}
 }
@@ -248,7 +245,7 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 		{
 			aiString Path;
 
-			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
+			if (pMaterial->GetTexture(aiTextureType_NONE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
 			{
 				std::string p(Path.data);
 
@@ -270,7 +267,7 @@ void ComponentGraphics::render()
 	Program::getInstance().use("skinning");
 	updateShader();
 	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
-		glUniformMatrix4fv(_boneLocation[i], 1, GL_TRUE, (const GLfloat*)&_frameBoneTransforms[i]);
+		glUniformMatrix4fv(_boneLocation[i], 1, GL_FALSE, (const GLfloat*)&_frameBoneTransforms[i]);
 	Program::getInstance().updateLighting("skinning");
 	//
 	glBindVertexArray(_vao);
@@ -499,7 +496,7 @@ void ComponentGraphics::updateShader()
 	W = glm::translate(W, _owner->pos);
 	//W = glm::rotate(W, _owner->rot);
 	//W = glm::scale(W, _owner->scale);
-	W = glm::scale(W, glm::vec3(1, 1, 1));
+	W = glm::scale(W, glm::vec3(0.01, 0.01, 0.01));
 
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();

@@ -415,7 +415,7 @@ static void Update(float secondsElapsed) {
 
 	std::vector<glm::mat4> trans;
 	tElap += secondsElapsed;
-	//gModel->BoneTransform(tElap, trans);
+	gModel->BoneTransform(tElap, trans);
 	tCol->checkVs(qtCol);
 }
 
@@ -438,8 +438,8 @@ void AppMain() {
     // open a window with GLFW
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
@@ -465,8 +465,8 @@ void AppMain() {
 
 	// Init DevIL
 	ilInit();
-	iluInit();
-	ilutRenderer(ILUT_OPENGL);
+	//iluInit();
+	//ilutRenderer(ILUT_OPENGL);
 
 	// enable vsync using windows only code
 #ifdef _WIN32
@@ -486,8 +486,8 @@ void AppMain() {
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 
     // make sure OpenGL version 3.2 API is available
-    if(!GLEW_VERSION_3_2)
-        throw std::runtime_error("OpenGL 3.2 API is not available.");
+    if(!GLEW_VERSION_4_5)
+        throw std::runtime_error("OpenGL 4.5 API is not available.");
 
     // OpenGL settings
     glEnable(GL_DEPTH_TEST);
@@ -502,9 +502,9 @@ void AppMain() {
     CreateInstances();
 
     // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(0,0,250));
+    Camera::getInstance().setPosition(glm::vec3(0,0,50));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-    Camera::getInstance().setNearAndFarPlanes(0.0005f, 10000000.0f);
+    Camera::getInstance().setNearAndFarPlanes(0.01f, 100.0f);
 
     // setup lights
     //Light spotlight;
@@ -533,7 +533,7 @@ void AppMain() {
 	model->SetName("ArmyGuy");
 	gModel = new ComponentGraphics();
 	gModel->setOwner(model);
-	gModel->loadModel("../Debug/models/base.dae");
+	gModel->loadModel("../Debug/models/ArmyGuy.dae");
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 	gCol = new ComponentCollision();
@@ -542,6 +542,7 @@ void AppMain() {
 	model->pos = glm::vec3(0, -2.5, 0);
 	gCol->setCollisionElip(glm::vec3(10, 0.5, 10));
 	gp = gCol;
+
 	//model->AddComponent(ComponentId::PHYSICS, gp);
 	
 
@@ -589,9 +590,11 @@ void AppMain() {
 	light->SetVars(lPOINT, lc);
 
 	tModel->render();
-	//gModel->render();
+	gModel->render();
 	qtModel->render();
 	//END MODEL INITS
+
+	wglSwapIntervalEXT(1);
 
 
     // run while the window is open

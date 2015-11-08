@@ -7,6 +7,7 @@ in vec2 TexCoord0;
 in vec3 Normal0;
 in vec3 WorldPos0;
 in vec4 Debug0;
+in ivec4 Debug1;
 
 struct VSOutput
 {
@@ -143,4 +144,5 @@ void main()
     }
 
     FragColor = texture(gColorMap, In.TexCoord.xy) * TotalLight;
+	//FragColor = Debug0;
 }
