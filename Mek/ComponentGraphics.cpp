@@ -245,18 +245,22 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 		{
 			aiString Path;
 
-			if (pMaterial->GetTexture(aiTextureType_NONE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
+			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
 			{
-				std::string p(Path.data);
-
 				Bitmap bmp;
-				_textures[i] = new Texture("../Debug/wooden-crate.jpg");
+				_textures[i] = new Texture(Path.data);
+				if (_textures[i]->originalWidth() == 0)
+				{
+					GLuint o = _textures[i]->object();
+					glDeleteTextures(1, &o);
+					free(_textures[i]);
+					_textures[i] = new Texture("../Debug/missingtexture.png");
+				}
 			}
 		}
 		else
 		{
-			std::string p("../Debug/wooden-crate.jpg");
-			_textures[i] = new Texture((char*)p.c_str());
+			_textures[i] = new Texture("../Debug/missingtexture.png");
 		}
 	}
 }
@@ -424,7 +428,7 @@ void ComponentGraphics::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNo
 		aiVector3D Scaling;
 		CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
 		glm::mat4 ScalingM;
-		glm::scale(ScalingM, glm::vec3(Scaling.x, Scaling.y, Scaling.z));
+		ScalingM = glm::scale(ScalingM, glm::vec3(Scaling.x, Scaling.y, Scaling.z));
 
 		// Interpolate rotation and generate rotation transformation matrix
 		aiQuaternion RotationQ;
@@ -436,17 +440,18 @@ void ComponentGraphics::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNo
 		aiVector3D Translation;
 		CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
 		glm::mat4 TranslationM;
-		glm::translate(TranslationM, glm::vec3(Translation.x, Translation.y, Translation.z));
+		TranslationM = glm::translate(TranslationM, glm::vec3(Translation.x, Translation.y, Translation.z));
+		
 		// Combine the above transformations
 		NodeTransformation = TranslationM * RotationM * ScalingM;
 	}
 
 	glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;
-
+	
 	if (_boneMapping.find(NodeName) != _boneMapping.end())
 	{
 		unsigned int BoneIndex = _boneMapping[NodeName];
-		_boneInfo[BoneIndex].FinalTransformation = _transform * GlobalTransformation * _boneInfo[BoneIndex].BoneOffset;
+		_boneInfo[BoneIndex].FinalTransformation = GlobalTransformation * _boneInfo[BoneIndex].BoneOffset;
 	}
 
 	for (unsigned int i = 0; i < pNode->mNumChildren; i++)
@@ -496,7 +501,7 @@ void ComponentGraphics::updateShader()
 	W = glm::translate(W, _owner->pos);
 	//W = glm::rotate(W, _owner->rot);
 	//W = glm::scale(W, _owner->scale);
-	W = glm::scale(W, glm::vec3(0.01, 0.01, 0.01));
+	//W = glm::scale(W, glm::vec3(0.01, 0.01, 0.01));
 
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();

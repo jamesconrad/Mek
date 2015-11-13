@@ -20,6 +20,13 @@
 #include "Camera.h"
 #include "ComponentGraphics.h"
 #include "ComponentCollision.h"
+#include "ComponentInput.h"
+
+//BEGIN THE SHITTIEST CODE I HAVE EVER DONE
+//Pls no kill future me.  I sorry
+std::vector<GameObject*> goVec;
+ComponentInput* cInput;
+
 
 /*
  Represents a textured geometry asset
@@ -340,13 +347,12 @@ static void Render() {
 	tModel->render();
 	qtModel->render();
 	gModel->render();
-
-    // render all the instances
-    //std::list<ModelInstance>::const_iterator it;
-    //for(it = gInstances.begin(); it != gInstances.end(); ++it){
-    //	RenderInstance(*it);
-    //}
-
+	
+	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
+	{
+		ComponentGraphics* cg = static_cast<ComponentGraphics*>(goVec[i]->GetComponent(GRAPHICS));
+		cg->render();
+	}
 
     // swap the display buffers (displays what was just drawn)
     glfwSwapBuffers(gWindow);
@@ -355,14 +361,9 @@ static void Render() {
 
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-    //rotate the first instance in `gInstances`
-    const GLfloat degreesPerSecond = 10.0f;
-    gDegreesRotated += secondsElapsed * degreesPerSecond;
-    //while(gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
-    //gInstances.front().transform = glm::rotate(glm::mat4(), gDegreesRotated, glm::vec3(0,1,0));
 
     //move position of camera based on WASD keys, and XZ keys for up and down
-    const float moveSpeed = 4.0; //units per second
+    const float moveSpeed = 0.2f; //units per second
     if(glfwGetKey(gWindow, 'S')){
         Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 10.f * -Camera::getInstance().forward());
     } else if(glfwGetKey(gWindow, 'W')){
@@ -379,19 +380,13 @@ static void Update(float secondsElapsed) {
         Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
     }
 	
-    //move light
-    //if(glfwGetKey(gWindow, '1')){
-    //    gLights[0].position = glm::vec4(Camera::getInstance().position(), 1.0);
-    //    gLights[0].coneDirection = Camera::getInstance().forward();
-    //}
-	//
-    //// change light color
-    //if(glfwGetKey(gWindow, '2'))
-    //    gLights[0].intensities = glm::vec3(2,0,0); //red
-    //else if(glfwGetKey(gWindow, '3'))
-    //    gLights[0].intensities = glm::vec3(0,2,0); //green
-    //else if(glfwGetKey(gWindow, '4'))
-    //    gLights[0].intensities = glm::vec3(2,2,2); //white
+	if (cInput->Refresh())
+	{
+		Camera::getInstance().offsetPosition(cInput->leftStickY * moveSpeed * 10.0f * Camera::getInstance().forward());
+		Camera::getInstance().offsetPosition(cInput->leftStickX * moveSpeed * Camera::getInstance().right());
+
+		Camera::getInstance().offsetOrientation(-cInput->rightStickY * 0.5f, cInput->rightStickX * 0.5f);
+	}
 
 
     //rotate camera based on mouse movement
@@ -410,13 +405,13 @@ static void Update(float secondsElapsed) {
     gScrollY = 0;
 
 	//tmodel->pos += glm::vec3(0.001, 0, 0);
-	CollisionManager::instance().checkAll();
+	//CollisionManager::instance().checkAll();
 
 
 	std::vector<glm::mat4> trans;
 	tElap += secondsElapsed;
 	gModel->BoneTransform(tElap, trans);
-	tCol->checkVs(qtCol);
+	//tCol->checkVs(qtCol);
 }
 
 // records how far the y axis has been scrolled
@@ -504,28 +499,7 @@ void AppMain() {
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(0,0,50));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-    Camera::getInstance().setNearAndFarPlanes(0.01f, 100.0f);
-
-    // setup lights
-    //Light spotlight;
-	////LightComponent *spot = new LightComponent(LightType::SPOT);
-	////spot->SetVars(SPOT, glm::vec4(-4, 0, 10, 1), glm::vec3(0, 0, -1), glm::vec3(2, 2, 2), 0.1f, 0.0f, 15);
-    //spotlight.position = glm::vec4(-4,0,10,1);
-    //spotlight.intensities = glm::vec3(2,2,2); //strong white light
-    //spotlight.attenuation = 0.1f;
-    //spotlight.ambientCoefficient = 0.0f; //no ambient light
-    //spotlight.coneAngle = 15.0f;
-    //spotlight.coneDirection = glm::vec3(0,0,-1);
-	//
-    //Light directionalLight;
-	////LightComponent *dir = new LightComponent(LightType::SPOT);
-	////dir->SetVars(LightType::SPOT, glm::vec4(1, 0.8, 0.6, 0), glm::vec3(0, 1, 0), glm::vec3(0, 0, 0), 0, 0.06f, 0);
-    //directionalLight.position = glm::vec4(1, 0.8, 0.6, 0); //w == 0 indications a directional light
-    //directionalLight.intensities = glm::vec3(0.4,0.3,0.1); //weak yellowish light
-    //directionalLight.ambientCoefficient = 0.06f;
-	//
-    //gLights.push_back(spotlight);
-    //gLights.push_back(directionalLight);
+    Camera::getInstance().setNearAndFarPlanes(0.1f, 1000.0f);
 
 	//MODEL INITS
 
@@ -542,9 +516,23 @@ void AppMain() {
 	model->pos = glm::vec3(0, -2.5, 0);
 	gCol->setCollisionElip(glm::vec3(10, 0.5, 10));
 	gp = gCol;
-
-	//model->AddComponent(ComponentId::PHYSICS, gp);
 	
+	//PROPER INIT
+	GameObject *gObject = new GameObject(goVec.size());
+	ComponentGraphics *cModel = new ComponentGraphics();
+	ComponentCollision *cCollision = new ComponentCollision();
+	Component *c;
+	gObject->SetName("Player");
+	cModel->setOwner(gObject);
+	cModel->loadModel("../Debug/models/All_Of_IT.dae");
+	c = cModel;
+	gObject->AddComponent(GRAPHICS, c);
+	//cCollision->setOwner(gObject);
+	//cCollision->setCollisionMask(cModel->getScene());
+	//cCollision->staticObj = true;
+	//cCollision->setCollisionElip(glm::vec3(1, 1, 1));
+	//gObject->AddComponent(PHYSICS, cCollision);
+	goVec.push_back(gObject);
 
 	tmodel = new GameObject(1);
 	tmodel->SetName("t-PAYNE");
@@ -593,6 +581,7 @@ void AppMain() {
 	gModel->render();
 	qtModel->render();
 	//END MODEL INITS
+	cInput = new ComponentInput(0.25, 0.25);
 
 	wglSwapIntervalEXT(1);
 
