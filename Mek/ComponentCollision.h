@@ -1,19 +1,24 @@
 #include "GameObject.h"
 #include "include\assimp\scene.h"
+#include "lib\glm\glm.hpp"
 
 
-//outdated, new method below
-struct Bone
+//IMPORTANT
+//Collision dosn't do animation scaling!
+
+struct BoneBox
 {
-	//this totally isnt the 10th time ive made and deleted this
-	//note values are in modelspace
-	std::vector<glm::vec3> v;
-	std::vector<glm::vec3> n;
 	int boneNum;
-	aiMesh* parent;
-	char* name;
-};
+	std::string name;
+	glm::vec3 min, max;
+	glm::vec3 uN, rN, fN;
 
+	glm::vec3 centre;
+	float hwU, hwR, hwF;
+
+	glm::vec3 fmin, fmax, fuN, frN, ffN, fc;
+};
+/*
 class PLANE {
 public:
 	float equation[4];
@@ -39,39 +44,48 @@ struct CollisionPacket {
 	float nearestDistance;
 	glm::vec3 intersectionPoint;
 };
-
+*/
 class CollisionManager;
 
 class ComponentCollision : public Component
 {
 public:
 	ComponentCollision();
+	//WARNING: MUST RECIEVE A CompoentGraphics::getBoneInfoRef()
+	void updateFrame(void* boneInfoLocation);
 	
 	bool checkVs(ComponentCollision* c);
 	void setCollisionMask(const aiScene* _scene);
 
 	void ComponentCollision::collideAndSlide(const glm::vec3& vel, const glm::vec3& gravity, int vs);
 	glm::vec3 ComponentCollision::collideWithWorld(const glm::vec3& pos, const glm::vec3& vel, int vs);
-	void update();
+	void update() {}
 	
-	void setCollisionElip(glm::vec3);
+	void setCollisionElip(glm::vec3) {}
 
 	float radius;
-	std::vector<Bone*> _cMesh;
-	CollisionPacket* collisionPackage;
+	std::vector<BoneBox*> _cMesh;
 	const aiScene* _scene;
 	int collisionRecursionDepth;
 	bool staticObj;
 private:
+
+	struct BoneInfo
+	{
+		glm::mat4 BoneOffset;
+		glm::mat4 FinalTransformation;
+	};
+
+
 };
 
 class CollisionManager
 {
 public:
-	bool checkCollision(CollisionPacket*, int handle, int vs);
+	//bool checkCollision(CollisionPacket*, int handle, int vs);
 	void addObject(ComponentCollision*);
 
-	void checkAll();
+	void checkAll() {}
 
 	//singleton
 	static CollisionManager& instance()

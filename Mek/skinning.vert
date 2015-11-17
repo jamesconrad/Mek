@@ -30,8 +30,8 @@ void main()
 	Debug1 = BoneIDs;
 
     vec4 PosL    = BoneTransform * vec4(Position, 1.0);
-    gl_Position  = gWVP * PosL;
-    //gl_Position  = gWVP * vec4(Position, 1.0);
+    //gl_Position  = gWVP * PosL;
+    gl_Position  = gWVP * vec4(Position, 1.0);
 	TexCoord0    = TexCoord;
     vec4 NormalL = BoneTransform * vec4(Normal, 0.0);
     Normal0      = (gWorld * NormalL).xyz;

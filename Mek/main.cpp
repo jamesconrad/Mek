@@ -365,27 +365,27 @@ static void Update(float secondsElapsed) {
     //move position of camera based on WASD keys, and XZ keys for up and down
     const float moveSpeed = 0.2f; //units per second
     if(glfwGetKey(gWindow, 'S')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 10.f * -Camera::getInstance().forward());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * -Camera::getInstance().forward());
     } else if(glfwGetKey(gWindow, 'W')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 10.f * Camera::getInstance().forward());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * Camera::getInstance().forward());
     }
     if(glfwGetKey(gWindow, 'A')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * -Camera::getInstance().right());
+        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * -Camera::getInstance().right());
     } else if(glfwGetKey(gWindow, 'D')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * Camera::getInstance().right());
+		Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * Camera::getInstance().right());
     }
     if(glfwGetKey(gWindow, 'Z')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0,1,0));
+		Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * -glm::vec3(0, 1, 0));
     } else if(glfwGetKey(gWindow, 'X')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0,1,0));
+		Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * glm::vec3(0, 1, 0));
     }
 	
 	if (cInput->Refresh())
 	{
-		Camera::getInstance().offsetPosition(cInput->leftStickY * moveSpeed * 10.0f * Camera::getInstance().forward());
-		Camera::getInstance().offsetPosition(cInput->leftStickX * moveSpeed * Camera::getInstance().right());
+		//Camera::getInstance().offsetPosition(cInput->leftStickY * moveSpeed * 10.0f * Camera::getInstance().forward());
+		//Camera::getInstance().offsetPosition(cInput->leftStickX * moveSpeed * Camera::getInstance().right());
 
-		Camera::getInstance().offsetOrientation(-cInput->rightStickY * 0.5f, cInput->rightStickX * 0.5f);
+		//Camera::getInstance().offsetOrientation(-cInput->rightStickY * 0.5f, cInput->rightStickX * 0.5f);
 	}
 
 
@@ -404,13 +404,29 @@ static void Update(float secondsElapsed) {
     Camera::getInstance().setFieldOfView(fieldOfView);
     gScrollY = 0;
 
-	//tmodel->pos += glm::vec3(0.001, 0, 0);
-	//CollisionManager::instance().checkAll();
 
+
+	struct BoneInfo
+	{
+		glm::mat4 BoneOffset;
+		glm::mat4 FinalTransformation;
+	};
+	BoneInfo* bi = new BoneInfo;
+
+
+	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
+	c->Refresh();
+	c->getOwner()->pos += glm::vec3(c->leftStickX/10, c->leftStickY/10, 0);
+	
+	ComponentCollision* c1 = static_cast<ComponentCollision*>(model->GetComponent(PHYSICS));
+	ComponentCollision* c2 = static_cast<ComponentCollision*>(qtmodel->GetComponent(PHYSICS));
+	c1->updateFrame(bi);
+	c2->updateFrame(bi);
+	c1->checkVs(c2);
 
 	std::vector<glm::mat4> trans;
 	tElap += secondsElapsed;
-	gModel->BoneTransform(tElap, trans);
+	//gModel->BoneTransform(tElap, trans);
 	//tCol->checkVs(qtCol);
 }
 
@@ -497,61 +513,65 @@ void AppMain() {
     CreateInstances();
 
     // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(0,0,50));
+    Camera::getInstance().setPosition(glm::vec3(0,0,250));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-    Camera::getInstance().setNearAndFarPlanes(0.1f, 1000.0f);
+    Camera::getInstance().setNearAndFarPlanes(0.1f, 500.0f);
 
 	//MODEL INITS
 
 	model = new GameObject(0);
-	model->SetName("ArmyGuy");
+	model->SetName("Moving");
 	gModel = new ComponentGraphics();
 	gModel->setOwner(model);
-	gModel->loadModel("../Debug/models/ArmyGuy.dae");
+	gModel->loadModel("../Debug/models/2boxesv1.dae");
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 	gCol = new ComponentCollision();
 	gCol->setCollisionMask(gModel->getScene());
 	gCol->setOwner(model);
-	model->pos = glm::vec3(0, -2.5, 0);
-	gCol->setCollisionElip(glm::vec3(10, 0.5, 10));
+	model->pos = glm::vec3(-5, 0, 0);
+	gCol->setCollisionElip(glm::vec3(1, 2, 1));
+	gCol->staticObj = false;
 	gp = gCol;
+	model->AddComponent(PHYSICS, gp);
+	ComponentInput* ci = new ComponentInput(0.05,0.05);
+	gp = ci;
+	model->AddComponent(CONTROLLER, gp);
 	
 	//PROPER INIT
-	GameObject *gObject = new GameObject(goVec.size());
-	ComponentGraphics *cModel = new ComponentGraphics();
-	ComponentCollision *cCollision = new ComponentCollision();
-	Component *c;
-	gObject->SetName("Player");
-	cModel->setOwner(gObject);
-	cModel->loadModel("../Debug/models/All_Of_IT.dae");
-	c = cModel;
-	gObject->AddComponent(GRAPHICS, c);
-	//cCollision->setOwner(gObject);
-	//cCollision->setCollisionMask(cModel->getScene());
-	//cCollision->staticObj = true;
-	//cCollision->setCollisionElip(glm::vec3(1, 1, 1));
-	//gObject->AddComponent(PHYSICS, cCollision);
-	goVec.push_back(gObject);
+	//GameObject *gObject = new GameObject(goVec.size());
+	//ComponentGraphics *cModel = new ComponentGraphics();
+	//ComponentCollision *cCollision = new ComponentCollision();
+	//Component *c;
+	//gObject->SetName("Unused");
+	//cModel->setOwner(gObject);
+	//cModel->loadModel("../Debug/models/All_Of_IT.dae");
+	//c = cModel;
+	//gObject->AddComponent(GRAPHICS, c);
+	////cCollision->setOwner(gObject);
+	////cCollision->setCollisionMask(cModel->getScene());
+	////cCollision->staticObj = true;
+	////cCollision->setCollisionElip(glm::vec3(1, 1, 1));
+	////gObject->AddComponent(PHYSICS, cCollision);
+	//goVec.push_back(gObject);
 
 	tmodel = new GameObject(1);
-	tmodel->SetName("t-PAYNE");
+	tmodel->SetName("Base");
 	tModel = new ComponentGraphics();
 	tModel->setOwner(tmodel);
-	tModel->loadModel("../Debug/models/2boxesv1.dae");
+	tModel->loadModel("../Debug/models/base.dae");
 	gp = tModel;
 	tmodel->AddComponent(GRAPHICS, gp);
 	tCol = new ComponentCollision();
 	tCol->setCollisionMask(tModel->getScene());
 	tCol->setOwner(model);
-	tCol->staticObj = false;//x,1/y,z
 	tCol->setCollisionElip(glm::vec3(1, 6, 2));
-	tmodel->pos = glm::vec3(-5, 0, 0);
+	tmodel->pos = glm::vec3(0, -0.5, 0);
 	gp = tCol;
 	tmodel->AddComponent(ComponentId::PHYSICS, gp);
 
 	qtmodel = new GameObject(2);
-	qtmodel->SetName("qt-PAYNE");
+	qtmodel->SetName("StaticObject");
 	qtModel = new ComponentGraphics();
 	qtModel->setOwner(qtmodel);
 	qtModel->loadModel("../Debug/models/2boxesv1.dae");

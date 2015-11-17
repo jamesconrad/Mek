@@ -31,6 +31,11 @@ public:
 	void render();
 	void updateShader();
 
+	void* getBoneInfoRef()
+	{
+		return (void*)_boneInfo.data();
+	}
+
 
 	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms);
 

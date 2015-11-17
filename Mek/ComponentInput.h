@@ -6,8 +6,9 @@
 #include <iostream>
 #include <Windows.h>
 #include <Xinput.h>
+#include "Component.h"
 
-class ComponentInput
+class ComponentInput : public Component
 {
 public:
 	ComponentInput() : deadzoneX(0.05f), deadzoneY(0.02f) {}
@@ -25,6 +26,8 @@ public:
 	bool CheckConnection();
 	bool Refresh();
 	bool IsPressed(WORD);
+
+	void update() {}
 
 private:
 	int cId;
