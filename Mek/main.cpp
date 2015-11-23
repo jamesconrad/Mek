@@ -3,6 +3,7 @@
 #include "include\GL\glfw3.h"
 #include "lib\glm\glm.hpp"
 #include "lib\glm\gtc\matrix_transform.hpp"
+#include "lib\glm\gtx\rotate_vector.hpp"
 #include "include\IL\ilut.h"
 
 // standard C++ libraries
@@ -18,9 +19,13 @@
 #include "ComponentLight.h"
 #include "Texture.h"
 #include "Camera.h"
-#include "ComponentGraphics.h"
-#include "ComponentCollision.h"
+//#include "ComponentGraphics.h"
+//#include "ComponentCollision.h"
 #include "ComponentInput.h"
+
+
+#include "Projectile.h"
+
 
 //BEGIN THE SHITTIEST CODE I HAVE EVER DONE
 //Pls no kill future me.  I sorry
@@ -28,38 +33,7 @@ std::vector<GameObject*> goVec;
 ComponentInput* cInput;
 
 
-/*
- Represents a textured geometry asset
-
- Contains everything necessary to draw arbitrary geometry with a single texture:
-
-  - shaders
-  - a texture
-  - a VBO
-  - a VAO
-  - the parameters to glDrawArrays (drawType, drawStart, drawCount)
- */
-//struct ModelAsset {
-//    Texture* texture;
-//    GLuint vbo;
-//    GLuint vao;
-//    GLenum drawType;
-//    GLint drawStart;
-//    GLint drawCount;
-//    GLfloat shininess;
-//    glm::vec3 specularColor;
-//
-//    ModelAsset() :
-//        texture(NULL),
-//        vbo(0),
-//        vao(0),
-//        drawType(GL_TRIANGLES),
-//        drawStart(0),
-//        drawCount(0),
-//        shininess(0.0f),
-//        specularColor(1.0f, 1.0f, 1.0f)
-//    {}
-//};
+//TODO : SLERP (Targets?), Sprite animation, Paths and Curves(Targets?) 
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
 {
@@ -71,43 +45,13 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	Program::getInstance().createShader("skinning", GL_FRAGMENT_SHADER, "skinning.frag");
 }
 
-/*
- Represents an instance of an `ModelAsset`
-
- Contains a pointer to the asset, and a model transformation matrix to be used when drawing.
- */
-//struct ModelInstance {
-//    ModelAsset* asset;
-//    glm::mat4 transform;
-//
-//    ModelInstance() :
-//        asset(NULL),
-//        transform()
-//    {}
-//};
-
-/*
- Represents a point light
- */
-//struct Light {
-//    glm::vec4 position;
-//    glm::vec3 intensities; //a.k.a. the color of the light
-//    float attenuation;
-//    float ambientCoefficient;
-//    float coneAngle;
-//    glm::vec3 coneDirection;
-//};
-
 // constants
 const glm::vec2 SCREEN_SIZE(1920, 1080);
 
 // globals
 GLFWwindow* gWindow = NULL;
 double gScrollY = 0.0;
-//ModelAsset gWoodenCrate;
-//std::list<ModelInstance> gInstances;
 GLfloat gDegreesRotated = 0.0f;
-//std::vector<Light> gLights;
 
 GameObject* model;
 ComponentGraphics* gModel;
@@ -133,91 +77,7 @@ static Texture* LoadTexture(char* filename) {
 
 // initialises the gWoodenCrate global
 static void LoadWoodenCrateAsset() {
-    // set all the elements of gWoodenCrate
     LoadShaders("vertex-shader.vert", "fragment-shader.frag");
-    //gWoodenCrate.drawType = GL_TRIANGLES;
-    //gWoodenCrate.drawStart = 0;
-    //gWoodenCrate.drawCount = 6*2*3;
-	//
-	//gWoodenCrate.texture = LoadTexture("../Debug/wooden-crate.jpg");
-    //gWoodenCrate.shininess = 80.0;
-    //gWoodenCrate.specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    //glGenBuffers(1, &gWoodenCrate.vbo);
-    //glGenVertexArrays(1, &gWoodenCrate.vao);
-	//
-    //// bind the VAO
-    //glBindVertexArray(gWoodenCrate.vao);
-	//
-    //// bind the VBO
-    //glBindBuffer(GL_ARRAY_BUFFER, gWoodenCrate.vbo);
-	//
-    //// Make a cube out of triangles (two triangles per side)
-    //GLfloat vertexData[] = {
-    //    //  X     Y     Z       U     V          Normal
-    //    // bottom
-    //    -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,   0.0f, -1.0f, 0.0f,
-    //     1.0f,-1.0f,-1.0f,   1.0f, 0.0f,   0.0f, -1.0f, 0.0f,
-    //    -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,   0.0f, -1.0f, 0.0f,
-    //     1.0f,-1.0f,-1.0f,   1.0f, 0.0f,   0.0f, -1.0f, 0.0f,
-    //     1.0f,-1.0f, 1.0f,   1.0f, 1.0f,   0.0f, -1.0f, 0.0f,
-    //    -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,   0.0f, -1.0f, 0.0f,
-	//
-    //    // top
-    //    -1.0f, 1.0f,-1.0f,   0.0f, 0.0f,   0.0f, 1.0f, 0.0f,
-    //    -1.0f, 1.0f, 1.0f,   0.0f, 1.0f,   0.0f, 1.0f, 0.0f,
-    //     1.0f, 1.0f,-1.0f,   1.0f, 0.0f,   0.0f, 1.0f, 0.0f,
-    //     1.0f, 1.0f,-1.0f,   1.0f, 0.0f,   0.0f, 1.0f, 0.0f,
-    //    -1.0f, 1.0f, 1.0f,   0.0f, 1.0f,   0.0f, 1.0f, 0.0f,
-    //     1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   0.0f, 1.0f, 0.0f,
-	//
-    //    // front
-    //    -1.0f,-1.0f, 1.0f,   1.0f, 0.0f,   0.0f, 0.0f, 1.0f,
-    //     1.0f,-1.0f, 1.0f,   0.0f, 0.0f,   0.0f, 0.0f, 1.0f,
-    //    -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   0.0f, 0.0f, 1.0f,
-    //     1.0f,-1.0f, 1.0f,   0.0f, 0.0f,   0.0f, 0.0f, 1.0f,
-    //     1.0f, 1.0f, 1.0f,   0.0f, 1.0f,   0.0f, 0.0f, 1.0f,
-    //    -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   0.0f, 0.0f, 1.0f,
-	//
-    //    // back
-    //    -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,   0.0f, 0.0f, -1.0f,
-    //    -1.0f, 1.0f,-1.0f,   0.0f, 1.0f,   0.0f, 0.0f, -1.0f,
-    //     1.0f,-1.0f,-1.0f,   1.0f, 0.0f,   0.0f, 0.0f, -1.0f,
-    //     1.0f,-1.0f,-1.0f,   1.0f, 0.0f,   0.0f, 0.0f, -1.0f,
-    //    -1.0f, 1.0f,-1.0f,   0.0f, 1.0f,   0.0f, 0.0f, -1.0f,
-    //     1.0f, 1.0f,-1.0f,   1.0f, 1.0f,   0.0f, 0.0f, -1.0f,
-	//
-    //    // left
-    //    -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,   -1.0f, 0.0f, 0.0f,
-    //    -1.0f, 1.0f,-1.0f,   1.0f, 0.0f,   -1.0f, 0.0f, 0.0f,
-    //    -1.0f,-1.0f,-1.0f,   0.0f, 0.0f,   -1.0f, 0.0f, 0.0f,
-    //    -1.0f,-1.0f, 1.0f,   0.0f, 1.0f,   -1.0f, 0.0f, 0.0f,
-    //    -1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   -1.0f, 0.0f, 0.0f,
-    //    -1.0f, 1.0f,-1.0f,   1.0f, 0.0f,   -1.0f, 0.0f, 0.0f,
-	//
-    //    // right
-    //     1.0f,-1.0f, 1.0f,   1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
-    //     1.0f,-1.0f,-1.0f,   1.0f, 0.0f,   1.0f, 0.0f, 0.0f,
-    //     1.0f, 1.0f,-1.0f,   0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
-    //     1.0f,-1.0f, 1.0f,   1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
-    //     1.0f, 1.0f,-1.0f,   0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
-    //     1.0f, 1.0f, 1.0f,   0.0f, 1.0f,   1.0f, 0.0f, 0.0f
-    //};
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-	//
-    //// connect the xyz to the "vert" attribute of the vertex shader
-    //glEnableVertexAttribArray(Program::getInstance().attrib("standard", "vert"));
-    //glVertexAttribPointer(Program::getInstance().attrib("standard", "vert"), 3, GL_FLOAT, GL_FALSE, 8*sizeof(GLfloat), NULL);
-	//
-    //// connect the uv coords to the "vertTexCoord" attribute of the vertex shader
-    //glEnableVertexAttribArray(Program::getInstance().attrib("standard", "vertTexCoord"));
-    //glVertexAttribPointer(Program::getInstance().attrib("standard", "vertTexCoord"), 2, GL_FLOAT, GL_TRUE,  8*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
-	//
-    //// connect the normal to the "vertNormal" attribute of the vertex shader
-    //glEnableVertexAttribArray(Program::getInstance().attrib("standard", "vertNormal"));
-    //glVertexAttribPointer(Program::getInstance().attrib("standard", "vertNormal"), 3, GL_FLOAT, GL_TRUE,  8*sizeof(GLfloat), (const GLvoid*)(5 * sizeof(GLfloat)));
-	//
-    //// unbind the VAO
-    //glBindVertexArray(0);
 }
 
 
@@ -235,96 +95,8 @@ glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
 
 //create all the `instance` structs for the 3D scene, and add them to `gInstances`
 static void CreateInstances() {
-	//ModelInstance dot;
-	//dot.asset = &gWoodenCrate;
-	//dot.transform = glm::mat4();
-	//gInstances.push_back(dot);
-	//
-	//ModelInstance i;
-	//i.asset = &gWoodenCrate;
-	//i.transform = translate(0,-4,0) * scale(1,2,1);
-	//gInstances.push_back(i);
-	//
-	//ModelInstance hLeft;
-	//hLeft.asset = &gWoodenCrate;
-	//hLeft.transform = translate(-8,0,0) * scale(1,6,1);
-	//gInstances.push_back(hLeft);
-	//
-	//ModelInstance hRight;
-	//hRight.asset = &gWoodenCrate;
-	//hRight.transform = translate(-4,0,0) * scale(1,6,1);
-	//gInstances.push_back(hRight);
-	//
-	//ModelInstance hMid;
-	//hMid.asset = &gWoodenCrate;
-	//hMid.transform = translate(-6,0,0) * scale(2,1,0.8f);
-	//gInstances.push_back(hMid);
-	//
-	//ModelInstance floor;
-	//floor.asset = &gWoodenCrate;
-	//floor.transform = translate(0, 0, 0) * scale(10, 0.1, 10);
-	//gInstances.push_back(floor);
 
-	//ModelInstance a;
-	//a.asset = &gWoodenCrate;
-	//a.transform = translate(1, 0, 0) * scale(0.25, 0.25, 0.25);
-	//gInstances.push_back(a);
-	//
-	//ModelInstance b;
-	//b.asset = &gWoodenCrate;
-	//b.transform = translate(0, -1, 0) * scale(0.25, 0.25, 0.25);
-	//gInstances.push_back(b);
 }
-
-//template <typename T>
-//void SetLightUniform(char* shaderName, const char* propertyName, size_t lightIndex, const T& value) {
-//    std::ostringstream ss;
-//    ss << "allLights[" << lightIndex << "]." << propertyName;
-//    std::string uniformName = ss.str();
-//
-//	Program::getInstance().setUniform("standard", uniformName.c_str(), value);
-//	Program::getInstance().setUniform("skinning", uniformName.c_str(), value);
-//}
-
-//renders a single `ModelInstance`
-//static void RenderInstance(const ModelInstance& inst) {
-    //ModelAsset* asset = inst.asset;
-	//
-    ////bind the shaders
-    //Program::getInstance().use("standard");
-	//
-    ////set the shader uniforms
-    //Program::getInstance().setUniform("standard", "camera", Camera::getInstance().matrix());
-    //Program::getInstance().setUniform("standard", "model", inst.transform);
-    //Program::getInstance().setUniform("standard", "materialTex", 0); //set to 0 because the texture will be bound to GL_TEXTURE0
-    //Program::getInstance().setUniform("standard", "materialShininess", asset->shininess);
-    //Program::getInstance().setUniform("standard", "materialSpecularColor", asset->specularColor);
-    //Program::getInstance().setUniform("standard", "cameraPosition", Camera::getInstance().position());
-    
-	//Program::getInstance().setUniform("standard", "numLights", (int)gLights.size());
-    //for(size_t i = 0; i < gLights.size(); ++i){
-    //    SetLightUniform("standard", "position", i, gLights[i].position);
-    //    SetLightUniform("standard", "intensities", i, gLights[i].intensities);
-    //    SetLightUniform("standard", "attenuation", i, gLights[i].attenuation);
-    //    SetLightUniform("standard", "ambientCoefficient", i, gLights[i].ambientCoefficient);
-    //    SetLightUniform("standard", "coneAngle", i, gLights[i].coneAngle);
-    //    SetLightUniform("standard", "coneDirection", i, gLights[i].coneDirection);
-    //}
-
-    //bind the texture
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, asset->texture->object());
-	//
-    ////bind VAO and draw
-    //glBindVertexArray(asset->vao);
-    //glDrawArrays(asset->drawType, asset->drawStart, asset->drawCount);
-	//
-    ////unbind everything
-    //glBindVertexArray(0);
-    //glBindTexture(GL_TEXTURE_2D, 0);
-    //Program::getInstance().stopUsing("standard");
-//}
-
 
 void LoadWorld()
 {
@@ -345,8 +117,8 @@ static void Render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	tModel->render();
-	qtModel->render();
-	gModel->render();
+	//qtModel->render();
+	//gModel->render();
 	
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
@@ -398,36 +170,62 @@ static void Update(float secondsElapsed) {
 
     //increase or decrease field of view based on mouse wheel
     const float zoomSensitivity = -20.2f;
-    float fieldOfView = Camera::getInstance().fieldOfView() + zoomSensitivity * (float)gScrollY;
-    if(fieldOfView < 5.0f) fieldOfView = 5.0f;
-    if(fieldOfView > 130.0f) fieldOfView = 130.0f;
-    Camera::getInstance().setFieldOfView(fieldOfView);
+    //float fieldOfView = Camera::getInstance().fieldOfView() + zoomSensitivity * (float)gScrollY;
+    //if(fieldOfView < 5.0f) fieldOfView = 5.0f;
+    //if(fieldOfView > 130.0f) fieldOfView = 130.0f;
+	//
+	//printf("FOV : %f \n", fieldOfView);
+
+    Camera::getInstance().setFieldOfView(179);
     gScrollY = 0;
 
 
+	//Theory:
+	//Camera pos always = object pos
+	//Camera dir always = object dir
 
-	struct BoneInfo
-	{
-		glm::mat4 BoneOffset;
-		glm::mat4 FinalTransformation;
-	};
-	BoneInfo* bi = new BoneInfo;
-
+	Camera* cam = &Camera::getInstance();
 
 	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
 	c->Refresh();
-	c->getOwner()->pos += glm::vec3(c->leftStickX/10, c->leftStickY/10, 0);
+	glm::vec3 lInput = glm::vec3(c->leftStickX, 0, c->leftStickY);
+	glm::vec2 rInput = glm::vec2(c->rightStickX / 5, c->rightStickY / 5);
 	
-	ComponentCollision* c1 = static_cast<ComponentCollision*>(model->GetComponent(PHYSICS));
-	ComponentCollision* c2 = static_cast<ComponentCollision*>(qtmodel->GetComponent(PHYSICS));
-	c1->updateFrame(bi);
-	c2->updateFrame(bi);
-	c1->checkVs(c2);
+	//c->getOwner()->pos += cam->forward() * (c->getOwner()->vel * -lInput.z);
+	//c->getOwner()->pos += cam->right() * (c->getOwner()->vel * -lInput.x);
+	glm::vec3 fmy = cam->forward();
+	fmy.y = 0;
+
+	model->pos += fmy * (c->getOwner()->vel * lInput.z);
+	model->pos += cam->right() * (c->getOwner()->vel * lInput.x);
+
+	cam->offsetPosition(model->pos - cam->position());
+
+	c->getOwner()->dir = glm::rotateX(c->getOwner()->dir, -rInput.y);
+	c->getOwner()->dir = glm::rotateY(c->getOwner()->dir, rInput.x);
+	cam->offsetOrientation(-rInput.y, rInput.x);
+
+	glm::vec3 f = cam->forward();
+	glm::vec3 r = cam->right();
+	
+	for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
+		ObjectManager::instance().pMap[i]->update(secondsElapsed);
+
+	glm::vec3 p = Camera::getInstance().position();
+	if (c->rightTrigger > 0.5)
+	{
+		Projectile* pr = new Projectile(p, f, 0.5, 100, 100);
+		ObjectManager::instance().pMap.push_back(pr);
+	}
+
+	CollisionManager::instance().checkAll();
+
+	//if (model->pos != p)
+	//	Camera::getInstance().getInstance().offsetPosition(p - model->pos);
 
 	std::vector<glm::mat4> trans;
 	tElap += secondsElapsed;
 	//gModel->BoneTransform(tElap, trans);
-	//tCol->checkVs(qtCol);
 }
 
 // records how far the y axis has been scrolled
@@ -455,7 +253,7 @@ void AppMain() {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
     if(!gWindow)
-        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.2?");
+        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 4.5?");
 
     // GLFW settings
     glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -513,25 +311,30 @@ void AppMain() {
     CreateInstances();
 
     // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(0,0,250));
+    Camera::getInstance().setPosition(glm::vec3(0, 0, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
     Camera::getInstance().setNearAndFarPlanes(0.1f, 500.0f);
 
+
+
 	//MODEL INITS
+
+	prepProjectiles();
 
 	model = new GameObject(0);
 	model->SetName("Moving");
 	gModel = new ComponentGraphics();
 	gModel->setOwner(model);
-	gModel->loadModel("../Debug/models/2boxesv1.dae");
+	gModel->loadModel("../Debug/models/2boxes.dae");
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 	gCol = new ComponentCollision();
 	gCol->setCollisionMask(gModel->getScene());
 	gCol->setOwner(model);
-	model->pos = glm::vec3(-5, 0, 0);
-	gCol->setCollisionElip(glm::vec3(1, 2, 1));
-	gCol->staticObj = false;
+	model->pos = glm::vec3(0, 1, 0);
+	model->vel = 0.1;
+	model->dir = glm::vec3(1, 0, 0);
+	gCol->type = MOVING;
 	gp = gCol;
 	model->AddComponent(PHYSICS, gp);
 	ComponentInput* ci = new ComponentInput(0.05,0.05);
@@ -539,21 +342,99 @@ void AppMain() {
 	model->AddComponent(CONTROLLER, gp);
 	
 	//PROPER INIT
-	//GameObject *gObject = new GameObject(goVec.size());
-	//ComponentGraphics *cModel = new ComponentGraphics();
-	//ComponentCollision *cCollision = new ComponentCollision();
-	//Component *c;
-	//gObject->SetName("Unused");
-	//cModel->setOwner(gObject);
-	//cModel->loadModel("../Debug/models/All_Of_IT.dae");
-	//c = cModel;
-	//gObject->AddComponent(GRAPHICS, c);
-	////cCollision->setOwner(gObject);
-	////cCollision->setCollisionMask(cModel->getScene());
-	////cCollision->staticObj = true;
-	////cCollision->setCollisionElip(glm::vec3(1, 1, 1));
-	////gObject->AddComponent(PHYSICS, cCollision);
-	//goVec.push_back(gObject);
+	for (int i = 0; i < 10; i++)
+	{
+		GameObject *gObject = new GameObject(goVec.size());
+		ComponentGraphics *cModel = new ComponentGraphics();
+		ComponentCollision *cCollision = new ComponentCollision();
+		Component *c;
+
+		if (i == 0)
+		{
+			gObject->SetName("Mek");
+			cModel->loadModel("../Debug/models/2boxes.dae");
+			gObject->pos = glm::vec3(0, 0, -5);
+		}
+		else if (i == 1)
+		{
+			gObject->SetName("Water Tower");
+			cModel->loadModel("../Debug/models/Watertower.dae");
+			
+			gObject->scale = glm::vec3(3, 3, 3);
+			gObject->pos = glm::vec3(-4, 0, 4);
+		}
+		else if (i == 2)
+		{
+			gObject->SetName("Building");
+			cModel->loadModel("../Debug/models/Building.dae");
+			
+			gObject->scale = glm::vec3(1.6, 1.6, 1.6);
+			gObject->pos = glm::vec3(8, 0, 3);
+		}
+		else if (i == 3)
+		{
+		//	gObject->SetName("Mech");
+		//	cModel->loadModel("../Debug/models/Mech.dae");
+		//	gObject->pos = glm::vec3(0, 0, 0);
+		//	gObject->scale = glm::vec3(10, 10, 10);
+		}
+		else if (i == 4)
+		{
+			gObject->SetName("Dumpster");
+			cModel->loadModel("../Debug/models/Dumpster.dae");
+			
+			gObject->scale = glm::vec3(0.50, 0.50, 0.50);
+			gObject->pos = glm::vec3(3, 0, -3);
+		}
+		else if (i == 5)
+		{
+			gObject->SetName("Container");
+			cModel->loadModel("../Debug/models/Container.dae");
+			
+			gObject->scale = glm::vec3(0.7, 0.70, 0.70);
+			gObject->pos = glm::vec3(12, 0, 8);
+		}
+		//else if (i == 6)
+		//{
+		//	gObject->SetName("Crane");
+		//	cModel->loadModel("../Debug/models/Crane.dae");
+		//	gObject->pos = glm::vec3(0, 0, -15);
+		//	gObject->scale = glm::vec3(3, 3, 3);
+		//}
+		else if (i == 7)
+		{
+			gObject->SetName("Shack");
+			cModel->loadModel("../Debug/models/Shack.dae");
+			
+			gObject->scale = glm::vec3(0.50, 0.50, 0.50);
+			gObject->pos = glm::vec3(-6, 0, -6);
+		}
+		else if (i == 8)
+		{
+			gObject->SetName("2 boxes");
+			cModel->loadModel("../Debug/models/2boxes.dae");
+			gObject->pos = glm::vec3(0, 0, 0);
+		//	gObject->scale = glm::vec3(10, 10, 10);
+		}
+		else if (i == 9)
+		{
+			gObject->SetName("Container 2");
+			cModel->loadModel("../Debug/models/Container.dae");
+			
+			gObject->scale = glm::vec3(0.70, 0.70, 0.70);
+			gObject->pos = glm::vec3(8, 0, 10);
+		}
+
+		cModel->setOwner(gObject);
+		c = cModel;
+		gObject->AddComponent(GRAPHICS, c);
+		//cCollision->setOwner(gObject);
+		//cCollision->setCollisionMask(cModel->getScene());
+		//cCollision->type = STATIC;
+		//cCollision->setCollisionElip(glm::vec3(1, 1, 1));
+		//gObject->AddComponent(PHYSICS, cCollision);
+		goVec.push_back(gObject);
+	}
 
 	tmodel = new GameObject(1);
 	tmodel->SetName("Base");
@@ -569,21 +450,22 @@ void AppMain() {
 	tmodel->pos = glm::vec3(0, -0.5, 0);
 	gp = tCol;
 	tmodel->AddComponent(ComponentId::PHYSICS, gp);
-
-	qtmodel = new GameObject(2);
-	qtmodel->SetName("StaticObject");
-	qtModel = new ComponentGraphics();
-	qtModel->setOwner(qtmodel);
-	qtModel->loadModel("../Debug/models/2boxesv1.dae");
-	gp = qtModel;
-	qtmodel->AddComponent(GRAPHICS, gp);
-	qtCol = new ComponentCollision();
-	qtCol->setCollisionMask(qtModel->getScene());
-	qtCol->setOwner(model);
-	qtCol->setCollisionElip(glm::vec3(1, 3, 2));
-	gp = qtCol;
-	qtmodel->AddComponent(ComponentId::PHYSICS, gp);
-	qtmodel->pos = glm::vec3(5, 0, 0);
+	model->scale = glm::vec3(10, 10, 10);
+	
+	//qtmodel = new GameObject(2);
+	//qtmodel->SetName("StaticObject");
+	//qtModel = new ComponentGraphics();
+	//qtModel->setOwner(qtmodel);
+	//qtModel->loadModel("../Debug/models/2boxesv1.dae");
+	//gp = qtModel;
+	//qtmodel->AddComponent(GRAPHICS, gp);
+	//qtCol = new ComponentCollision();
+	//qtCol->setCollisionMask(qtModel->getScene());
+	//qtCol->setOwner(model);
+	//qtCol->setCollisionElip(glm::vec3(1, 3, 2));
+	//gp = qtCol;
+	//qtmodel->AddComponent(ComponentId::PHYSICS, gp);
+	//qtmodel->pos = glm::vec3(5, 0, 0);
 
 	LightComponent* light = new LightComponent(lPOINT);
 	PointLight* lc = new PointLight;
@@ -597,9 +479,9 @@ void AppMain() {
 
 	light->SetVars(lPOINT, lc);
 
-	tModel->render();
-	gModel->render();
-	qtModel->render();
+	//tModel->render();
+	//gModel->render();
+	//qtModel->render();
 	//END MODEL INITS
 	cInput = new ComponentInput(0.25, 0.25);
 

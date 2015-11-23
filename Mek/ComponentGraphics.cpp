@@ -71,6 +71,33 @@ void ComponentGraphics::loadModel(char* filepath)
 	glBindVertexArray(0);
 }
 
+void ComponentGraphics::loadModel(aiScene* scene)
+{
+	// Create the VAO
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+
+	// Create the buffers for the vertices attributes
+	glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(_buffers), _buffers);
+
+	
+	_scene = scene;
+
+	if (_scene)
+	{
+		CopyaiMat(&_scene->mRootNode->mTransformation, _transform);
+		_transform = glm::inverse(_transform);
+		initFromScene(_scene, "");
+	}
+	else
+	{
+		printf("Error parsing '%s': '%s'\n", "Pre-Defined Scene", _importer.GetErrorString());
+	}
+
+	// Make sure the VAO is not changed from the outside
+	glBindVertexArray(0);
+}
+
 void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath)
 {
 	_entries.resize(scene->mNumMeshes);
@@ -248,7 +275,9 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
 			{
 				Bitmap bmp;
-				_textures[i] = new Texture(Path.data);
+				std::string fp = "../Debug/";
+				fp.append(Path.data);
+				_textures[i] = new Texture((char*)fp.c_str());
 				if (_textures[i]->originalWidth() == 0)
 				{
 					GLuint o = _textures[i]->object();
@@ -497,11 +526,12 @@ const aiNodeAnim* ComponentGraphics::FindNodeAnim(const aiAnimation* pAnimation,
 
 void ComponentGraphics::updateShader()
 {
-	glm::mat4 W;
+	glm::mat4 W;// = _transform;
 	W = glm::translate(W, _owner->pos);
 	//W = glm::rotate(W, _owner->rot);
 	//W = glm::scale(W, _owner->scale);
-	//W = glm::scale(W, glm::vec3(0.01, 0.01, 0.01));
+	W = glm::scale(W, glm::vec3(0.1, 0.1, 0.1));
+	W = glm::scale(W, _owner->scale);
 
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();

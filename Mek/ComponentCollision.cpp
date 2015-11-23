@@ -6,24 +6,41 @@
 #include "lib\glm\geometric.hpp"
 #include "lib\glm\gtc\matrix_transform.hpp"
 
+#include "Projectile.h"
+
 ComponentCollision::ComponentCollision()
 {
 	//collisionPackage = new CollisionPacket;
-	staticObj = true;
+	type = STATIC;
 }
 
-void ComponentCollision::updateFrame(void* boneInfoLocation)
+void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 {
-	BoneInfo* boneInfo = static_cast<BoneInfo*>(boneInfoLocation);
-
-	for (int i = 0, s = _cMesh.size(); i < s; i++)
+	if (bones)
 	{
-		_cMesh[i]->fmin = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->min, 0)) + _owner->pos;
-		_cMesh[i]->fmax = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->max, 0)) + _owner->pos;
-		_cMesh[i]->fuN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->uN, 0));
-		_cMesh[i]->frN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->rN, 0));
-		_cMesh[i]->ffN = glm::vec3(boneInfo[i].FinalTransformation *glm::vec4(_cMesh[i]->fN, 0));
-		_cMesh[i]->fc = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->centre, 0)) + _owner->pos;
+		BoneInfo* boneInfo = static_cast<BoneInfo*>(boneInfoLocation);
+
+		for (int i = 0, s = _cMesh.size(); i < s; i++)
+		{
+			boneInfo[i].FinalTransformation = glm::scale(boneInfo[i].FinalTransformation, glm::vec3(0.1, 0.1, 0.1));
+			_cMesh[i]->fmin = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->min, 0)) + _owner->pos;
+			_cMesh[i]->fmax = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->max, 0)) + _owner->pos;
+			_cMesh[i]->fuN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->uN, 0));
+			_cMesh[i]->frN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->rN, 0));
+			_cMesh[i]->ffN = glm::vec3(boneInfo[i].FinalTransformation *glm::vec4(_cMesh[i]->fN, 0));
+			_cMesh[i]->fc = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->centre, 0)) + _owner->pos;
+		}
+	}
+	else
+	{
+		glm::mat4 h = glm::translate(h, _owner->pos);
+		h = glm::scale(h, glm::vec3(0.1, 0.1, 0.1));
+		_cMesh[0]->fmin = (_cMesh[0]->min * 0.1f + _owner->pos);
+		_cMesh[0]->fmax = (_cMesh[0]->max * 0.1f + _owner->pos);
+		_cMesh[0]->fuN = _cMesh[0]->uN;
+		_cMesh[0]->frN = _cMesh[0]->rN;
+		_cMesh[0]->ffN = _cMesh[0]->fN;
+		_cMesh[0]->fc = (_cMesh[0]->centre * 0.1f + _owner->pos);
 	}
 }
 
@@ -75,9 +92,9 @@ void ComponentCollision::setCollisionMask(const aiScene* m)
 				bb->fN = glm::normalize(glm::cross(b - a, c - a));
 
 				//compute centre
-				bb->hwR = abs(bb->max.x - bb->min.x / 2);
-				bb->hwU = abs(bb->max.y - bb->min.y / 2);
-				bb->hwF = abs(bb->max.z - bb->min.z / 2);
+				bb->hwR = abs((bb->max.x - bb->min.x) / 2);
+				bb->hwU = abs((bb->max.y - bb->min.y) / 2);
+				bb->hwF = abs((bb->max.z - bb->min.z) / 2);
 				
 				bb->centre.x = bb->min.x + bb->hwR;
 				bb->centre.y = bb->min.y + bb->hwU;
@@ -90,7 +107,7 @@ void ComponentCollision::setCollisionMask(const aiScene* m)
 		{
 			BoneBox* bb = new BoneBox;
 			bb->name = "Boneless Object";
-			bb->boneNum = 0;
+			bb->boneNum = -1;
 			for (int vertexIndex = 0; vertexIndex < m->mMeshes[i]->mNumVertices; vertexIndex++)
 			{
 				aiVector3D aiV = m->mMeshes[i]->mVertices[vertexIndex];
@@ -120,9 +137,9 @@ void ComponentCollision::setCollisionMask(const aiScene* m)
 			bb->fN = glm::normalize(glm::cross(b - a, c - a));
 
 			//compute centre
-			bb->hwR = abs(bb->max.x - bb->min.x / 2);
-			bb->hwU = abs(bb->max.y - bb->min.y / 2);
-			bb->hwF = abs(bb->max.z - bb->min.z / 2);
+			bb->hwR = abs((bb->max.x - bb->min.x) / 2);
+			bb->hwU = abs((bb->max.y - bb->min.y) / 2);
+			bb->hwF = abs((bb->max.z - bb->min.z) / 2);
 
 			bb->centre.x = bb->min.x + bb->hwR;
 			bb->centre.y = bb->min.y + bb->hwU;
@@ -141,6 +158,8 @@ bool OBBSatCheck(BoneBox& a, BoneBox& b, glm::vec3& mtd)
 	//must check the 15 cases that represent 3d space collision
 
 	glm::vec3 T = b.fc - a.fc;
+
+	glm::vec3 mtdb;
 
 	float Rxx = abs(glm::dot(a.frN, b.frN));
 	float Rxy = abs(glm::dot(a.frN, b.fuN));
@@ -164,33 +183,42 @@ bool OBBSatCheck(BoneBox& a, BoneBox& b, glm::vec3& mtd)
 	r = a.hwR + b.hwR * Rxx + b.hwU * Rxy + b.hwF * Rxz;
 	lr = l - r;
 	mtd.x = l - r;
-	if (abs(glm::dot(T, a.frN)) > a.hwR + b.hwR * Rxx + b.hwU * Rxy + b.hwF * Rxz)
+	if (l > r)
 		return false;
 	//CASE 2
 	//L = Ay
 	l = abs(glm::dot(T, a.fuN));
 	r = a.hwU + b.hwR * Ryx + b.hwU * Ryy + b.hwF * Ryz;
 	mtd.y = l - r;
-	if (abs(glm::dot(T, a.fuN)) > a.hwU + b.hwR * Ryx + b.hwU * Ryy + b.hwF * Ryz)
+	if (l > r)
 		return false;
 	//CASE 3
 	//L = Az
 	l = abs(glm::dot(T, a.ffN));
 	r = a.hwF + b.hwR * Rzx + b.hwU * Rzy + b.hwF * Rzz;
 	mtd.z = l - r;
-	if (abs(glm::dot(T, a.ffN)) > a.hwF + b.hwR * Rzx + b.hwU * Rzy + b.hwF * Rzz)
+	if (l > r)
 		return false;
 	//CASE 4
 	//L = Bx
-	if (abs(glm::dot(T, b.frN)) > b.hwR + a.hwR * Rxx + a.hwU * Rxy + a.hwF * Rxz)
+	l = abs(glm::dot(T, b.frN));
+	r = b.hwR + a.hwR * Rxx + a.hwU * Rxy + a.hwF * Rxz;
+	mtdb.x = l - r;
+	if (l > r)
 		return false;
 	//CASE 5
 	//L = By
-	if (abs(glm::dot(T, b.fuN)) > b.hwU + a.hwR * Ryx + a.hwU * Ryy + a.hwF * Ryz)
+	l = abs(glm::dot(T, b.fuN));
+	r = b.hwU + a.hwR * Ryx + a.hwU * Ryy + a.hwF * Ryz;
+	mtdb.y = l - r;
+	if (l > r)
 		return false;
 	//CASE 6
 	//L = Bz
-	if (abs(glm::dot(T, b.ffN)) > b.hwF + a.hwR * Rzx + a.hwU * Rzy + a.hwF * Rzz)
+	l = abs(glm::dot(T, b.ffN));
+	r = b.hwF + a.hwR * Rzx + a.hwU * Rzy + a.hwF * Rzz;
+	mtdb.z = l - r;
+	if (l > r)
 		return false;
 	//CASE 7
 	//L = Ax x Bx
@@ -229,7 +257,20 @@ bool OBBSatCheck(BoneBox& a, BoneBox& b, glm::vec3& mtd)
 	if (abs(glm::dot(T, a.fuN) * Rxz - glm::dot(T, a.frN) * Ryz) > a.hwR * Ryz + a.hwU * Rxz + b.hwR * Rzy + b.hwU * Rzx)
 		return false;
 
-	
+	if (abs(mtdb.x) < abs(mtd.x))
+		mtd.x = mtdb.x; 
+	if (abs(mtdb.y) < abs(mtd.y))
+		mtd.y = mtdb.y;
+	if (abs(mtdb.z) < abs(mtd.z))
+		mtd.z = mtdb.z;
+
+	abs(mtd.x) > abs(mtd.y) ? mtd.x = 0 : mtd.y = 0;
+	abs(mtd.x) > abs(mtd.z) ? mtd.x = 0 : mtd.z = 0;
+	abs(mtd.y) > abs(mtd.z) && mtd.z != 0 ? mtd.y = 0 : mtd.z = 0;
+
+	mtd.x && T.x < 0 ? mtd.x *= -1 : T.x;
+	mtd.y && T.y < 0 ? mtd.y *= -1 : T.y;
+	mtd.z && T.z < 0 ? mtd.z *= -1 : T.z;
 
 	return true;
 }
@@ -243,12 +284,21 @@ bool ComponentCollision::checkVs(ComponentCollision* c)
 		for (int j = 0, ss = c->_cMesh.size(); j < ss; j++)
 		{
 			//iterate through all bones on the other object
-			glm::vec3 mtd;
+			glm::vec3 mtd = glm::vec3(0,0,0);
 			if (OBBSatCheck(*_cMesh[i], *c->_cMesh[j], mtd))
 			{
-				printf("%f, %f, %f\n", mtd.x, mtd.y, mtd.z);
-				//_owner->pos += mtd;
-				//printf("NOTICE: s.%s and %s.%s", _owner->GetName(), _cMesh[i]->name.c_str(), c->_owner->GetName(), c->_cMesh[j]->name.c_str());
+				//printf("%f, %f, %f\n", mtd.x, mtd.y, mtd.z);
+				if (type == MOVING)
+					_owner->pos += mtd;
+				else if (type == PROJ)
+				{
+					//this is where the hit would be done
+					if (strcmp(c->getOwner()->GetName(), "Target"))
+						c->getOwner()->scale = glm::vec3(0, 0, 0);
+					ObjectManager::instance().removeProjectile(_owner->handle);
+					printf("TARGET HIT\n");
+				}
+				printf("NOTICE: s.%s and %s.%s\n", _owner->GetName(), _cMesh[i]->name.c_str(), c->_owner->GetName(), c->_cMesh[j]->name.c_str());
 				ret = true;
 				break;
 			}
@@ -257,536 +307,53 @@ bool ComponentCollision::checkVs(ComponentCollision* c)
 	return ret;
 }
 
-/*
-void ComponentCollision::setCollisionElip(glm::vec3 r)
-{
-	collisionPackage->eRadius = r;
-}
-
-/* Time to go back to OBB
-//Yay for collision code
-bool checkPointInTriangle(const glm::vec3& point, const glm::vec3& pa, const glm::vec3& pb, const glm::vec3& pc)
-{
-	glm::vec3 e10 = pb - pa;
-	glm::vec3 e20 = pc - pa;
-	float a = glm::dot(e10, e10);
-	float b = glm::dot(e10, e20);
-	float c = glm::dot(e20, e20);
-	float ac_bb = (a*c) - (b*b);
-	glm::vec3 vp(point.x - pa.x, point.y - pa.y, point.z - pa.z);
-	float d = glm::dot(vp, e10);
-	float e = glm::dot(vp, e20);
-	float x = (d*c) - (e*b);
-	float y = (e*a) - (d*b);
-	float z = x + y - ac_bb;
-	return (((unsigned int&)(z)& ~((unsigned int&)(x) | (unsigned int&)(y))) & 0x80000000);
-}
-
-bool getLowestRoot(float a, float b, float c, float maxR, float* root) {
-	// Check if a solution exists
-	float determinant = b*b - 4.0f*a*c;
-	// If determinant is negative it means no solutions.
-	if (determinant < 0.0f) return false;
-	// calculate the two roots: (if determinant == 0 then
-	// x1==x2 but let’s disregard that slight optimization)
-	float sqrtD = sqrt(determinant);
-	float r1 = (-b - sqrtD) / (2 * a);
-	float r2 = (-b + sqrtD) / (2 * a);
-	// Sort so x1 <= x2
-	if (r1 > r2) {
-		float temp = r2;
-		r2 = r1;
-		r1 = temp;
-	}
-	// Get lowest root:
-	if (r1 > 0 && r1 < maxR) {
-		*root = r1;
-		return true;
-	}
-	// It is possible that we want x2 - this can happen
-	// if x1 < 0
-	if (r2 > 0 && r2 < maxR) {
-		*root = r2;
-		return true;
-	}
-	// No (valid) solutions
-	return false;
-}
-
-// Assumes: p1,p2 and p3 are given in ellisoid space:
-void checkTriangle(CollisionPacket* colPackage, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3)
-{
-	// Make the plane containing this triangle.
-	PLANE trianglePlane(p1, p2, p3);
-	// Is triangle front-facing to the velocity vec?
-	// We only check front-facing triangles
-	if (trianglePlane.isFrontFacingTo(colPackage->normalizedVelocity))
-	{
-		// Get interval of plane intersection:
-		float t0, t1;
-		bool embeddedInPlane = false;
-		// Calculate the signed distance from sphere
-		// position to triangle plane
-		float signedDistToTrianglePlane = trianglePlane.signedDistanceTo(colPackage->basePoint);
-		// cache this as we’re going to use it a few times below:
-		float normalDotVelocity = glm::dot(trianglePlane.normal, colPackage->velocity);
-		// if sphere is travelling parrallel to the plane:
-		if (normalDotVelocity == 0.0f)
-		{
-			if (fabs(signedDistToTrianglePlane) >= 1.0f)
-			{
-				// Sphere is not embedded in plane.
-				// No collision possible:
-				return;
-			}
-			else
-			{
-				// sphere is embedded in plane.
-				// It intersects in the whole range [0..1]
-				embeddedInPlane = true;
-				t0 = 0.0;
-				t1 = 1.0;
-			}
-		}
-		else
-		{
-			// N dot D is not 0. Calculate intersection interval:
-			t0 = (-1.0 - signedDistToTrianglePlane) / normalDotVelocity;
-			t1 = (1.0 - signedDistToTrianglePlane) / normalDotVelocity;
-			// Swap so t0 < t1
-			if (t0 > t1)
-			{
-				float temp = t1;
-				t1 = t0;
-				t0 = temp;
-			}
-			// Check that at least one result is within range:
-			if (t0 > 1.0f || t1 < 0.0f)
-			{
-				// Both t values are outside values [0,1]
-				// No collision possible:
-				return;
-			}
-			// Clamp to [0,1]
-			if (t0 < 0.0) t0 = 0.0;
-			if (t1 < 0.0) t1 = 0.0;
-			if (t0 > 1.0) t0 = 1.0;
-			if (t1 > 1.0) t1 = 1.0;
-		}
-		// OK, at this point we have two time values t0 and t1
-		// between which the swept sphere intersects with the
-		// triangle plane. If any collision is to occur it must
-		// happen within this interval.
-		glm::vec3 collisionPoint;
-		bool foundCollison = false;
-		float t = 1.0;
-		// First we check for the easy case - collision inside
-		// the triangle. If this happens it must be at time t0
-		// as this is when the sphere rests on the front side
-		// of the triangle plane. Note, this can only happen if
-		// the sphere is not embedded in the triangle plane.
-		if (!embeddedInPlane)
-		{
-			glm::vec3 planeIntersectionPoint = (colPackage->basePoint - trianglePlane.normal) + t0 * colPackage->velocity;
-			if (checkPointInTriangle(planeIntersectionPoint, p1, p2, p3))
-			{
-				foundCollison = true;
-				t = t0;
-				collisionPoint = planeIntersectionPoint;
-			}
-		}
-		// if we haven’t found a collision already we’ll have to
-		// sweep sphere against points and edges of the triangle.
-		// Note: A collision inside the triangle (the check above)
-		// will always happen before a vertex or edge collision!
-		// This is why we can skip the swept test if the above
-		// gives a collision!
-		if (foundCollison == false)
-		{
-			// some commonly used terms:
-			glm::vec3 velocity = colPackage->velocity;
-			glm::vec3 base = colPackage->basePoint;
-			float velocitySquaredLength = pow(velocity.length(), 2);
-			float a, b, c; // Params for equation
-			float newT;
-			// For each vertex or edge a quadratic equation have to
-			// be solved. We parameterize this equation as
-			// a*t^2 + b*t + c = 0 and below we calculate the
-			// parameters a,b and c for each test.
-			// Check against points:
-			a = velocitySquaredLength;
-			// P1
-			b = 2.0*(glm::dot(velocity, base - p1));
-			c = (p1 - base).length() - 1.0;
-			if (getLowestRoot(a, b, c, t, &newT))
-			{
-				t = newT;
-				foundCollison = true;
-				collisionPoint = p1;
-			}
-			// P2
-			b = 2.0*(glm::dot(velocity, (base - p2)));
-			c = pow((p2 - base).length(), 2) - 1.0;
-			if (getLowestRoot(a, b, c, t, &newT))
-			{
-				t = newT;
-				foundCollison = true;
-				collisionPoint = p2;
-			}
-			// P3
-			b = 2.0*glm::dot(velocity, (base - p3));
-			c = pow((p3 - base).length(), 2) - 1.0;
-			if (getLowestRoot(a, b, c, t, &newT))
-			{
-				t = newT;
-				foundCollison = true;
-				collisionPoint = p3;
-			}
-			// Check against edges:
-			// p1 -> p2:
-			glm::vec3 edge = p2 - p1;
-			glm::vec3 baseToVertex = p1 - base;
-			float edgeSquaredLength = pow(edge.length(), 2);
-			float edgeDotVelocity = glm::dot(edge, velocity);
-			float edgeDotBaseToVertex = glm::dot(edge, baseToVertex);
-			// Calculate parameters for equation
-			a = edgeSquaredLength*-velocitySquaredLength + edgeDotVelocity*edgeDotVelocity;
-			b = edgeSquaredLength*(2 * glm::dot(velocity, baseToVertex)) - 2.0*edgeDotVelocity*edgeDotBaseToVertex;
-			c = edgeSquaredLength*(1 - pow(baseToVertex.length(), 2)) + edgeDotBaseToVertex*edgeDotBaseToVertex;
-			// Does the swept sphere collide against infinite edge?
-			if (getLowestRoot(a, b, c, t, &newT)) {
-				// Check if intersection is within line segment:
-				float f = (edgeDotVelocity*newT - edgeDotBaseToVertex) / edgeSquaredLength;
-				if (f >= 0.0 && f <= 1.0) {
-					// intersection took place within segment.
-					t = newT;
-					foundCollison = true;
-					collisionPoint = p1 + f*edge;
-				}
-			}
-			// p2 -> p3:
-			edge = p3 - p2;
-			baseToVertex = p2 - base;
-			edgeSquaredLength = pow(edge.length(), 2);
-			edgeDotVelocity = glm::dot(edge, velocity);
-			edgeDotBaseToVertex = glm::dot(edge, baseToVertex);
-			a = edgeSquaredLength*-velocitySquaredLength + edgeDotVelocity*edgeDotVelocity;
-			b = edgeSquaredLength*(2 * glm::dot(velocity, baseToVertex)) - 2.0*edgeDotVelocity*edgeDotBaseToVertex;
-			c = edgeSquaredLength*(1 - pow(baseToVertex.length(), 2)) + edgeDotBaseToVertex*edgeDotBaseToVertex;
-			if (getLowestRoot(a, b, c, t, &newT)) {
-				float f = (edgeDotVelocity*newT - edgeDotBaseToVertex) /
-					edgeSquaredLength;
-				if (f >= 0.0 && f <= 1.0) {
-					t = newT;
-					foundCollison = true;
-					collisionPoint = p2 + f*edge;
-				}
-			}
-			// p3 -> p1:
-			edge = p1 - p3;
-			baseToVertex = p3 - base;
-			edgeSquaredLength = pow(edge.length(), 2);
-			edgeDotVelocity = glm::dot(edge, velocity);
-			edgeDotBaseToVertex = glm::dot(edge, baseToVertex);
-			a = edgeSquaredLength*-velocitySquaredLength + edgeDotVelocity*edgeDotVelocity;
-			b = edgeSquaredLength*(2 * glm::dot(velocity, baseToVertex)) - 2.0*edgeDotVelocity*edgeDotBaseToVertex;
-			c = edgeSquaredLength*(1 - pow(baseToVertex.length(), 2)) + edgeDotBaseToVertex*edgeDotBaseToVertex;
-			if (getLowestRoot(a, b, c, t, &newT)) {
-				float f = (edgeDotVelocity*newT - edgeDotBaseToVertex) /
-					edgeSquaredLength;
-				if (f >= 0.0 && f <= 1.0) {
-					t = newT;
-					foundCollison = true;
-					collisionPoint = p3 + f*edge;
-				}
-			}
-		}
-		// Set result:
-		if (foundCollison == true)
-		{
-			// distance to collision: ’t’ is time of collision
-			float distToCollision = t*colPackage->velocity.length();
-			// Does this triangle qualify for the closest hit?
-			// it does if it’s the first hit or the closest
-			if (colPackage->foundCollision == false || distToCollision < colPackage->nearestDistance)
-			{
-				// Collision information nessesary for sliding
-				colPackage->nearestDistance = distToCollision;
-				colPackage->intersectionPoint = collisionPoint;
-				colPackage->foundCollision = true;
-			}
-		}
-	} // if not backface
-}
-
-
-void ComponentCollision::collideAndSlide(const glm::vec3& vel, const glm::vec3& gravity, int vs)
-{
-	// Do collision detection:
-	collisionPackage->R3Position = _owner->pos;
-	collisionPackage->R3Velocity = vel;
-	// calculate position and velocity in eSpace
-	glm::vec3 eSpacePosition = collisionPackage->R3Position / collisionPackage->eRadius;
-	glm::vec3 eSpaceVelocity = collisionPackage->R3Velocity / collisionPackage->eRadius;
-	// Iterate until we have our final position.
-	collisionRecursionDepth = 0;
-	glm::vec3 finalPosition = collideWithWorld(eSpacePosition, eSpaceVelocity, vs);
-	// Add gravity pull:
-	// To remove gravity uncomment from here .....
-	// Set the new R3 position (convert back from eSpace to R3
-	collisionPackage->R3Position = finalPosition*collisionPackage->eRadius;
-	collisionPackage->R3Velocity = gravity;
-	eSpaceVelocity = gravity / collisionPackage->eRadius;
-	collisionRecursionDepth = 0;
-	finalPosition = collideWithWorld(finalPosition, eSpaceVelocity, vs);
-	// ... to here
-	// Convert final result back to R3:
-	finalPosition = finalPosition*collisionPackage->eRadius;
-	// Move the entity
-	//MoveTo(finalPosition);
-	_owner->pos = finalPosition;
-}
-
-// Make sure to update this when it seems fit
-const float unitsPerMeter = 100.0f;
-glm::vec3 ComponentCollision::collideWithWorld(const glm::vec3& pos, const glm::vec3& vel, int vs)
-{
-	// All hard-coded distances in this function is
-	// scaled to fit the setting above..
-	float unitScale = unitsPerMeter / 100.0f;
-	float veryCloseDistance = 0.005f * unitScale;
-	// do we need to worry?
-	if (collisionRecursionDepth > 5)
-		return pos;
-	// Ok, we need to worry:
-	collisionPackage->velocity = vel;
-	collisionPackage->normalizedVelocity = glm::normalize(vel);
-	collisionPackage->basePoint = pos;
-	collisionPackage->foundCollision = false;
-
-	// Check for collision (calls the collision routines)
-	CollisionManager::instance().checkCollision(collisionPackage, _owner->handle, vs);
-
-	// If no collision we just move along the velocity
-	if (collisionPackage->foundCollision == false) {
-		return pos + vel;
-	}
-
-	// *** Collision occured ***
-	printf("COLLIDE %f, %f, %f\n", collisionPackage->intersectionPoint.x, collisionPackage->intersectionPoint.y, collisionPackage->intersectionPoint.z);
-	// The original destination point
-	glm::vec3 destinationPoint = pos + vel;
-	glm::vec3 newBasePoint = pos;
-	// only update if we are not already very close
-	// and if so we only move very close to intersection..not
-	// to the exact spot.
-	if (collisionPackage->nearestDistance >= veryCloseDistance)
-	{
-		glm::vec3 V = vel;
-		V = glm::normalize(V) * (collisionPackage->nearestDistance - veryCloseDistance);
-		newBasePoint = collisionPackage->basePoint + V;
-		// Adjust polygon intersection point (so sliding
-		// plane will be unaffected by the fact that we
-		// move slightly less than collision tells us)
-		V = glm::normalize(V);
-		collisionPackage->intersectionPoint -= veryCloseDistance * V;
-	}
-	// Determine the sliding plane
-	glm::vec3 slidePlaneOrigin = collisionPackage->intersectionPoint;
-	glm::vec3 slidePlaneNormal = newBasePoint - collisionPackage->intersectionPoint;
-	slidePlaneNormal = glm::normalize(slidePlaneNormal);
-	PLANE slidingPlane(slidePlaneOrigin, slidePlaneNormal);
-	glm::vec3 newDestinationPoint = destinationPoint - slidingPlane.signedDistanceTo(destinationPoint) * slidePlaneNormal;
-	// Generate the slide glm::vec3, which will become our new
-	// velocity glm::vec3 for the next iteration
-	glm::vec3 newVelocityV = newDestinationPoint - collisionPackage->intersectionPoint;
-	// Recurse:
-	// dont recurse if the new velocity is very small
-	if (newVelocityV.length() < veryCloseDistance)
-	{
-		return newBasePoint;
-	}
-	collisionRecursionDepth++;
-	return collideWithWorld(newBasePoint, newVelocityV, vs);
-}
-
-
-PLANE::PLANE(const glm::vec3& origin, const glm::vec3& normal)
-{
-	this->normal = normal;
-	this->origin = origin;
-	equation[0] = normal.x;
-	equation[1] = normal.y;
-	equation[2] = normal.z;
-	equation[3] = -(normal.x*origin.x + normal.y*origin.y
-		+ normal.z*origin.z);
-}
-// Construct from triangle:
-PLANE::PLANE(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3)
-{
-	normal = glm::cross((p2 - p1), (p3 - p1));
-	normal = glm::normalize(normal);
-	origin = p1;
-	equation[0] = normal.x;
-	equation[1] = normal.y;
-	equation[2] = normal.z;
-	equation[3] = -(normal.x*origin.x + normal.y*origin.y
-		+ normal.z*origin.z);
-}
-bool PLANE::isFrontFacingTo(const glm::vec3& direction) const
-{
-	float dot = glm::dot(normal, direction);
-	return (dot <= 0);
-}
-float PLANE::signedDistanceTo(const glm::vec3& point) const
-{
-	return (glm::dot(point, normal)) + equation[3];
-}
-
-void ComponentCollision::update()
-{
-	collisionPackage->R3Position = _owner->pos;
-	collisionPackage->R3Velocity = _owner->vel;
-}
-
-//FOR COLLISON CHECK:
-//CALL collideAndSlide with the null values for each object that can move
-//this call will then call the managers checkCollision
-//check collision will have to check using checkTriangle and object meshes
-//handle passed is the moving object that is asking for a check
-
 void CollisionManager::checkAll()
 {
-	ComponentCollision* c;
+	//STAGE 1 SCAN NONSTATIC VS STATIC
+
 	for (int i = 0, s = ObjectManager::instance().colMap.size(); i < s; i++)
 	{
-		GameObject* it = ObjectManager::instance().gMap[ObjectManager::instance().colMap[i]];
-		//c is now a pointer to the object we are moving
-		c = static_cast<ComponentCollision*>(it->GetComponent(PHYSICS));
+		GameObject* thisGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[i]]);
+		ComponentCollision* thisCC = static_cast<ComponentCollision*>(thisGO->GetComponent(PHYSICS));
+		
+		thisCC->updateFrame(thisGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thisCC->_cMesh[0]->boneNum == -1 ? false : true));
 
-		if (c->staticObj == false)
+		if (thisCC->type == MOVING)
 		{
 			for (int j = 0; j < s; j++)
 			{
 				if (j != i)
 				{
-					//printf("%s vs %s\n", it->GetName(), ObjectManager::instance().gMap[ObjectManager::instance().colMap[j]]->GetName());
+					GameObject* thatGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[j]]);
+					ComponentCollision* thatCC = static_cast<ComponentCollision*>(thatGO->GetComponent(PHYSICS));
 
-					//at this point i is our object, and j is the object we are checking against
-					//static objects from i have already been discarded
-					//Time to start cascading the functions
-					//This call will inevitably call managers checkCollision
-					//we pass j as the vs variable so we know what object we are checking against
-					c->update();
-					glm::vec3 inputvel;
-					if (it->HasComponent(CONTROLLER))
-					{
-						ComponentInput* con = static_cast<ComponentInput*>(it->GetComponent(CONTROLLER));
-						inputvel = glm::vec3(con->leftStickX, 0, 0);
-						inputvel *= 0.1;
-						if (!con->IsPressed(XINPUT_GAMEPAD_A))
-							return;
-					}
-					else
-						inputvel = glm::vec3(0, 0, 0);
+					thatCC->updateFrame(thatGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thatCC->_cMesh[0]->boneNum == -1 ? false : true));
 
-					
-					c->collideAndSlide(inputvel, glm::vec3(0, -0.01, 0), ObjectManager::instance().colMap[j]);
+					if (thatCC->type == STATIC)
+						thisCC->checkVs(thatCC);
 				}
 			}
 		}
 	}
-}
+	
+	//STAGE 2 SCAN PROJECTILES VS ALL
 
-bool CollisionManager::checkCollision(CollisionPacket* p, int handle, int vs)
-{
-	//now for checking p against vs.GRAPHICS.mesh
-	//iterate through vs mesh for every 3 verticies in every bone
-	ComponentCollision* cc = static_cast<ComponentCollision*>(ObjectManager::instance().gMap[handle]->GetComponent(PHYSICS));
-	aiMesh* m;
-	printf("eRadius            - %f, %f, %f\n", p->eRadius.x, p->eRadius.y, p->eRadius.z);
-	printf("R3Velocity         - %f, %f, %f\n", p->R3Velocity.x, p->R3Velocity.y, p->R3Velocity.z);
-	printf("R3Position         - %f, %f, %f\n", p->R3Position.x, p->R3Position.y, p->R3Position.z);
-	printf("velocity           - %f, %f, %f\n", p->velocity.x, p->velocity.y, p->velocity.z);
-	printf("normalizedVelocity - %f, %f, %f\n", p->normalizedVelocity.x, p->normalizedVelocity.y, p->normalizedVelocity.z);
-	printf("basePoint          - %f, %f, %f\n", p->basePoint.x, p->basePoint.y, p->basePoint.z);
-	printf("foundCollision     - %i\n", p->foundCollision);
-	printf("nearestDistance    - %f\n", p->nearestDistance);
-	printf("intersectionPoint  - %f, %f, %f\n\n", p->intersectionPoint.x, p->intersectionPoint.y, p->intersectionPoint.z);
-	for (int i = 0; i < cc->_scene->mNumMeshes; i++)
+	for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
-		m = cc->_scene->mMeshes[i];
-		if (m->mNumBones == 0)
+		
+		for (int j = 0, ss = ObjectManager::instance().colMap.size(); j < ss; j++)
 		{
-			for (int j = 0; j < m->mNumFaces; j++)
+			if (j != i)
 			{
-				//Reference triangles by faces
-				aiVector3D aiA = m->mVertices[m->mFaces[j].mIndices[0]];
-				aiVector3D aiB = m->mVertices[m->mFaces[j].mIndices[1]];
-				aiVector3D aiC = m->mVertices[m->mFaces[j].mIndices[2]];
-				printf("%i, %i, %i\n", m->mFaces[j].mIndices[0], m->mFaces[j].mIndices[1], m->mFaces[j].mIndices[2]);
+				GameObject* thatGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[j]]);
+				ComponentCollision* thatCC = static_cast<ComponentCollision*>(thatGO->GetComponent(PHYSICS));
 
-				std::vector<GameObject*> q = ObjectManager::instance().gMap;
-				std::vector<unsigned int> qq = ObjectManager::instance().colMap;
-				
-				glm::vec3 vd = ObjectManager::instance().gMap[vs]->pos;
-				//glm::vec3 hd = ObjectManager::instance().gMap[handle]->pos;
-				//convert to glm because that is the standard
-				glm::vec3 a(aiA.x, aiA.y, aiA.z);
-				glm::vec3 b(aiB.x, aiB.y, aiB.z);
-				glm::vec3 c(aiC.x, aiC.y, aiC.z);
-				//translate from model to world space
-				a += vd;
-				b += vd;
-				c += vd;
-				//convert to eSpace
-				a /= p->eRadius;
-				b /= p->eRadius;
-				c /= p->eRadius;
+				thatCC->updateFrame(thatGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thatCC->_cMesh[0]->boneNum == -1 ? false : true));
 
-				checkTriangle(p, a, b, c);
+				if (thatCC->type == STATIC)
+					thatCC->checkVs(ObjectManager::instance().pMap[i]->cc);
 			}
 		}
-		else
-		{
-			for (int j = 0, ss = m->mNumBones; j < ss; j++)
-			{
-				for (int k = 0, sss = m->mBones[j]->mNumWeights - 3; k < sss; k += 3)
-				{
-					aiVector3D aiA = m->mVertices[k];
-					aiVector3D aiB = m->mVertices[k + 1];
-					aiVector3D aiC = m->mVertices[k + 2];
-					//have to move all of the verticies by vs.v
-					glm::vec3 d = ObjectManager::instance().gMap[handle]->pos;
-					//convert to glm because that is the standard
-					glm::vec3 a(aiA.x, aiA.y, aiA.z);
-					glm::vec3 b(aiB.x, aiB.y, aiB.z);
-					glm::vec3 c(aiC.x, aiC.y, aiC.z);
-					//do the actual translation
-					a += d;
-					b += d;
-					c += d;
 
-					checkTriangle(p, a, b, c);
-				}
-			}
-		}
 	}
-	return p->foundCollision;
 }
-
-/*
-for (int j = 0, ss = c->_scene->mMeshes[i]->mNumBones - 3; j < ss; j += 3)
-{
-aiVector3D aiA = c->_scene->mMeshes[i]->mVertices[c->_scene->mMeshes[i]->mBones[j]->mWeights->mVertexId];
-aiVector3D aiB = c->_scene->mMeshes[i]->mVertices[c->_scene->mMeshes[i]->mBones[j + 1]->mWeights->mVertexId];
-aiVector3D aiC = c->_scene->mMeshes[i]->mVertices[c->_scene->mMeshes[i]->mBones[j + 2]->mWeights->mVertexId];
-
-//have to move all of the verticies by vs.v - h.v
-
-glm::vec3 a(aiA.x, aiA.y, aiA.z);
-glm::vec3 b(aiB.x, aiB.y, aiB.z);
-glm::vec3 c(aiC.x, aiC.y, aiC.z);
-checkTriangle(p, a, b, c);
-}
-*/

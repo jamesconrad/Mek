@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2015-10-22T15:02:02Z</created><keywords></keywords><modified>2015-10-22T15:02:02Z</modified><revision></revision><subject></subject><title></title><unit meter="0.010000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
+  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2015-11-20T16:30:57Z</created><keywords></keywords><modified>2015-11-20T16:30:57Z</modified><revision></revision><subject></subject><title></title><unit meter="0.010000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
   <library_materials>
     <material id="lambert1" name="lambert1">
       <instance_effect url="#lambert1-fx"/>
@@ -36,14 +36,14 @@
       <mesh>
         <source id="pCube1-POSITION">
           <float_array id="pCube1-POSITION-array" count="24">
--12.087597 -0.113805 12.071479
-12.087597 -0.113805 12.071479
--12.087597 0.113805 12.071479
-12.087597 0.113805 12.071479
--12.087597 0.113805 -12.071479
-12.087597 0.113805 -12.071479
--12.087597 -0.113805 -12.071479
-12.087597 -0.113805 -12.071479
+-11.945421 -0.274457 11.996435
+11.945421 -0.274457 11.996435
+-11.945421 0.274457 11.996435
+11.945421 0.274457 11.996435
+-11.945421 0.274457 -11.996435
+11.945421 0.274457 -11.996435
+-11.945421 -0.274457 -11.996435
+11.945421 -0.274457 -11.996435
 </float_array>
           <technique_common>
             <accessor source="#pCube1-POSITION-array" count="8" stride="3">
@@ -133,7 +133,7 @@
   </library_geometries>
   <library_visual_scenes>
     <visual_scene id="base" name="base">
-      <node name="pCube1" id="pCube1" sid="pCube1"><matrix sid="matrix">1.000000 0.000000 0.000000 -0.125305 0.000000 1.000000 0.000000 -0.113805 0.000000 0.000000 1.000000 -0.077300 0.000000 0.000000 0.000000 1.000000</matrix><instance_geometry url="#pCube1-lib"><bind_material><technique_common><instance_material symbol="lambert1" target="#lambert1"/></technique_common></bind_material></instance_geometry><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node>
+      <node name="pCube1" id="pCube1" sid="pCube1"><matrix sid="matrix">100.000000 0.000000 0.000000 0.045983 0.000000 1.000000 0.000000 -0.274457 0.000000 0.000000 100.000000 0.005031 0.000000 0.000000 0.000000 1.000000</matrix><instance_geometry url="#pCube1-lib"><bind_material><technique_common><instance_material symbol="lambert1" target="#lambert1"/></technique_common></bind_material></instance_geometry><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node>
       <extra><technique profile="MAX3D"><frame_rate>24.000000</frame_rate></technique><technique profile="FCOLLADA"><start_time>0.041667</start_time><end_time>8.333333</end_time></technique></extra>
     </visual_scene>
   </library_visual_scenes>

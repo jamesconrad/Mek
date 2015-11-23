@@ -4,6 +4,8 @@
 #include "Component.h"
 #include <unordered_map>
 
+class Projectile;
+
 class GameObject;
 
 enum ComponentId
@@ -18,6 +20,7 @@ class Component
 {
 public:
 	virtual void update() = 0;
+	virtual void* getBoneInfoRef() { return 0; }
 	void setOwner(GameObject* owner) 
 	{ 
 		_owner = owner;
@@ -39,7 +42,8 @@ public:
 	void SetName(char* name) { _n = name; }
 	char* GetName() { return _n; }
 
-	glm::vec3 pos, scale, rot, vel;
+	glm::vec3 pos, scale, rot, dir;
+	float vel;
 	int handle;
 private:
 	char* _n;
@@ -54,6 +58,9 @@ public:
 	void addComponent(ComponentId ctype, Component* c, int handle);
 	void addToMap(ComponentId ctype, int handle);
 
+	void addProjectile(Projectile*);
+	void removeProjectile(int handle);
+
 	//singleton
 	static ObjectManager& instance()
 	{
@@ -63,6 +70,7 @@ public:
 
 	std::vector<GameObject*> gMap;
 	std::vector<unsigned int> colMap;
+	std::vector<Projectile*> pMap;
 private:
 	ObjectManager() {}
 };

@@ -28,12 +28,16 @@ class ComponentGraphics : public Component
 public:
 	void update();
 	void loadModel(char* model);
+	void loadModel(aiScene* scene);
 	void render();
 	void updateShader();
 
 	void* getBoneInfoRef()
 	{
-		return (void*)_boneInfo.data();
+		if (_scene->mMeshes[0]->mNumBones > 0)
+			return (void*)_boneInfo.data();
+		else
+			return (void*)new BoneInfo;
 	}
 
 

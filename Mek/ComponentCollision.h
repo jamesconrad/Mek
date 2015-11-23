@@ -1,3 +1,5 @@
+#pragma once
+
 #include "GameObject.h"
 #include "include\assimp\scene.h"
 #include "lib\glm\glm.hpp"
@@ -5,6 +7,13 @@
 
 //IMPORTANT
 //Collision dosn't do animation scaling!
+
+enum ColType
+{
+	PROJ,
+	STATIC,
+	MOVING
+};
 
 struct BoneBox
 {
@@ -52,7 +61,7 @@ class ComponentCollision : public Component
 public:
 	ComponentCollision();
 	//WARNING: MUST RECIEVE A CompoentGraphics::getBoneInfoRef()
-	void updateFrame(void* boneInfoLocation);
+	void updateFrame(void* boneInfoLocation, bool bones);
 	
 	bool checkVs(ComponentCollision* c);
 	void setCollisionMask(const aiScene* _scene);
@@ -67,7 +76,7 @@ public:
 	std::vector<BoneBox*> _cMesh;
 	const aiScene* _scene;
 	int collisionRecursionDepth;
-	bool staticObj;
+	ColType type;
 private:
 
 	struct BoneInfo
@@ -85,7 +94,7 @@ public:
 	//bool checkCollision(CollisionPacket*, int handle, int vs);
 	void addObject(ComponentCollision*);
 
-	void checkAll() {}
+	void checkAll();
 
 	//singleton
 	static CollisionManager& instance()
