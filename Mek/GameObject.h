@@ -59,7 +59,7 @@ public:
 	void addToMap(ComponentId ctype, int handle);
 
 	void addProjectile(Projectile*);
-	void removeProjectile(int handle);
+	void updateProjectile(float dTime);
 
 	//singleton
 	static ObjectManager& instance()

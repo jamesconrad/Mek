@@ -81,14 +81,30 @@ void ObjectManager::addProjectile(Projectile* p)
 	pMap.push_back(p);
 }
 
-void ObjectManager::removeProjectile(int index)
+void ObjectManager::updateProjectile(float dTime)
 {
+	//Determine which targets to remove
+	std::vector<unsigned int> todel;
 	for (int i = 0, s = pMap.size(); i < s; i++)
 	{
+		pMap[i]->update(dTime);
 		if (pMap[i]->alive == false)
 		{
-			free(pMap[i]);
-			pMap.erase(pMap.begin() + index);
+			todel.push_back(i);
+		}
+	}
+	//remove targets
+	for (int i = 0, s = todel.size(); i < s; i++)
+	{
+		free(pMap[todel[i]]);
+		pMap.erase(pMap.begin() + todel[i]);
+	}
+	//redetermine handles
+	if (todel.size() > 0)
+	{
+		for (int i = 0, s = pMap.size(); i < s; i++)
+		{
+			pMap[i]->go->handle = i;
 		}
 	}
 }

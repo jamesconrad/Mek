@@ -530,8 +530,7 @@ void ComponentGraphics::updateShader()
 	W = glm::translate(W, _owner->pos);
 	//W = glm::rotate(W, _owner->rot);
 	//W = glm::scale(W, _owner->scale);
-	W = glm::scale(W, glm::vec3(0.1, 0.1, 0.1));
-	W = glm::scale(W, _owner->scale);
+	W = glm::scale(W, 0.1f * _owner->scale);
 
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
@@ -540,6 +539,5 @@ void ComponentGraphics::updateShader()
 	
 	Program::getInstance().setUniform("skinning", "gWVP", WVP);
 	Program::getInstance().setUniform("skinning", "gWorld", W);
-	//Program::getInstance().setUniform("skinning", "cameraPosition", Camera::getInstance().position());
 	Program::getInstance().updateLighting("skinning");
 }

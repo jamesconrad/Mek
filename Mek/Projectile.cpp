@@ -6,7 +6,7 @@ aiScene* scene;
 void prepProjectiles()
 {
 	ComponentGraphics* cg = new ComponentGraphics();
-	cg->loadModel("../Debug/models/Projectile.dae");
+	cg->loadModel("../Debug/models/SmallCube.dae");
 	scene = (aiScene*)cg->getScene();
 }
 
@@ -29,7 +29,10 @@ Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifesp
 	cg->loadModel(scene);
 
 	cc->setCollisionMask(cg->getScene());
+	cc->type = PROJ;
 	go->pos = p;
+
+	go->handle = ObjectManager::instance().pMap.size();
 
 	alive = true;
 }

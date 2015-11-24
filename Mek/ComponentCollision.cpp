@@ -6,6 +6,9 @@
 #include "lib\glm\geometric.hpp"
 #include "lib\glm\gtc\matrix_transform.hpp"
 
+
+#include "Program.h"
+#include "Camera.h"
 #include "Projectile.h"
 
 ComponentCollision::ComponentCollision()
@@ -23,24 +26,31 @@ void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 		for (int i = 0, s = _cMesh.size(); i < s; i++)
 		{
 			boneInfo[i].FinalTransformation = glm::scale(boneInfo[i].FinalTransformation, glm::vec3(0.1, 0.1, 0.1));
-			_cMesh[i]->fmin = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->min, 0)) + _owner->pos;
-			_cMesh[i]->fmax = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->max, 0)) + _owner->pos;
+			_cMesh[i]->fmin = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->min, 0)) + _owner->pos);// *_owner->scale;
+			_cMesh[i]->fmax = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->max, 0)) + _owner->pos);// *_owner->scale;
 			_cMesh[i]->fuN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->uN, 0));
 			_cMesh[i]->frN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->rN, 0));
 			_cMesh[i]->ffN = glm::vec3(boneInfo[i].FinalTransformation *glm::vec4(_cMesh[i]->fN, 0));
-			_cMesh[i]->fc = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->centre, 0)) + _owner->pos;
+			_cMesh[i]->fc = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->centre, 0)) + _owner->pos);//  *_owner->scale;
 		}
 	}
 	else
 	{
-		glm::mat4 h = glm::translate(h, _owner->pos);
-		h = glm::scale(h, glm::vec3(0.1, 0.1, 0.1));
-		_cMesh[0]->fmin = (_cMesh[0]->min * 0.1f + _owner->pos);
-		_cMesh[0]->fmax = (_cMesh[0]->max * 0.1f + _owner->pos);
-		_cMesh[0]->fuN = _cMesh[0]->uN;
-		_cMesh[0]->frN = _cMesh[0]->rN;
-		_cMesh[0]->ffN = _cMesh[0]->fN;
-		_cMesh[0]->fc = (_cMesh[0]->centre * 0.1f + _owner->pos);
+		for (int i = 0, s = _cMesh.size(); i < s; i++)
+		{
+			glm::mat4 h = glm::translate(glm::mat4(), _owner->pos);
+			h = glm::scale(glm::mat4(), glm::vec3(0.1, 0.1, 0.1));
+			h = glm::scale(glm::mat4(), _owner->scale);
+			//_cMesh[i]->fmin = (_cMesh[i]->min * 0.1f) + _owner->pos;// *_owner->scale;
+			//_cMesh[i]->fmax = (_cMesh[i]->max * 0.1f) + _owner->pos;// *_owner->scale;
+			_cMesh[i]->fuN = _cMesh[i]->uN;
+			_cMesh[i]->frN = _cMesh[i]->rN;
+			_cMesh[i]->ffN = _cMesh[i]->fN;
+			_cMesh[i]->fhwF = _cMesh[i]->hwF * 0.1f *_owner->scale.z;
+			_cMesh[i]->fhwU = _cMesh[i]->hwU;// *0.1f * _owner->scale.y;
+			_cMesh[i]->fhwR = _cMesh[i]->hwR * 0.1f *_owner->scale.x;
+			_cMesh[i]->fc = (_cMesh[i]->centre + _owner->pos);// *_owner->scale;
+		}
 	}
 }
 
@@ -177,134 +187,247 @@ bool OBBSatCheck(BoneBox& a, BoneBox& b, glm::vec3& mtd)
 	float r;
 	float lr;
 
+	float smallestPen;
+	glm::vec3 penAxis;
 	//CASE 1
 	//L = Ax
 	l = abs(glm::dot(T, a.frN));
-	r = a.hwR + b.hwR * Rxx + b.hwU * Rxy + b.hwF * Rxz;
+	r = a.fhwR + b.fhwR * Rxx + b.fhwU * Rxy + b.fhwF * Rxz;
 	lr = l - r;
 	mtd.x = l - r;
+
+	smallestPen = l - r;
+	penAxis = a.frN;
+
 	if (l > r)
 		return false;
 	//CASE 2
 	//L = Ay
 	l = abs(glm::dot(T, a.fuN));
-	r = a.hwU + b.hwR * Ryx + b.hwU * Ryy + b.hwF * Ryz;
+	r = a.fhwU + b.fhwR * Ryx + b.fhwU * Ryy + b.fhwF * Ryz;
 	mtd.y = l - r;
+
+	if (abs(l - r) < abs(smallestPen))
+	{
+		smallestPen = l - r;
+		penAxis = a.fuN;
+	}
+
 	if (l > r)
 		return false;
 	//CASE 3
 	//L = Az
 	l = abs(glm::dot(T, a.ffN));
-	r = a.hwF + b.hwR * Rzx + b.hwU * Rzy + b.hwF * Rzz;
+	r = a.fhwF + b.fhwR * Rzx + b.fhwU * Rzy + b.fhwF * Rzz;
 	mtd.z = l - r;
+
+	if (abs(l - r) < abs(smallestPen))
+	{
+		smallestPen = l - r;
+		penAxis = a.ffN;
+	}
+
 	if (l > r)
 		return false;
 	//CASE 4
 	//L = Bx
 	l = abs(glm::dot(T, b.frN));
-	r = b.hwR + a.hwR * Rxx + a.hwU * Rxy + a.hwF * Rxz;
+	r = b.fhwR + a.fhwR * Rxx + a.fhwU * Rxy + a.fhwF * Rxz;
 	mtdb.x = l - r;
+
+	if (abs(l - r) < abs(smallestPen))
+	{
+		smallestPen = l - r;
+		penAxis = a.frN;
+	}
+
 	if (l > r)
 		return false;
 	//CASE 5
 	//L = By
 	l = abs(glm::dot(T, b.fuN));
-	r = b.hwU + a.hwR * Ryx + a.hwU * Ryy + a.hwF * Ryz;
+	r = b.fhwU + a.fhwR * Ryx + a.fhwU * Ryy + a.fhwF * Ryz;
 	mtdb.y = l - r;
+
+	if (abs(l - r) < abs(smallestPen))
+	{
+		smallestPen = l - r;
+		penAxis = a.fuN;
+	}
+
 	if (l > r)
 		return false;
 	//CASE 6
 	//L = Bz
 	l = abs(glm::dot(T, b.ffN));
-	r = b.hwF + a.hwR * Rzx + a.hwU * Rzy + a.hwF * Rzz;
+	r = b.fhwF + a.fhwR * Rzx + a.fhwU * Rzy + a.fhwF * Rzz;
 	mtdb.z = l - r;
+
+	if (abs(l - r) < abs(smallestPen))
+	{
+		smallestPen = l - r;
+		penAxis = a.ffN;
+	}
+
 	if (l > r)
 		return false;
 	//CASE 7
 	//L = Ax x Bx
-	if (abs(glm::dot(T, a.ffN) * Ryx - glm::dot(T, a.fuN) * Rzx) > a.hwU * Rzx + a.hwF * Ryx + b.hwU * Rxz + b.hwF * Rxy)
+	l = abs(glm::dot(T, a.ffN) * Ryx - glm::dot(T, a.fuN) * Rzx);
+	r = a.fhwU * Rzx + a.fhwF * Ryx + b.fhwU * Rxz + b.fhwF * Rxy;
+	//if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.frN, b.frN);
+	//}
+
+	if (l > r)
 		return false;
 	//CASE 8
 	//L = Ax x By
-	if (abs(glm::dot(T, a.ffN) * Ryy - glm::dot(T, a.fuN) * Rzy) > a.hwU * Rzy + a.hwF * Ryy + b.hwR * Rxz + b.hwF * Rxx)
+	l = abs(glm::dot(T, a.ffN) * Ryy - glm::dot(T, a.fuN) * Rzy);
+	r = a.fhwU * Rzy + a.fhwF * Ryy + b.fhwR * Rxz + b.fhwF * Rxx;
+	if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.frN, b.fuN);
+	//}
+
+	if (l > r)
 		return false;
 	//CASE 9
 	//L = Ax x Bz
-	if (abs(glm::dot(T, a.ffN) * Ryz - glm::dot(T, a.fuN) * Rzz) > a.hwU * Rzz + a.hwF * Ryz + b.hwR * Rxy + b.hwU * Rxx)
+	l = abs(glm::dot(T, a.ffN) * Ryz - glm::dot(T, a.fuN) * Rzz);
+	r = a.fhwU * Rzz + a.fhwF * Ryz + b.fhwR * Rxy + b.fhwU * Rxx;
+	//if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.frN, b.ffN);
+	//}
+	if (l > r)
 		return false;
 	//CASE 10
 	//L = Ay x Bx
-	if (abs(glm::dot(T, a.frN) * Rzx - glm::dot(T, a.ffN) * Rxx) > a.hwU * Rzx + a.hwF * Rxx + b.hwU * Ryz + b.hwF * Ryy)
+	l = abs(glm::dot(T, a.frN) * Rzx - glm::dot(T, a.ffN) * Rxx);
+	r = a.fhwU * Rzx + a.fhwF * Rxx + b.fhwU * Ryz + b.fhwF * Ryy;
+	//if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.fuN, b.ffN);
+	//}
+	if (l > r)
 		return false;
 	//CASE 11
 	//L = Ay x By
-	if (abs(glm::dot(T, a.frN) * Rzy - glm::dot(T, a.ffN) * Rxy) > a.hwU * Rzy + a.hwF * Rxy + b.hwR * Ryz + b.hwF * Ryx)
+	l = abs(glm::dot(T, a.frN) * Rzy - glm::dot(T, a.ffN) * Rxy);
+	r = a.fhwU * Rzy + a.fhwF * Rxy + b.fhwR * Ryz + b.fhwF * Ryx;
+	//if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.fuN, b.fuN);
+	//}
+	if (l > r)
 		return false;
 	//CASE 12
 	//L = Ay x Bz
-	if (abs(glm::dot(T, a.frN) * Rzz - glm::dot(T, a.ffN) * Rxz) > a.hwU * Rzz + a.hwF * Rxz + b.hwR * Ryy + b.hwU * Ryx)
+	l = abs(glm::dot(T, a.frN) * Rzz - glm::dot(T, a.ffN) * Rxz);
+	r = a.fhwU * Rzz + a.fhwF * Rxz + b.fhwR * Ryy + b.fhwU * Ryx;
+	//if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.fuN, b.ffN);
+	//}
+	if (l > r)
 		return false;
 	//CASE 13
 	//L = Az x Bx
-	if (abs(glm::dot(T, a.fuN) * Rxx - glm::dot(T, a.frN) * Ryx) > a.hwR * Ryx + a.hwU * Rxx + b.hwU * Rzz + b.hwF * Rzy)
+	l = abs(glm::dot(T, a.fuN) * Rxx - glm::dot(T, a.frN) * Ryx);
+	r = a.fhwR * Ryx + a.fhwU * Rxx + b.fhwU * Rzz + b.fhwF * Rzy;
+	//if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.ffN, b.frN);
+	//}
+	if (l > r)
 		return false;
 	//CASE 14
 	//L = Az x By
-	if (abs(glm::dot(T, a.fuN) * Rxy - glm::dot(T, a.frN) * Ryy) > a.hwR * Ryy + a.hwU * Rxy + b.hwR * Rzz + b.hwF * Rzx)
+	l = abs(glm::dot(T, a.fuN) * Rxy - glm::dot(T, a.frN) * Ryy);
+	r = a.fhwR * Ryy + a.fhwU * Rxy + b.fhwR * Rzz + b.fhwF * Rzx;
+	//if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.ffN, b.fuN);
+	//}
+	if (l > r)
 		return false;
 	//CASE 15
 	//L = Az x Bz
-	if (abs(glm::dot(T, a.fuN) * Rxz - glm::dot(T, a.frN) * Ryz) > a.hwR * Ryz + a.hwU * Rxz + b.hwR * Rzy + b.hwU * Rzx)
+	l = abs(glm::dot(T, a.fuN) * Rxz - glm::dot(T, a.frN) * Ryz);
+	r = a.fhwR * Ryz + a.fhwU * Rxz + b.fhwR * Rzy + b.fhwU * Rzx;
+	//if (abs(l - r) < abs(smallestPen))
+	//{
+	//	smallestPen = l - r;
+	//	penAxis = glm::cross(a.ffN, b.ffN);
+	//}
+	if (l > r)
 		return false;
 
+
+	//We have collision
+
+	//Old MTD
 	if (abs(mtdb.x) < abs(mtd.x))
 		mtd.x = mtdb.x; 
 	if (abs(mtdb.y) < abs(mtd.y))
 		mtd.y = mtdb.y;
 	if (abs(mtdb.z) < abs(mtd.z))
 		mtd.z = mtdb.z;
-
-	abs(mtd.x) > abs(mtd.y) ? mtd.x = 0 : mtd.y = 0;
+	
+	//abs(mtd.x) > abs(mtd.y) ? mtd.x = 0 : mtd.y = 0;
 	abs(mtd.x) > abs(mtd.z) ? mtd.x = 0 : mtd.z = 0;
-	abs(mtd.y) > abs(mtd.z) && mtd.z != 0 ? mtd.y = 0 : mtd.z = 0;
+	//abs(mtd.y) > abs(mtd.z) && mtd.z != 0 ? mtd.y = 0 : mtd.z = 0;
+	
+
+	//new MTD
+	//mtd = glm::normalize(penAxis) * smallestPen;
 
 	mtd.x && T.x < 0 ? mtd.x *= -1 : T.x;
 	mtd.y && T.y < 0 ? mtd.y *= -1 : T.y;
 	mtd.z && T.z < 0 ? mtd.z *= -1 : T.z;
+
+
 
 	return true;
 }
 
 bool ComponentCollision::checkVs(ComponentCollision* c)
 {
-	bool ret = false;
 	for (int i = 0, s = _cMesh.size(); i < s; i++)
 	{
 		//iterate through all bones on this object
 		for (int j = 0, ss = c->_cMesh.size(); j < ss; j++)
 		{
 			//iterate through all bones on the other object
-			glm::vec3 mtd = glm::vec3(0,0,0);
+			glm::vec3 mtd;
 			if (OBBSatCheck(*_cMesh[i], *c->_cMesh[j], mtd))
 			{
-				//printf("%f, %f, %f\n", mtd.x, mtd.y, mtd.z);
-				if (type == MOVING)
+				printf("%f, %f, %f\n", mtd.x, mtd.y, mtd.z);
+				if (type == MOVING && c->type != PROJ)
 					_owner->pos += mtd;
-				else if (type == PROJ)
+				else if (c->type == PROJ)
 				{
 					//this is where the hit would be done
-					if (strcmp(c->getOwner()->GetName(), "Target"))
-						c->getOwner()->scale = glm::vec3(0, 0, 0);
-					ObjectManager::instance().removeProjectile(_owner->handle);
-					printf("TARGET HIT\n");
+					if (strcmp(_owner->GetName(), "Target") == 0)
+						_owner->scale = glm::vec3(0, 0, 0);
+					ObjectManager::instance().pMap[c->_owner->handle]->alive = false;
 				}
-				printf("NOTICE: s.%s and %s.%s\n", _owner->GetName(), _cMesh[i]->name.c_str(), c->_owner->GetName(), c->_cMesh[j]->name.c_str());
-				ret = true;
-				break;
+				printf("NOTICE: %s.%s and %s.%s\n", _owner->GetName(), _cMesh[i]->name.c_str(), c->_owner->GetName(), c->_cMesh[j]->name.c_str());
+				return true;
 			}
 		}
 	}
-	return ret;
+	return false;
 }
 
 void CollisionManager::checkAll()
@@ -336,7 +459,7 @@ void CollisionManager::checkAll()
 		}
 	}
 	
-	//STAGE 2 SCAN PROJECTILES VS ALL
+	//STAGE 2 ALL VS PROJECTILES
 
 	for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
@@ -347,13 +470,100 @@ void CollisionManager::checkAll()
 			{
 				GameObject* thatGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[j]]);
 				ComponentCollision* thatCC = static_cast<ComponentCollision*>(thatGO->GetComponent(PHYSICS));
-
+	
 				thatCC->updateFrame(thatGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thatCC->_cMesh[0]->boneNum == -1 ? false : true));
-
+	
 				if (thatCC->type == STATIC)
 					thatCC->checkVs(ObjectManager::instance().pMap[i]->cc);
 			}
 		}
+	
+	}
+}
+void ComponentCollision::createHitboxRender()
+{
+	unsigned int s = _cMesh.size();
 
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+
+	_vbo = new GLuint[s];
+	glGenBuffers(s, _vbo);
+
+	for (int i = 0; i < s; i++)
+	{
+		gHitbox hb;
+		float sx = 0.1f;// * _owner->scale.x;
+		float sy = 0.1f;// * _owner->scale.y;
+		float sz = 0.1f;// * _owner->scale.z;
+		hb.vertexData = new GLfloat[108]{
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->min.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->min.x * sx, _cMesh[i]->max.y * sy, _cMesh[i]->max.z * sz,
+			_cMesh[i]->max.x * sx, _cMesh[i]->min.y * sy, _cMesh[i]->max.z * sz
+		};
+		gHitboxes.push_back(hb);	
+		glBindBuffer(GL_ARRAY_BUFFER, _vbo[i]);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glBufferData(GL_ARRAY_BUFFER, 108*sizeof(float), gHitboxes[i].vertexData, GL_STATIC_DRAW);
+	}	
+	glBindVertexArray(0);
+	Program::getInstance().createShader("hitbox", GL_VERTEX_SHADER, "vertex-shader.vert");
+	Program::getInstance().createShader("hitbox", GL_FRAGMENT_SHADER, "fragment-shader.frag");
+
+	_hitboxRender = true;
+}
+
+void ComponentCollision::renderHitbox()
+{
+	if (_hitboxRender)
+	{
+		//update shader vars
+		Program::getInstance().use("hitbox");
+		glBindVertexArray(_vao);
+		for (int i = 0, s = gHitboxes.size(); i < s; i++)
+		{
+			glm::mat4 m = glm::translate(glm::mat4(), _owner->pos) * glm::scale(glm::mat4(), _owner->scale);
+			Program::getInstance().setUniform("hitbox", "model", m);
+			Program::getInstance().setUniform("hitbox", "camera", Camera::getInstance().matrix());
+			Program::getInstance().setUniform("hitbox", "colour", glm::normalize(_owner->pos));
+
+			//glBindBuffer(GL_ARRAY_BUFFER, _vbo[i]);
+			glDrawArrays(GL_LINE_STRIP, 0, 108);
+		}
+		glBindVertexArray(0);
 	}
 }

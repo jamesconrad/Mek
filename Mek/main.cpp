@@ -116,7 +116,7 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	tModel->render();
+	//tModel->render();
 	//qtModel->render();
 	//gModel->render();
 	
@@ -124,13 +124,19 @@ static void Render() {
 	{
 		ComponentGraphics* cg = static_cast<ComponentGraphics*>(goVec[i]->GetComponent(GRAPHICS));
 		cg->render();
+		if (goVec[i]->HasComponent(PHYSICS))
+		{
+			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
+			cc->renderHitbox();
+		}
 	}
-
+	gCol->renderHitbox();
     // swap the display buffers (displays what was just drawn)
     glfwSwapBuffers(gWindow);
 }
 
-
+#define SHOT_CD 0.1
+float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
 
@@ -165,7 +171,7 @@ static void Update(float secondsElapsed) {
     const float mouseSensitivity = 0.005f;
     double mouseX, mouseY;
     glfwGetCursorPos(gWindow, &mouseX, &mouseY);
-    Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
+    //Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
     glfwSetCursorPos(gWindow, 0, 0); //reset the mouse, so it doesn't go out of the window
 
     //increase or decrease field of view based on mouse wheel
@@ -212,13 +218,20 @@ static void Update(float secondsElapsed) {
 		ObjectManager::instance().pMap[i]->update(secondsElapsed);
 
 	glm::vec3 p = Camera::getInstance().position();
-	if (c->rightTrigger > 0.5)
+	if (c->rightTrigger > 0.5 && shotcd > SHOT_CD)
 	{
-		Projectile* pr = new Projectile(p, f, 0.5, 100, 100);
+		Projectile* pr = new Projectile(p, f, 0.5, 100, 10);
 		ObjectManager::instance().pMap.push_back(pr);
+		shotcd = 0;
 	}
+	else
+		shotcd += secondsElapsed;
 
 	CollisionManager::instance().checkAll();
+	
+	ObjectManager::instance().updateProjectile(secondsElapsed);
+
+	model->pos.y = 1;
 
 	//if (model->pos != p)
 	//	Camera::getInstance().getInstance().offsetPosition(p - model->pos);
@@ -325,16 +338,18 @@ void AppMain() {
 	model->SetName("Moving");
 	gModel = new ComponentGraphics();
 	gModel->setOwner(model);
-	gModel->loadModel("../Debug/models/2boxes.dae");
+	gModel->loadModel("../Debug/models/TallCube.dae");
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 	gCol = new ComponentCollision();
 	gCol->setCollisionMask(gModel->getScene());
 	gCol->setOwner(model);
-	model->pos = glm::vec3(0, 1, 0);
+	model->pos = glm::vec3(0, 1, 25);
 	model->vel = 0.1;
 	model->dir = glm::vec3(1, 0, 0);
+	model->scale = glm::vec3(20, 20, 20);
 	gCol->type = MOVING;
+	gCol->createHitboxRender();
 	gp = gCol;
 	model->AddComponent(PHYSICS, gp);
 	ComponentInput* ci = new ComponentInput(0.05,0.05);
@@ -352,8 +367,8 @@ void AppMain() {
 		if (i == 0)
 		{
 			gObject->SetName("Mek");
-			cModel->loadModel("../Debug/models/2boxes.dae");
-			gObject->pos = glm::vec3(0, 0, -5);
+			cModel->loadModel("../Debug/models/Dumpster.dae");
+			gObject->pos = glm::vec3(0, 0, 5);
 		}
 		else if (i == 1)
 		{
@@ -366,17 +381,17 @@ void AppMain() {
 		else if (i == 2)
 		{
 			gObject->SetName("Building");
-			cModel->loadModel("../Debug/models/Building.dae");
+			cModel->loadModel("../Debug/models/Dumpster.dae");
 			
-			gObject->scale = glm::vec3(1.6, 1.6, 1.6);
+			gObject->scale = glm::vec3(1, 1, 1);// glm::vec3(1.6, 1.6, 1.6);
 			gObject->pos = glm::vec3(8, 0, 3);
 		}
 		else if (i == 3)
 		{
-		//	gObject->SetName("Mech");
-		//	cModel->loadModel("../Debug/models/Mech.dae");
-		//	gObject->pos = glm::vec3(0, 0, 0);
-		//	gObject->scale = glm::vec3(10, 10, 10);
+			gObject->SetName("Mech Dumpster");
+			cModel->loadModel("../Debug/models/Dumpster.dae");
+			gObject->pos = glm::vec3(0, 0, 0);
+			gObject->scale = glm::vec3(1, 1, 1);
 		}
 		else if (i == 4)
 		{
@@ -394,13 +409,13 @@ void AppMain() {
 			gObject->scale = glm::vec3(0.7, 0.70, 0.70);
 			gObject->pos = glm::vec3(12, 0, 8);
 		}
-		//else if (i == 6)
-		//{
-		//	gObject->SetName("Crane");
-		//	cModel->loadModel("../Debug/models/Crane.dae");
-		//	gObject->pos = glm::vec3(0, 0, -15);
-		//	gObject->scale = glm::vec3(3, 3, 3);
-		//}
+		else if (i == 6)
+		{
+			gObject->SetName("Target");//Crane
+			cModel->loadModel("../Debug/models/Dumpster.dae");
+			gObject->pos = glm::vec3(0, 0, -15);
+			gObject->scale = glm::vec3(3, 3, 3);
+		}
 		else if (i == 7)
 		{
 			gObject->SetName("Shack");
@@ -412,7 +427,7 @@ void AppMain() {
 		else if (i == 8)
 		{
 			gObject->SetName("2 boxes");
-			cModel->loadModel("../Debug/models/2boxes.dae");
+			cModel->loadModel("../Debug/models/Dumpster.dae");
 			gObject->pos = glm::vec3(0, 0, 0);
 		//	gObject->scale = glm::vec3(10, 10, 10);
 		}
@@ -428,29 +443,30 @@ void AppMain() {
 		cModel->setOwner(gObject);
 		c = cModel;
 		gObject->AddComponent(GRAPHICS, c);
-		//cCollision->setOwner(gObject);
-		//cCollision->setCollisionMask(cModel->getScene());
-		//cCollision->type = STATIC;
-		//cCollision->setCollisionElip(glm::vec3(1, 1, 1));
-		//gObject->AddComponent(PHYSICS, cCollision);
+		cCollision->setOwner(gObject);
+		cCollision->setCollisionMask(cModel->getScene());
+		cCollision->type = STATIC;
+		cCollision->setCollisionElip(glm::vec3(1, 1, 1));
+		cCollision->createHitboxRender();
+		gObject->AddComponent(PHYSICS, cCollision);
 		goVec.push_back(gObject);
 	}
 
-	tmodel = new GameObject(1);
-	tmodel->SetName("Base");
-	tModel = new ComponentGraphics();
-	tModel->setOwner(tmodel);
-	tModel->loadModel("../Debug/models/base.dae");
-	gp = tModel;
-	tmodel->AddComponent(GRAPHICS, gp);
-	tCol = new ComponentCollision();
-	tCol->setCollisionMask(tModel->getScene());
-	tCol->setOwner(model);
-	tCol->setCollisionElip(glm::vec3(1, 6, 2));
-	tmodel->pos = glm::vec3(0, -0.5, 0);
-	gp = tCol;
-	tmodel->AddComponent(ComponentId::PHYSICS, gp);
-	model->scale = glm::vec3(10, 10, 10);
+	//tmodel = new GameObject(1);
+	//tmodel->SetName("Base");
+	//tModel = new ComponentGraphics();
+	//tModel->setOwner(tmodel);
+	//tModel->loadModel("../Debug/models/base.dae");
+	//gp = tModel;
+	//tmodel->AddComponent(GRAPHICS, gp);
+	////tCol = new ComponentCollision();
+	////tCol->setCollisionMask(tModel->getScene());
+	////tCol->setOwner(model);
+	////tCol->setCollisionElip(glm::vec3(1, 6, 2));
+	//tmodel->pos = glm::vec3(0, -0.5, 0);
+	////gp = tCol;
+	//tmodel->AddComponent(ComponentId::PHYSICS, gp);
+	//model->scale = glm::vec3(10, 10, 10);
 	
 	//qtmodel = new GameObject(2);
 	//qtmodel->SetName("StaticObject");

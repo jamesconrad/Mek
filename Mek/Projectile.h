@@ -12,6 +12,7 @@ public:
 	void update(float dtime)
 	{
 		pos += dir * (vel);
+		go->pos = pos;
 		life -= dtime;
 		if (life < 0)
 			alive = false;

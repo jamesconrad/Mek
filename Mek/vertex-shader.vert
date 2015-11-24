@@ -1,22 +1,14 @@
-#version 150
+#version 330
+
+layout(location = 0) in vec3 vert;
 
 uniform mat4 camera;
 uniform mat4 model;
-
-in vec3 vert;
-in vec2 vertTexCoord;
-in vec3 vertNormal;
-
-out vec3 fragVert;
-out vec2 fragTexCoord;
-out vec3 fragNormal;
+uniform vec3 colour;
+out vec4 color;
 
 void main() {
-    // Pass some variables to the fragment shader
-    fragTexCoord = vertTexCoord;
-    fragNormal = vertNormal;
-    fragVert = vert;
-    
     // Apply all matrix transformations to vert
+	color = vec4(colour, 1);
     gl_Position = camera * model * vec4(vert, 1);
 }
