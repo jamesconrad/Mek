@@ -9,11 +9,7 @@
 
 class LightComponent;
 struct PointLight;
-/**
- Represents an OpenGL program made by linking shaders.
- */
 
-//the light locations
 struct LocBaseLight
 {
 	GLint Color;
@@ -62,9 +58,6 @@ enum SkinningShaderIndex
 
 class Program {
 public:
-	 /**
-	 The program's object ID, as returned from glCreateProgram
-	  */
 	GLuint object(char* name) const;
 
 	void use(char* name) const;
@@ -75,15 +68,8 @@ public:
 
 	void createShader(char* name, GLenum type, char* filepath);
 
-	/**
-	The attribute index for the given name, as returned from glGetAttribLocation.
-	 */
 	GLint attrib(char* shaderName, const GLchar* attribName) const;
 
-
-	/**
-	 The uniform index for the given name, as returned from glGetUniformLocation.
-	 */
 	GLint uniform(char* shaderName, const GLchar* uniformName) const;
 
 	//NO DELETE FUNCTION YET TODO:: DELETE FUNCTION ON LIGHTCOMPONENT DECONSTRUCTOR ALSO ADD THE LIGHTSOURCE ON CONSTRUCTOR
@@ -94,11 +80,6 @@ public:
 
 	void updateLighting(char* shadername);
 
-	/**
-	 Setters for attribute and uniform variables.
-
-	 These are convenience methods for the glVertexAttrib* and glUniform* functions.
-	 */
 #define _TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(SHADER_NAME, OGL_TYPE) \
         void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0); \
         void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1); \

@@ -23,17 +23,21 @@
 //#include "ComponentCollision.h"
 #include "ComponentInput.h"
 
-
+#include "2dOverlayAnim.h"
+#include "Target.h"
 #include "Projectile.h"
 
 
-//BEGIN THE SHITTIEST CODE I HAVE EVER DONE
+//Bad Inits need to fix at a later time
 //Pls no kill future me.  I sorry
+float runTime = 0;
 std::vector<GameObject*> goVec;
-ComponentInput* cInput;
+std::vector<Target*> targets;
+int targetsKilled = 0;
+twodOverlay* crosshair;
+twodOverlayAnim* skull;
 
-
-//TODO : SLERP (Targets?), Sprite animation, Paths and Curves(Targets?) 
+//TODO : World/Target Loading, Menu, Timer, Target Counter
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
 {
@@ -43,6 +47,8 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	// load skinning shaders
 	Program::getInstance().createShader("skinning", GL_VERTEX_SHADER, "skinning.vert");
 	Program::getInstance().createShader("skinning", GL_FRAGMENT_SHADER, "skinning.frag");
+	Program::getInstance().createShader("hud", GL_VERTEX_SHADER, "hud.vert");
+	Program::getInstance().createShader("hud", GL_FRAGMENT_SHADER, "hud.frag");
 }
 
 // constants
@@ -130,7 +136,22 @@ static void Render() {
 			cc->renderHitbox();
 		}
 	}
+
+	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
+	{
+		ObjectManager::instance().pMap[i]->cg->render();
+		ObjectManager::instance().pMap[i]->cc->renderHitbox();
+	}
+
+	for (unsigned int i = 0, s = targets.size(); i < s; i++)
+	{
+		if (targets[i]->alive)
+			targets[i]->cg->render();
+	}
+
 	gCol->renderHitbox();
+	crosshair->render();
+	skull->render();
     // swap the display buffers (displays what was just drawn)
     glfwSwapBuffers(gWindow);
 }
@@ -139,69 +160,53 @@ static void Render() {
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
+	runTime += secondsElapsed;
 
-    //move position of camera based on WASD keys, and XZ keys for up and down
-    const float moveSpeed = 0.2f; //units per second
-    if(glfwGetKey(gWindow, 'S')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * -Camera::getInstance().forward());
-    } else if(glfwGetKey(gWindow, 'W')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * Camera::getInstance().forward());
-    }
-    if(glfwGetKey(gWindow, 'A')){
-        Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * -Camera::getInstance().right());
-    } else if(glfwGetKey(gWindow, 'D')){
-		Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * Camera::getInstance().right());
-    }
-    if(glfwGetKey(gWindow, 'Z')){
-		Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * -glm::vec3(0, 1, 0));
-    } else if(glfwGetKey(gWindow, 'X')){
-		Camera::getInstance().offsetPosition(secondsElapsed * moveSpeed * 500.f * glm::vec3(0, 1, 0));
-    }
-	
-	if (cInput->Refresh())
-	{
-		//Camera::getInstance().offsetPosition(cInput->leftStickY * moveSpeed * 10.0f * Camera::getInstance().forward());
-		//Camera::getInstance().offsetPosition(cInput->leftStickX * moveSpeed * Camera::getInstance().right());
-
-		//Camera::getInstance().offsetOrientation(-cInput->rightStickY * 0.5f, cInput->rightStickX * 0.5f);
-	}
-
-
-    //rotate camera based on mouse movement
-    const float mouseSensitivity = 0.005f;
-    double mouseX, mouseY;
-    glfwGetCursorPos(gWindow, &mouseX, &mouseY);
-    //Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
-    glfwSetCursorPos(gWindow, 0, 0); //reset the mouse, so it doesn't go out of the window
-
-    //increase or decrease field of view based on mouse wheel
-    const float zoomSensitivity = -20.2f;
-    //float fieldOfView = Camera::getInstance().fieldOfView() + zoomSensitivity * (float)gScrollY;
-    //if(fieldOfView < 5.0f) fieldOfView = 5.0f;
-    //if(fieldOfView > 130.0f) fieldOfView = 130.0f;
-	//
-	//printf("FOV : %f \n", fieldOfView);
-
-    Camera::getInstance().setFieldOfView(179);
-    gScrollY = 0;
-
-
-	//Theory:
-	//Camera pos always = object pos
-	//Camera dir always = object dir
-
+	glm::vec3 lInput;
+	glm::vec2 rInput;
 	Camera* cam = &Camera::getInstance();
-
-	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
-	c->Refresh();
-	glm::vec3 lInput = glm::vec3(c->leftStickX, 0, c->leftStickY);
-	glm::vec2 rInput = glm::vec2(c->rightStickX / 5, c->rightStickY / 5);
-	
-	//c->getOwner()->pos += cam->forward() * (c->getOwner()->vel * -lInput.z);
-	//c->getOwner()->pos += cam->right() * (c->getOwner()->vel * -lInput.x);
+	glm::vec3 f = cam->forward();
+	glm::vec3 r = cam->right();
 	glm::vec3 fmy = cam->forward();
 	fmy.y = 0;
+	bool shoot = false;
 
+	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
+	if (c->Refresh())
+	{
+		lInput = glm::vec3(c->leftStickX, 0, c->leftStickY);
+		rInput = glm::vec2(c->rightStickX / 5, c->rightStickY / 5);
+		if (c->rightTrigger > 0.5 && shotcd > SHOT_CD)
+			shoot = true;
+	}
+	else
+	{
+		const float moveSpeed = 0.2f; //units per second
+		if (glfwGetKey(gWindow, 'S'))
+			lInput.z = -1;
+		else if (glfwGetKey(gWindow, 'W'))
+			lInput.z = 1;
+		if (glfwGetKey(gWindow, 'A'))
+			lInput.x = -1;
+		else if (glfwGetKey(gWindow, 'D'))
+			lInput.x = 1;
+
+		if (glfwGetKey(gWindow, ' '))
+		{
+			shoot = true;
+		}
+
+		//rotate camera based on mouse movement
+		const float mouseSensitivity = 0.005f;
+		double mouseX, mouseY;
+		glfwGetCursorPos(gWindow, &mouseX, &mouseY);
+		//Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
+		glfwSetCursorPos(gWindow, 0, 0);
+		rInput.x = mouseX * mouseSensitivity;
+		rInput.y = mouseY * mouseSensitivity;
+	}
+
+	//Begin Camera code
 	model->pos += fmy * (c->getOwner()->vel * lInput.z);
 	model->pos += cam->right() * (c->getOwner()->vel * lInput.x);
 
@@ -210,33 +215,40 @@ static void Update(float secondsElapsed) {
 	c->getOwner()->dir = glm::rotateX(c->getOwner()->dir, -rInput.y);
 	c->getOwner()->dir = glm::rotateY(c->getOwner()->dir, rInput.x);
 	cam->offsetOrientation(-rInput.y, rInput.x);
-
-	glm::vec3 f = cam->forward();
-	glm::vec3 r = cam->right();
+	//End Camera code
 	
 	for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 		ObjectManager::instance().pMap[i]->update(secondsElapsed);
 
 	glm::vec3 p = Camera::getInstance().position();
-	if (c->rightTrigger > 0.5 && shotcd > SHOT_CD)
+	if (shoot && shotcd > SHOT_CD)
 	{
 		Projectile* pr = new Projectile(p, f, 0.5, 100, 10);
 		ObjectManager::instance().pMap.push_back(pr);
 		shotcd = 0;
 	}
-	else
-		shotcd += secondsElapsed;
+
 
 	CollisionManager::instance().checkAll();
 	
 	ObjectManager::instance().updateProjectile(secondsElapsed);
 
+	for (int i = 0, s = targets.size(); i < s; i++)
+	{
+		if (targets[i]->hit && targets[i]->alive)
+		{
+			targets[i]->alive = false;
+			skull->play();
+			targetsKilled++;
+		}
+	}
+
+	skull->update(secondsElapsed);
+
 	model->pos.y = 1;
 
-	//if (model->pos != p)
-	//	Camera::getInstance().getInstance().offsetPosition(p - model->pos);
-
 	std::vector<glm::mat4> trans;
+	shotcd += secondsElapsed;
 	tElap += secondsElapsed;
 	//gModel->BoneTransform(tElap, trans);
 }
@@ -260,13 +272,13 @@ void AppMain() {
     // open a window with GLFW
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
     if(!gWindow)
-        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 4.5?");
+        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.3?");
 
     // GLFW settings
     glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -282,18 +294,15 @@ void AppMain() {
         throw std::runtime_error("glewInit failed");
 	}
 
-    // GLEW throws some errors, so discard all the errors so far
+    // GLEW throws some errors so discard all the errors so far
     while(glGetError() != GL_NO_ERROR) {}
 
 	// Init DevIL
 	ilInit();
-	//iluInit();
-	//ilutRenderer(ILUT_OPENGL);
 
 	// enable vsync using windows only code
 #ifdef _WIN32
 	// Turn on vertical screen sync under Windows.
-	// (I.e. it uses the WGL_EXT_swap_control extension)
 	typedef BOOL(WINAPI *PFNWGLSWAPINTERVALEXTPROC)(int interval);
 	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
@@ -308,8 +317,8 @@ void AppMain() {
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 
     // make sure OpenGL version 3.2 API is available
-    if(!GLEW_VERSION_4_5)
-        throw std::runtime_error("OpenGL 4.5 API is not available.");
+    if(!GLEW_VERSION_3_3)
+        throw std::runtime_error("OpenGL 3.3 API is not available.");
 
     // OpenGL settings
     glEnable(GL_DEPTH_TEST);
@@ -326,10 +335,13 @@ void AppMain() {
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(0, 0, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-    Camera::getInstance().setNearAndFarPlanes(0.1f, 500.0f);
+	Camera::getInstance().setNearAndFarPlanes(0.1f, 500.0f);
+	Camera::getInstance().setFieldOfView(179);
 
-
-
+	crosshair = new twodOverlay("../Debug/crosshair.png", 0, 0, 1);
+	skull = new twodOverlayAnim("../Debug/killSkull.png", 5, 0.5);
+	skull->updatePos(-0.85f, -0.75f, 4);
+	skull ->cycle = true;
 	//MODEL INITS
 
 	prepProjectiles();
@@ -368,7 +380,7 @@ void AppMain() {
 		{
 			gObject->SetName("Mek");
 			cModel->loadModel("../Debug/models/Dumpster.dae");
-			gObject->pos = glm::vec3(0, 0, 5);
+			gObject->pos = glm::vec3(5, 0, 5);
 		}
 		else if (i == 1)
 		{
@@ -428,7 +440,7 @@ void AppMain() {
 		{
 			gObject->SetName("2 boxes");
 			cModel->loadModel("../Debug/models/Dumpster.dae");
-			gObject->pos = glm::vec3(0, 0, 0);
+			gObject->pos = glm::vec3(0, 0, 1);
 		//	gObject->scale = glm::vec3(10, 10, 10);
 		}
 		else if (i == 9)
@@ -452,37 +464,6 @@ void AppMain() {
 		goVec.push_back(gObject);
 	}
 
-	//tmodel = new GameObject(1);
-	//tmodel->SetName("Base");
-	//tModel = new ComponentGraphics();
-	//tModel->setOwner(tmodel);
-	//tModel->loadModel("../Debug/models/base.dae");
-	//gp = tModel;
-	//tmodel->AddComponent(GRAPHICS, gp);
-	////tCol = new ComponentCollision();
-	////tCol->setCollisionMask(tModel->getScene());
-	////tCol->setOwner(model);
-	////tCol->setCollisionElip(glm::vec3(1, 6, 2));
-	//tmodel->pos = glm::vec3(0, -0.5, 0);
-	////gp = tCol;
-	//tmodel->AddComponent(ComponentId::PHYSICS, gp);
-	//model->scale = glm::vec3(10, 10, 10);
-	
-	//qtmodel = new GameObject(2);
-	//qtmodel->SetName("StaticObject");
-	//qtModel = new ComponentGraphics();
-	//qtModel->setOwner(qtmodel);
-	//qtModel->loadModel("../Debug/models/2boxesv1.dae");
-	//gp = qtModel;
-	//qtmodel->AddComponent(GRAPHICS, gp);
-	//qtCol = new ComponentCollision();
-	//qtCol->setCollisionMask(qtModel->getScene());
-	//qtCol->setOwner(model);
-	//qtCol->setCollisionElip(glm::vec3(1, 3, 2));
-	//gp = qtCol;
-	//qtmodel->AddComponent(ComponentId::PHYSICS, gp);
-	//qtmodel->pos = glm::vec3(5, 0, 0);
-
 	LightComponent* light = new LightComponent(lPOINT);
 	PointLight* lc = new PointLight;
 	lc->Atten.Constant = 1;
@@ -494,12 +475,7 @@ void AppMain() {
 	lc->Position = glm::vec3(0, 0, 100);
 
 	light->SetVars(lPOINT, lc);
-
-	//tModel->render();
-	//gModel->render();
-	//qtModel->render();
 	//END MODEL INITS
-	cInput = new ComponentInput(0.25, 0.25);
 
 	wglSwapIntervalEXT(1);
 

@@ -34,11 +34,11 @@ Texture::Texture(char* filepath, GLint minMagFiler, GLint wrapMode)
 	err = glGetError();
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
-		GL_RGB,
+		GL_RGBA,
 		_originalWidth,
 		_originalHeight,
 		0,
-		GL_RGB,
+		GL_RGBA,
 		GL_UNSIGNED_BYTE,
 		bmp.pixelBuffer());
 	glBindTexture(GL_TEXTURE_2D, 0);

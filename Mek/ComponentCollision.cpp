@@ -463,6 +463,7 @@ void CollisionManager::checkAll()
 
 	for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
+		ObjectManager::instance().pMap[i]->cc->updateFrame(NULL, false);
 		
 		for (int j = 0, ss = ObjectManager::instance().colMap.size(); j < ss; j++)
 		{

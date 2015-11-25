@@ -31,6 +31,9 @@ Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifesp
 	cc->setCollisionMask(cg->getScene());
 	cc->type = PROJ;
 	go->pos = p;
+	go->scale = glm::vec3(0.1, 0.1, 0.1);
+
+	cc->createHitboxRender();
 
 	go->handle = ObjectManager::instance().pMap.size();
 
