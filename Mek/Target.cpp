@@ -1,15 +1,18 @@
 #include "Target.h"
 
-Target::Target(char* fp)
+Target::Target(char* fp, float t)
 {
+	tmod = t;
 	hit = false;
 	alive = true;
 	go = new GameObject(0);
 	go->SetName("Target");
 	cg = new ComponentGraphics();
+	cg->setOwner(go);
 	cg->loadModel(fp);
 	cc = new ComponentCollision();
 	cc->setCollisionMask(cg->getScene());
+	cc->setOwner(go);
 }
 
 void Target::update(float dTime)
@@ -20,7 +23,7 @@ void Target::update(float dTime)
 	}
 	else
 	{
-		interp.interpolate(dTime);
+		interp.speedControlInterp(dTime * tmod);
 		go->pos = interp.pos;
 	}
 }

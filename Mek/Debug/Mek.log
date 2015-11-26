@@ -1,50 +1,44 @@
-﻿Build started 11/24/2015 7:41:20 PM.
+﻿Build started 11/25/2015 11:31:30 PM.
      1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
      1>PreBuildEvent:
          echo C:\Users\100559437\Documents\Mek\Mek\
          :VCEnd
          C:\Users\100559437\Documents\Mek\Mek\
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt 2dOverlay.cpp 2dOverlayAnim.cpp Bitmap.cpp ComponentCollision.cpp ComponentGraphics.cpp GameObject.cpp Program.cpp Projectile.cpp Shader.cpp Target.cpp Texture.cpp main.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
          main.cpp
      1>c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY' : macro redefinition
                  c:\users\100559437\documents\mek\mek\include\gl\glfw3.h(85) : see previous definition of 'APIENTRY'
      1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\crtdbg.h(586): warning C4005: '_malloca' : macro redefinition
                  c:\program files (x86)\microsoft visual studio 12.0\vc\include\malloc.h(224) : see previous definition of '_malloca'
-     1>c:\users\100559437\documents\mek\mek\skybox.h(25): error C2146: syntax error : missing ';' before identifier 'm_fileNames'
-     1>c:\users\100559437\documents\mek\mek\skybox.h(25): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-     1>c:\users\100559437\documents\mek\mek\main.cpp(206): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\main.cpp(207): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\main.cpp(361): warning C4305: '=' : truncation from 'double' to 'float'
-     1>c:\users\100559437\documents\mek\mek\main.cpp(368): warning C4305: 'argument' : truncation from 'double' to 'float'
-         Shader.cpp
-         Program.cpp
-         Generating Code...
-         Compiling...
-         ComponentGraphics.cpp
-         ComponentCollision.cpp
-     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(62): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(66): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(73): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(121): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\100559437\documents\mek\mek\componentcollision.cpp(494): warning C4018: '<' : signed/unsigned mismatch
-         2dOverlayAnim.cpp
-     1>c:\users\100559437\documents\mek\mek\2doverlayanim.cpp(15): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\100559437\documents\mek\mek\2doverlayanim.cpp(36): warning C4018: '<' : signed/unsigned mismatch
-         2dOverlay.cpp
-         Generating Code...
-         Compiling...
-         Texture.cpp
-     1>c:\users\100559437\documents\mek\mek\texture.cpp(22): warning C4244: '=' : conversion from 'unsigned int' to 'GLfloat', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\texture.cpp(23): warning C4244: '=' : conversion from 'unsigned int' to 'GLfloat', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\texture.cpp(43): warning C4244: 'argument' : conversion from 'GLfloat' to 'GLsizei', possible loss of data
-         Target.cpp
-         Projectile.cpp
-         GameObject.cpp
-         Bitmap.cpp
-         Generating Code...
-     1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)) -- FAILED.
+     1>c:\users\100559437\documents\mek\mek\main.cpp(276): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\main.cpp(277): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\main.cpp(333): warning C4244: '=' : conversion from 'float' to 'unsigned int', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\main.cpp(336): warning C4553: '==' : operator has no effect; did you intend '='?
+     1>c:\users\100559437\documents\mek\mek\main.cpp(478): warning C4305: '=' : truncation from 'double' to 'float'
+     1>c:\users\100559437\documents\mek\mek\main.cpp(485): warning C4305: 'argument' : truncation from 'double' to 'float'
+         GLM: rotateX function taking degrees as parameters is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
+         GLM: rotateY function taking degrees as parameters is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\100559437\Documents\Mek\Debug\Mek.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\100559437\Documents\Mek\Mek\\lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib xinput.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\100559437\Documents\Mek\Debug\Mek.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\100559437\Documents\Mek\Debug\Mek.lib" /MACHINE:X86 Debug\2dOverlay.obj
+         Debug\2dOverlayAnim.obj
+         Debug\Bitmap.obj
+         Debug\Camera.obj
+         Debug\ComponentCollision.obj
+         Debug\ComponentGraphics.obj
+         Debug\GameObject.obj
+         Debug\ComponentInput.obj
+         Debug\Interpolation.obj
+         Debug\main.obj
+         Debug\Program.obj
+         Debug\Projectile.obj
+         Debug\Shader.obj
+         Debug\Target.obj
+         Debug\TextRendering.obj
+         Debug\Texture.obj
+         Mek.vcxproj -> C:\Users\100559437\Documents\Mek\Debug\Mek.exe
+     1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:08.45
+Time Elapsed 00:00:02.18

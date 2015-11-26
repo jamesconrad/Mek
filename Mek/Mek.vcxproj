@@ -25,6 +25,7 @@
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Target.cpp" />
+    <ClCompile Include="TextRendering.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +44,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Interpolation.h" />
     <ClInclude Include="Target.h" />
+    <ClInclude Include="TextRendering.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +56,8 @@
     <None Include="hud.vert" />
     <None Include="skinning.frag" />
     <None Include="skinning.vert" />
+    <None Include="text.frag" />
+    <None Include="text.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{222737CC-70B8-41BB-A92B-095192302DFF}</ProjectGuid>

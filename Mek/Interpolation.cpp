@@ -1,11 +1,36 @@
 #include "Interpolation.h"
 
-
-
-template <typename T>
-T lerp(T d0, T d1, float t)
+float Interpolation::arclength(int i)
 {
-	return d0 * (1 - t) + d1 * t;
+	glm::vec3 d = curve[i].v + (curve[i - 1].v * -1.f);
+	float ad = sqrt(pow(d.x, 2) + pow(d.y, 2) + pow(d.z, 2));
+	return ad + curve[i - 1].arcl;
+}
+
+void Interpolation::buildCurve()
+{
+	curveFin = false;
+	while (!curveFin && points.size() > 1)
+	{
+		interpolate(0.04);
+		ce c;
+		c.v = pos;
+		c.seg = stage;
+		c.tval = time;
+		c.arcl = 0;
+		curve.push_back(c);
+	}
+	//distance function
+	//mag(p2 - p1) + alp1
+	for (int i = 1; i < curve.size(); i++)
+	{
+		curve[i].arcl = arclength(i);
+	}
+
+	for (int i = 0; i < curve.size(); i++)
+	{
+		curve[i].arcl /= curve.back().arcl;
+	}
 }
 
 template <typename T>
@@ -60,11 +85,11 @@ void Interpolation::interpolate(float dTime)
 		else
 			last = points[stage + 2];
 		pos.x = ((-t3 + 2 * t2 - t)*(prev.x) + (3 * t3 - 5 * t2 + 2)*(points[stage].x) + (-3 * t3 + 4 * t2 + t)* (points[stage + 1].x) + (t3 - t2)*(last.x)) / 2;
-		pos.y = ((-t3 + 2 * t2 - t)*(prev.y) + (3 * t3 - 5 * t2 + 2)*(points[stage].y) + (-3 * t3 + 4 * t2 + t)* (points[stage + 1].y) + (t3 - t2)*(last.y)) / 2;
+		pos.z = ((-t3 + 2 * t2 - t)*(prev.z) + (3 * t3 - 5 * t2 + 2)*(points[stage].z) + (-3 * t3 + 4 * t2 + t)* (points[stage + 1].z) + (t3 - t2)*(last.z)) / 2;
 
 	}
 
-	if (stage + 1 < points.size() && state == 4)
+	if (stage + 1 < points.size() && state == SLERP)
 	{
 		pos = slerp(points[stage], points[stage + 1], time);
 	}
@@ -126,5 +151,33 @@ void Interpolation::interpolate(float dTime)
 			stage++;
 			cycles++;
 		}
+	}
+}
+
+void Interpolation::speedControlInterp(float dTime)
+{
+	if (curve.size() > 1)
+	{
+		//stage 1 lerp for distance
+		//d is incremented by vel and reset to 0
+		float dst = lerp(0.0f, 1.0f, time);
+		//stage 2 find closest points
+		int p1 = 0, p2 = 0;
+		for (int i = 1; i < curve.size(); i++)
+		{
+			if (curve[i].arcl > dst)
+			{
+				p2 = i;
+				p1 = i - 1;
+				break;
+			}
+		}
+
+		float il = invlerp(curve[p1].arcl, curve[p2].arcl, dst);
+		pos = lerp(curve[p1].v, curve[p2].v, il);
+
+		time += dTime;
+		if (time > 1)
+			time = 0;
 	}
 }

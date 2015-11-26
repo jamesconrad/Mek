@@ -60,6 +60,9 @@
     <ClCompile Include="Interpolation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextRendering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Program.h">
@@ -110,6 +113,9 @@
     <ClInclude Include="Target.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TextRendering.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragment-shader.frag">
@@ -130,6 +136,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="hud.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="text.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="text.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -143,8 +143,8 @@ void Program::updateLighting(char* shadername)
 
 	glUniform1i(_vlightVarLoc[gNumPointLights], numPointLights);
 	glUniform1i(_vlightVarLoc[gNumSpotLights], numSpotLights);
-	glUniform3f(_vlightVarLoc[gDirectionalLightBaseColor], 1.0f, 1.0f, 1.0f);
-	glUniform3f(_vlightVarLoc[gDirectionalLightDirection], -1.0f, -1.0f, -1.0f);
+	glUniform3f(_vlightVarLoc[gDirectionalLightBaseColor], 0.25f, 0.25f, 0.25f);
+	glUniform3f(_vlightVarLoc[gDirectionalLightDirection], 0.0f, -1.0f, -1.0f);
 	glUniform1f(_vlightVarLoc[gDirectionalLightBaseAmbientIntensity], 0.55f);
 	glUniform1f(_vlightVarLoc[gDirectionalLightBaseDiffuseIntensity], 0.9f);
 	glUniform1f(_vlightVarLoc[gMatSpecularIntensity], 0.5f);

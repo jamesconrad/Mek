@@ -69,8 +69,8 @@ void Camera::offsetOrientation(float upAngle, float rightAngle) {
 void Camera::lookAt(glm::vec3 position) {
     assert(position != _position);
     glm::vec3 direction = glm::normalize(position - _position);
-    _verticalAngle = glm::radians(asinf(-direction.y));
-    _horizontalAngle = -glm::radians(atan2f(-direction.x, -direction.z));
+    _verticalAngle = glm::degrees(asinf(-direction.y));
+    _horizontalAngle = -glm::degrees(atan2f(-direction.x, -direction.z));
     normalizeAngles();
 }
 
