@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2015-10-20T14:02:16Z</created><keywords></keywords><modified>2015-10-20T14:02:16Z</modified><revision></revision><subject></subject><title></title><unit meter="0.010000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
+  <library_materials>
+    <material id="lambert1" name="lambert1">
+      <instance_effect url="#lambert1-fx"/>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="lambert1-fx" name="lambert1">
+      <profile_COMMON>
+        <technique sid="standard">
+          <lambert>
+            <emission>
+              <color sid="emission">0.000000  0.000000 0.000000 1.000000</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0.000000  0.000000 0.000000 1.000000</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0.400000  0.400000 0.400000 1.000000</color>
+            </diffuse>
+            <transparent opaque="RGB_ZERO">
+              <color sid="transparent">0.000000  0.000000 0.000000 1.000000</color>
+            </transparent>
+            <transparency>
+              <float sid="transparency">1.000000</float>
+            </transparency>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_geometries>
+    <geometry id="Legs_ncl1_1-lib" name="Legs_ncl1_1Mesh">
+      <mesh>
+        <source id="Legs_ncl1_1-POSITION">
+          <float_array id="Legs_ncl1_1-POSITION-array" count="24">
+-1.000000 -2.000000 -1.000000
+1.000000 -2.000000 -1.000000
+-1.000000 -2.000000 1.000000
+1.000000 -2.000000 1.000000
+-1.000000 2.000000 1.000000
+1.000000 2.000000 1.000000
+-1.000000 2.000000 -1.000000
+1.000000 2.000000 -1.000000
+</float_array>
+          <technique_common>
+            <accessor source="#Legs_ncl1_1-POSITION-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Legs_ncl1_1-Normal0">
+          <float_array id="Legs_ncl1_1-Normal0-array" count="108">
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+</float_array>
+          <technique_common>
+            <accessor source="#Legs_ncl1_1-Normal0-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Legs_ncl1_1-UV0">
+          <float_array id="Legs_ncl1_1-UV0-array" count="28">
+0.375000 0.000000
+0.625000 0.000000
+0.375000 0.250000
+0.625000 0.250000
+0.375000 0.500000
+0.625000 0.500000
+0.375000 0.750000
+0.625000 0.750000
+0.375000 1.000000
+0.625000 1.000000
+0.875000 0.000000
+0.875000 0.250000
+0.125000 0.000000
+0.125000 0.250000
+</float_array>
+          <technique_common>
+            <accessor source="#Legs_ncl1_1-UV0-array" count="14" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Legs_ncl1_1-VERTEX">
+          <input semantic="POSITION" source="#Legs_ncl1_1-POSITION"/>
+        </vertices>
+        <triangles count="12" material="lambert1"><input semantic="VERTEX" offset="0" source="#Legs_ncl1_1-VERTEX"/><input semantic="NORMAL" offset="1" source="#Legs_ncl1_1-Normal0"/><input semantic="TEXCOORD" offset="2" set="0" source="#Legs_ncl1_1-UV0"/><p> 3 0 3 2 1 2 0 2 0 3 3 3 0 4 0 1 5 1 4 6 4 2 7 2 5 8 5 5 9 5 2 10 2 3 11 3 5 12 5 7 13 7 4 14 4 4 15 4 7 16 7 6 17 6 0 18 8 6 19 6 1 20 9 1 21 9 6 22 6 7 23 7 5 24 11 3 25 3 1 26 1 5 27 11 1 28 1 7 29 10 2 30 2 4 31 13 6 32 12 2 33 2 6 34 12 0 35 0</p></triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Head_ncl1_1-lib" name="Head_ncl1_1Mesh">
+      <mesh>
+        <source id="Head_ncl1_1-POSITION">
+          <float_array id="Head_ncl1_1-POSITION-array" count="24">
+-1.000000 -1.000000 -1.000000
+1.000000 -1.000000 -1.000000
+-1.000000 -1.000000 1.000000
+1.000000 -1.000000 1.000000
+-1.000000 1.000000 1.000000
+1.000000 1.000000 1.000000
+-1.000000 1.000000 -1.000000
+1.000000 1.000000 -1.000000
+</float_array>
+          <technique_common>
+            <accessor source="#Head_ncl1_1-POSITION-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Head_ncl1_1-Normal0">
+          <float_array id="Head_ncl1_1-Normal0-array" count="108">
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+</float_array>
+          <technique_common>
+            <accessor source="#Head_ncl1_1-Normal0-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Head_ncl1_1-UV0">
+          <float_array id="Head_ncl1_1-UV0-array" count="28">
+0.375000 0.000000
+0.625000 0.000000
+0.375000 0.250000
+0.625000 0.250000
+0.375000 0.500000
+0.625000 0.500000
+0.375000 0.750000
+0.625000 0.750000
+0.375000 1.000000
+0.625000 1.000000
+0.875000 0.000000
+0.875000 0.250000
+0.125000 0.000000
+0.125000 0.250000
+</float_array>
+          <technique_common>
+            <accessor source="#Head_ncl1_1-UV0-array" count="14" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Head_ncl1_1-VERTEX">
+          <input semantic="POSITION" source="#Head_ncl1_1-POSITION"/>
+        </vertices>
+        <triangles count="12" material="lambert1"><input semantic="VERTEX" offset="0" source="#Head_ncl1_1-VERTEX"/><input semantic="NORMAL" offset="1" source="#Head_ncl1_1-Normal0"/><input semantic="TEXCOORD" offset="2" set="0" source="#Head_ncl1_1-UV0"/><p> 3 0 3 2 1 2 0 2 0 3 3 3 0 4 0 1 5 1 5 6 5 4 7 4 2 8 2 5 9 5 2 10 2 3 11 3 5 12 5 7 13 7 4 14 4 4 15 4 7 16 7 6 17 6 1 18 9 0 19 8 6 20 6 1 21 9 6 22 6 7 23 7 5 24 11 3 25 3 1 26 1 5 27 11 1 28 1 7 29 10 2 30 2 4 31 13 6 32 12 2 33 2 6 34 12 0 35 0</p></triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Right_Arm_ncl1_1-lib" name="Right_Arm_ncl1_1Mesh">
+      <mesh>
+        <source id="Right_Arm_ncl1_1-POSITION">
+          <float_array id="Right_Arm_ncl1_1-POSITION-array" count="24">
+-1.000000 1.000000 2.000000
+-1.000000 -1.000000 2.000000
+1.000000 1.000000 2.000000
+1.000000 -1.000000 2.000000
+1.000000 1.000000 -2.000000
+1.000000 -1.000000 -2.000000
+-1.000000 1.000000 -2.000000
+-1.000000 -1.000000 -2.000000
+</float_array>
+          <technique_common>
+            <accessor source="#Right_Arm_ncl1_1-POSITION-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Right_Arm_ncl1_1-Normal0">
+          <float_array id="Right_Arm_ncl1_1-Normal0-array" count="108">
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+</float_array>
+          <technique_common>
+            <accessor source="#Right_Arm_ncl1_1-Normal0-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Right_Arm_ncl1_1-UV0">
+          <float_array id="Right_Arm_ncl1_1-UV0-array" count="28">
+0.375000 0.000000
+0.625000 0.000000
+0.375000 0.250000
+0.625000 0.250000
+0.375000 0.500000
+0.625000 0.500000
+0.375000 0.750000
+0.625000 0.750000
+0.375000 1.000000
+0.625000 1.000000
+0.875000 0.000000
+0.875000 0.250000
+0.125000 0.000000
+0.125000 0.250000
+</float_array>
+          <technique_common>
+            <accessor source="#Right_Arm_ncl1_1-UV0-array" count="14" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Right_Arm_ncl1_1-VERTEX">
+          <input semantic="POSITION" source="#Right_Arm_ncl1_1-POSITION"/>
+        </vertices>
+        <triangles count="12" material="lambert1"><input semantic="VERTEX" offset="0" source="#Right_Arm_ncl1_1-VERTEX"/><input semantic="NORMAL" offset="1" source="#Right_Arm_ncl1_1-Normal0"/><input semantic="TEXCOORD" offset="2" set="0" source="#Right_Arm_ncl1_1-UV0"/><p> 2 0 2 0 1 0 3 2 3 0 3 0 1 4 1 3 5 3 3 6 3 5 7 5 2 8 2 2 9 2 5 10 5 4 11 4 7 12 7 4 13 4 5 14 5 4 15 4 7 16 7 6 17 6 0 18 8 6 19 6 1 20 9 1 21 9 6 22 6 7 23 7 5 24 11 3 25 3 1 26 1 1 27 1 7 28 10 5 29 11 2 30 2 6 31 12 0 32 0 6 33 12 2 34 2 4 35 13</p></triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Lft_Arm-lib" name="Lft_ArmMesh">
+      <mesh>
+        <source id="Lft_Arm-POSITION">
+          <float_array id="Lft_Arm-POSITION-array" count="24">
+-1.000000 1.000000 2.000000
+-1.000000 -1.000000 2.000000
+1.000000 1.000000 2.000000
+1.000000 -1.000000 2.000000
+1.000000 1.000000 -2.000000
+1.000000 -1.000000 -2.000000
+-1.000000 1.000000 -2.000000
+-1.000000 -1.000000 -2.000000
+</float_array>
+          <technique_common>
+            <accessor source="#Lft_Arm-POSITION-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Lft_Arm-Normal0">
+          <float_array id="Lft_Arm-Normal0-array" count="108">
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+</float_array>
+          <technique_common>
+            <accessor source="#Lft_Arm-Normal0-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Lft_Arm-UV0">
+          <float_array id="Lft_Arm-UV0-array" count="28">
+0.375000 0.000000
+0.625000 0.000000
+0.375000 0.250000
+0.625000 0.250000
+0.375000 0.500000
+0.625000 0.500000
+0.375000 0.750000
+0.625000 0.750000
+0.375000 1.000000
+0.625000 1.000000
+0.875000 0.000000
+0.875000 0.250000
+0.125000 0.000000
+0.125000 0.250000
+</float_array>
+          <technique_common>
+            <accessor source="#Lft_Arm-UV0-array" count="14" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Lft_Arm-VERTEX">
+          <input semantic="POSITION" source="#Lft_Arm-POSITION"/>
+        </vertices>
+        <triangles count="12" material="lambert1"><input semantic="VERTEX" offset="0" source="#Lft_Arm-VERTEX"/><input semantic="NORMAL" offset="1" source="#Lft_Arm-Normal0"/><input semantic="TEXCOORD" offset="2" set="0" source="#Lft_Arm-UV0"/><p> 2 0 2 0 1 0 3 2 3 0 3 0 1 4 1 3 5 3 3 6 3 5 7 5 2 8 2 2 9 2 5 10 5 4 11 4 7 12 7 4 13 4 5 14 5 4 15 4 7 16 7 6 17 6 0 18 8 6 19 6 1 20 9 1 21 9 6 22 6 7 23 7 5 24 11 3 25 3 1 26 1 1 27 1 7 28 10 5 29 11 2 30 2 6 31 12 0 32 0 6 33 12 2 34 2 4 35 13</p></triangles>
+      </mesh>
+    </geometry>
+    <geometry id="pCube5-lib" name="pCube5Mesh">
+      <mesh>
+        <source id="pCube5-POSITION">
+          <float_array id="pCube5-POSITION-array" count="24">
+-1.000000 -1.500000 -1.000000
+1.000000 -1.500000 -1.000000
+-1.000000 -1.500000 1.000000
+1.000000 -1.500000 1.000000
+-1.000000 1.500000 1.000000
+1.000000 1.500000 1.000000
+-1.000000 1.500000 -1.000000
+1.000000 1.500000 -1.000000
+</float_array>
+          <technique_common>
+            <accessor source="#pCube5-POSITION-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pCube5-Normal0">
+          <float_array id="pCube5-Normal0-array" count="108">
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 -1.000000 0.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 0.000000 1.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 1.000000 0.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+0.000000 0.000000 -1.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+-1.000000 0.000000 0.000000
+</float_array>
+          <technique_common>
+            <accessor source="#pCube5-Normal0-array" count="36" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pCube5-UV0">
+          <float_array id="pCube5-UV0-array" count="28">
+0.375000 0.000000
+0.625000 0.000000
+0.375000 0.250000
+0.625000 0.250000
+0.375000 0.500000
+0.625000 0.500000
+0.375000 0.750000
+0.625000 0.750000
+0.375000 1.000000
+0.625000 1.000000
+0.875000 0.000000
+0.875000 0.250000
+0.125000 0.000000
+0.125000 0.250000
+</float_array>
+          <technique_common>
+            <accessor source="#pCube5-UV0-array" count="14" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="pCube5-VERTEX">
+          <input semantic="POSITION" source="#pCube5-POSITION"/>
+        </vertices>
+        <triangles count="12" material="lambert1"><input semantic="VERTEX" offset="0" source="#pCube5-VERTEX"/><input semantic="NORMAL" offset="1" source="#pCube5-Normal0"/><input semantic="TEXCOORD" offset="2" set="0" source="#pCube5-UV0"/><p> 3 0 3 2 1 2 0 2 0 3 3 3 0 4 0 1 5 1 5 6 5 4 7 4 2 8 2 5 9 5 2 10 2 3 11 3 5 12 5 7 13 7 4 14 4 4 15 4 7 16 7 6 17 6 1 18 9 0 19 8 6 20 6 1 21 9 6 22 6 7 23 7 5 24 11 3 25 3 1 26 1 5 27 11 1 28 1 7 29 10 2 30 2 4 31 13 6 32 12 2 33 2 6 34 12 0 35 0</p></triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Jesys" name="Jesys">
+      <node name="Head" id="Head" sid="Head"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 9.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="transform2" id="transform2" sid="transform2"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>0.000000</visibility></technique></extra></node></node>
+      <node name="Torso" id="Torso" sid="Torso"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 6.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="transform1" id="transform1" sid="transform1"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>0.000000</visibility></technique></extra></node></node>
+      <node name="Legs" id="Legs" sid="Legs"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="polySurface1" id="polySurface1" sid="polySurface1"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="transform5" id="transform5" sid="transform5"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>0.000000</visibility></technique></extra></node></node><node name="polySurface2" id="polySurface2" sid="polySurface2"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 0.666667 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="transform4" id="transform4" sid="transform4"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>0.000000</visibility></technique></extra></node></node><node name="transform3" id="transform3" sid="transform3"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>0.000000</visibility></technique></extra></node></node>
+      <node name="Leg_Jnt" id="Leg_Jnt" sid="Leg_Jnt" type="JOINT"><matrix sid="matrix">0.000000 1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 3.511950 0.000000 0.000000 1.000000 1.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="Feet_Ball" id="Feet_Ball" sid="Feet_Ball" type="JOINT"><matrix sid="matrix">0.000000 -1.000000 0.000000 3.155298 1.000000 0.000000 0.000000 -0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node><node name="Legs_ncl1_1" id="Legs_ncl1_1" sid="Legs_ncl1_1"><matrix sid="matrix">0.000000 -1.000000 0.000000 1.511950 1.000000 0.000000 0.000000 -0.000000 0.000000 0.000000 1.000000 -0.000000 0.000000 0.000000 0.000000 1.000000</matrix><instance_geometry url="#Legs_ncl1_1-lib"><bind_material><technique_common><instance_material symbol="lambert1" target="#lambert1"/></technique_common></bind_material></instance_geometry><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node></node>
+      <node name="joint3" id="joint3" sid="joint3" type="JOINT"><matrix sid="matrix">0.000000 -0.000000 1.000000 0.000000 0.999976 0.006896 0.000000 4.257909 -0.006896 0.999976 0.000000 1.004256 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="joint4" id="joint4" sid="joint4" type="JOINT"><matrix sid="matrix">0.999976 -0.006896 0.000000 2.721881 0.006896 0.999976 0.000000 0.000000 -0.000000 0.000000 1.000000 -0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="joint5" id="joint5" sid="joint5" type="JOINT"><matrix sid="matrix">0.999645 0.026657 0.000000 0.394194 0.026657 -0.999645 -0.000000 0.000000 -0.000000 0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="Head_Ball" id="Head_Ball" sid="Head_Ball" type="JOINT"><matrix sid="matrix">0.000000 0.999645 0.026657 1.408336 -0.000000 0.026657 -0.999645 0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node><node name="Head_ncl1_1" id="Head_ncl1_1" sid="Head_ncl1_1"><matrix sid="matrix">0.000000 0.999645 0.026657 0.626245 -0.000000 0.026657 -0.999645 0.002180 -1.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><instance_geometry url="#Head_ncl1_1-lib"><bind_material><technique_common><instance_material symbol="lambert1" target="#lambert1"/></technique_common></bind_material></instance_geometry><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node></node><node name="Right_Arm" id="Right_Arm" sid="Right_Arm" type="JOINT"><matrix sid="matrix">0.009434 0.999956 0.000000 -1.051184 -0.999956 0.009434 0.000000 -0.976099 -0.000000 -0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="Right_Arm_Ball" id="Right_Arm_Ball" sid="Right_Arm_Ball" type="JOINT"><matrix sid="matrix">0.000000 0.009434 -0.999956 3.979660 -0.000000 0.999956 0.009434 0.000000 1.000000 -0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node><node name="Right_Arm_ncl1_1" id="Right_Arm_ncl1_1" sid="Right_Arm_ncl1_1"><matrix sid="matrix">0.000000 0.009434 -0.999956 2.009970 -0.000000 0.999956 0.009434 0.052500 1.000000 -0.000000 0.000000 -0.000000 0.000000 0.000000 0.000000 1.000000</matrix><instance_geometry url="#Right_Arm_ncl1_1-lib"><bind_material><technique_common><instance_material symbol="lambert1" target="#lambert1"/></technique_common></bind_material></instance_geometry><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node></node><node name="joint6" id="joint6" sid="joint6" type="JOINT"><matrix sid="matrix">0.009302 0.999957 -0.000000 -1.051184 0.999957 -0.009302 0.000000 0.976099 0.000000 -0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra><node name="Lft_Arm_Ball" id="Lft_Arm_Ball" sid="Lft_Arm_Ball" type="JOINT"><matrix sid="matrix">0.000000 0.009302 0.999957 4.035971 -0.000000 0.999957 -0.009302 0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node><node name="Lft_Arm" id="Lft_Arm" sid="Lft_Arm"><matrix sid="matrix">0.000000 0.009302 0.999957 2.038992 -0.000000 0.999957 -0.009302 0.052495 -1.000000 0.000000 0.000000 -0.000000 0.000000 0.000000 0.000000 1.000000</matrix><instance_geometry url="#Lft_Arm-lib"><bind_material><technique_common><instance_material symbol="lambert1" target="#lambert1"/></technique_common></bind_material></instance_geometry><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node></node></node><node name="pCube5" id="pCube5" sid="pCube5"><matrix sid="matrix">0.000000 0.999976 -0.006896 1.242091 0.000000 0.006896 0.999976 0.004310 1.000000 -0.000000 0.000000 -0.000000 0.000000 0.000000 0.000000 1.000000</matrix><instance_geometry url="#pCube5-lib"><bind_material><technique_common><instance_material symbol="lambert1" target="#lambert1"/></technique_common></bind_material></instance_geometry><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node></node>
+      <node name="ikHandle1" id="ikHandle1" sid="ikHandle1"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 6.979725 0.000000 0.000000 1.000000 0.985485 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node>
+      <node name="ikHandle2" id="ikHandle2" sid="ikHandle2"><matrix sid="matrix">1.000000 0.000000 0.000000 -0.000000 0.000000 1.000000 0.000000 5.966083 0.000000 0.000000 1.000000 5.997381 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node>
+      <node name="ikHandle3" id="ikHandle3" sid="ikHandle3"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 5.966083 0.000000 0.000000 1.000000 -3.970097 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node>
+      <node name="ikHandle4" id="ikHandle4" sid="ikHandle4"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.356652 0.000000 0.000000 1.000000 1.000000 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node>
+      <node name="ikHandle5" id="ikHandle5" sid="ikHandle5"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 8.781754 0.000000 0.000000 1.000000 1.023027 0.000000 0.000000 0.000000 1.000000</matrix><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node>
+      <extra><technique profile="MAX3D"><frame_rate>24.000000</frame_rate></technique><technique profile="FCOLLADA"><start_time>0.041667</start_time><end_time>8.333333</end_time></technique></extra>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Jesys"></instance_visual_scene>
+  </scene>
+</COLLADA>

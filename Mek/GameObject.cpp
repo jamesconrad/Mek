@@ -59,6 +59,7 @@ void GameObject::UpdateAll()
 int ObjectManager::addObject(GameObject* o) 
 {
 	gMap.push_back(o);
+	gMap.back()->handle = gMap.size() - 1;
 	return gMap.size() - 1;
 }
 

@@ -6,7 +6,7 @@ aiScene* scene;
 void prepProjectiles()
 {
 	ComponentGraphics* cg = new ComponentGraphics();
-	cg->loadModel("../Debug/models/SmallCube.dae");
+	cg->loadModel("models/SmallCube.dae");
 	scene = (aiScene*)cg->getScene();
 }
 

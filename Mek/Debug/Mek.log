@@ -1,4 +1,4 @@
-﻿Build started 11/25/2015 11:31:30 PM.
+﻿Build started 11/26/2015 12:13:09 PM.
      1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
      1>PreBuildEvent:
          echo C:\Users\100559437\Documents\Mek\Mek\
@@ -11,12 +11,12 @@
                  c:\users\100559437\documents\mek\mek\include\gl\glfw3.h(85) : see previous definition of 'APIENTRY'
      1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\crtdbg.h(586): warning C4005: '_malloca' : macro redefinition
                  c:\program files (x86)\microsoft visual studio 12.0\vc\include\malloc.h(224) : see previous definition of '_malloca'
-     1>c:\users\100559437\documents\mek\mek\main.cpp(276): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\main.cpp(277): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\main.cpp(333): warning C4244: '=' : conversion from 'float' to 'unsigned int', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\main.cpp(336): warning C4553: '==' : operator has no effect; did you intend '='?
-     1>c:\users\100559437\documents\mek\mek\main.cpp(478): warning C4305: '=' : truncation from 'double' to 'float'
-     1>c:\users\100559437\documents\mek\mek\main.cpp(485): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\100559437\documents\mek\mek\main.cpp(328): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\main.cpp(329): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\main.cpp(381): warning C4244: '=' : conversion from 'float' to 'unsigned int', possible loss of data
+     1>c:\users\100559437\documents\mek\mek\main.cpp(384): warning C4553: '==' : operator has no effect; did you intend '='?
+     1>c:\users\100559437\documents\mek\mek\main.cpp(528): warning C4305: '=' : truncation from 'double' to 'float'
+     1>c:\users\100559437\documents\mek\mek\main.cpp(535): warning C4305: 'argument' : truncation from 'double' to 'float'
          GLM: rotateX function taking degrees as parameters is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
          GLM: rotateY function taking degrees as parameters is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
        Link:
@@ -41,4 +41,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.18
+Time Elapsed 00:00:06.09

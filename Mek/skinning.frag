@@ -144,5 +144,6 @@ void main()
     }
 
     FragColor = texture(gColorMap, In.TexCoord.xy) * TotalLight;
-	//FragColor = vec4(In.Normal,1);
+	//FragColor = CalcSpotLight(gSpotLights[0], In);
+	//FragColor = vec4(gSpotLights[0].Base.Base.Color, 1);
 }

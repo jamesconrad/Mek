@@ -13,6 +13,15 @@ Target::Target(char* fp, float t)
 	cc = new ComponentCollision();
 	cc->setCollisionMask(cg->getScene());
 	cc->setOwner(go);
+	cc->createHitboxRender();
+	cc->type = STATIC;
+
+	Component* c = cg;
+	go->AddComponent(GRAPHICS, c);
+	c = cc;
+	go->AddComponent(PHYSICS, c);
+	 
+	ObjectManager::instance().addObject(go);
 }
 
 void Target::update(float dTime)

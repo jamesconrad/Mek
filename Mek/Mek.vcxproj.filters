@@ -144,5 +144,11 @@
     <None Include="text.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="skinningA.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="skinningA.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

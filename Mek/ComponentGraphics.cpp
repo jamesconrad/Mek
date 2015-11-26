@@ -275,7 +275,7 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
 			{
 				Bitmap bmp;
-				std::string fp = "../Debug/";
+				std::string fp = "";
 				fp.append(Path.data);
 				_textures[i] = new Texture((char*)fp.c_str());
 				if (_textures[i]->originalWidth() == 0)
@@ -283,13 +283,13 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 					GLuint o = _textures[i]->object();
 					glDeleteTextures(1, &o);
 					free(_textures[i]);
-					_textures[i] = new Texture("../Debug/missingtexture.png");
+					_textures[i] = new Texture("missingtexture.png");
 				}
 			}
 		}
 		else
 		{
-			_textures[i] = new Texture("../Debug/missingtexture.png");
+			_textures[i] = new Texture("missingtexture.png");
 		}
 	}
 }
@@ -297,7 +297,10 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 void ComponentGraphics::render()
 {
 	//
-	Program::getInstance().use("skinning");
+	if (_scene->mMeshes[0]->mNumBones > 0)
+		Program::getInstance().use("skinningAnim");
+	else
+		Program::getInstance().use("skinning");
 	updateShader();
 	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
 		glUniformMatrix4fv(_boneLocation[i], 1, GL_FALSE, (const GLfloat*)&_frameBoneTransforms[i]);
@@ -328,7 +331,11 @@ void ComponentGraphics::render()
 
 	// Make sure the VAO is not changed from the outside
 	glBindVertexArray(0);
-	Program::getInstance().stopUsing("skinning");
+
+	if (_scene->mMeshes[0]->mNumBones > 0)
+		Program::getInstance().stopUsing("skinningAnim");
+	else
+		Program::getInstance().stopUsing("skinning");
 }
 
 unsigned int ComponentGraphics::FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)

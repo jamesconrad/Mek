@@ -542,8 +542,8 @@ void ComponentCollision::createHitboxRender()
 		glBufferData(GL_ARRAY_BUFFER, 108*sizeof(float), gHitboxes[i].vertexData, GL_STATIC_DRAW);
 	}	
 	glBindVertexArray(0);
-	Program::getInstance().createShader("hitbox", GL_VERTEX_SHADER, "vertex-shader.vert");
-	Program::getInstance().createShader("hitbox", GL_FRAGMENT_SHADER, "fragment-shader.frag");
+	Program::getInstance().createShader("hitbox", GL_VERTEX_SHADER, "shaders/vertex-shader.vert");
+	Program::getInstance().createShader("hitbox", GL_FRAGMENT_SHADER, "shaders/fragment-shader.frag");
 
 	_hitboxRender = true;
 }

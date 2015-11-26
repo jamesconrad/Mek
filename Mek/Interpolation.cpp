@@ -34,9 +34,15 @@ void Interpolation::buildCurve()
 }
 
 template <typename T>
-T slerp(T d0, T d1, float t)
+T slerp(T p0, T p1, float deltaT)
 {
-	return d0 * (sin(1 - t) / sin(1 / (cos(glm::dot(d0, d1))))) + d1 * (sin(t * 1 / cos(glm::dot(d0, d1))) / sin(1 / cos(glm::dot(d0, d1))));
+	float theta = acosf(glm::dot(p0,p1));
+	if (theta == 0)
+		return p0;
+	else if (theta == 180)
+		return lerp(p0, p1, deltaT);
+	else
+		return p0 * ((sin((1 - deltaT) * theta)) / sin(theta)) + p1 * ((sin(deltaT * theta)) / sin(theta));
 }
 
 template <typename T>
@@ -86,7 +92,7 @@ void Interpolation::interpolate(float dTime)
 			last = points[stage + 2];
 		pos.x = ((-t3 + 2 * t2 - t)*(prev.x) + (3 * t3 - 5 * t2 + 2)*(points[stage].x) + (-3 * t3 + 4 * t2 + t)* (points[stage + 1].x) + (t3 - t2)*(last.x)) / 2;
 		pos.z = ((-t3 + 2 * t2 - t)*(prev.z) + (3 * t3 - 5 * t2 + 2)*(points[stage].z) + (-3 * t3 + 4 * t2 + t)* (points[stage + 1].z) + (t3 - t2)*(last.z)) / 2;
-
+		pos.y = ((-t3 + 2 * t2 - t)*(prev.y) + (3 * t3 - 5 * t2 + 2)*(points[stage].y) + (-3 * t3 + 4 * t2 + t)* (points[stage + 1].y) + (t3 - t2)*(last.y)) / 2;
 	}
 
 	if (stage + 1 < points.size() && state == SLERP)

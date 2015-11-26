@@ -43,9 +43,13 @@ twodOverlayAnim* skull;
 game_state gameState = MENU;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
+glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
 float playTime = 0;
+
+GameObject* animatedMech;
+ComponentGraphics* animatedMechGC;
 
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
@@ -55,10 +59,12 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	Program::getInstance().createShader("standard", GL_FRAGMENT_SHADER, fragFilename);
 
 	// load skinning shaders
-	Program::getInstance().createShader("skinning", GL_VERTEX_SHADER, "skinning.vert");
-	Program::getInstance().createShader("skinning", GL_FRAGMENT_SHADER, "skinning.frag");
-	Program::getInstance().createShader("hud", GL_VERTEX_SHADER, "hud.vert");
-	Program::getInstance().createShader("hud", GL_FRAGMENT_SHADER, "hud.frag");
+	Program::getInstance().createShader("skinning", GL_VERTEX_SHADER, "shaders/skinning.vert");
+	Program::getInstance().createShader("skinning", GL_FRAGMENT_SHADER, "shaders/skinning.frag");
+	Program::getInstance().createShader("skinningAnim", GL_VERTEX_SHADER, "shaders/skinningA.vert");
+	Program::getInstance().createShader("skinningAnim", GL_FRAGMENT_SHADER, "shaders/skinningA.frag");
+	Program::getInstance().createShader("hud", GL_VERTEX_SHADER, "shaders/hud.vert");
+	Program::getInstance().createShader("hud", GL_FRAGMENT_SHADER, "shaders/hud.frag");
 }
 
 // constants
@@ -86,7 +92,7 @@ static Texture* LoadTexture(char* filename) {
 
 // initialises the gWoodenCrate global
 static void LoadWoodenCrateAsset() {
-    LoadShaders("vertex-shader.vert", "fragment-shader.frag");
+    LoadShaders("shaders/vertex-shader.vert", "shaders/fragment-shader.frag");
 }
 
 // convenience function that returns a translation matrix
@@ -112,6 +118,8 @@ void wonGame()
 	scoreTable.push_back(score);
 	sort(scoreTable.begin(), scoreTable.end());
 	std::reverse(scoreTable.begin(), scoreTable.end());
+	Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
+	Camera::getInstance().setNearAndFarPlanes(1.f, 500.f);
 }
 
 void startGame()
@@ -128,31 +136,70 @@ void startGame()
 		targets[i]->hit = false;
 		targets[i]->alive = true;
 	}
-
+	Camera::getInstance().setNearAndFarPlanes(0.01f, 50.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
 }
 
 void LoadTargets()
 {
 	//load in targets
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 6; i++)
 	{
-		Target* tar = new Target("../Debug/models/Dummy.dae", 0.5);
+		Target* tar = new Target("models/Dummy.dae", 0.5);
 
 		//last point needs to == first point
 
 		if (i == 0)
 		{
-			tar->interp.points.push_back(glm::vec3(5, 0, 0));
-			tar->interp.points.push_back(glm::vec3(6, 0, 1));
-			tar->interp.points.push_back(glm::vec3(7, 0, 0));
-			tar->interp.points.push_back(glm::vec3(6, 0, -1));
-			tar->interp.points.push_back(glm::vec3(5, 0, 0));
+			tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
+			tar->interp.points.push_back(glm::vec3(6, 0.4, 1));
+			tar->interp.points.push_back(glm::vec3(7, 0.4, 0));
+			tar->interp.points.push_back(glm::vec3(6, 0.4, -1));
+			tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
 			tar->interp.state = LINEAR;
 		}
-
-
-
+		if (i == 1)
+		{
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
+			tar->interp.points.push_back(glm::vec3(-1, 0.4, 9));
+			tar->interp.points.push_back(glm::vec3(1, 0.4, 9));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
+			tar->interp.state = CATMULLROM;
+		}
+		if (i == 2)
+		{
+			tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-2, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-4, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
+			tar->interp.state = CATMULLROM;
+		}
+		if (i == 3)
+		{
+			tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(-6, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
+			tar->interp.state = LINEAR;
+		}
+		if (i == 4)
+		{
+			tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(3, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
+			tar->interp.state = LINEAR;
+		}
+		if (i == 5)
+		{
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
+			tar->interp.points.push_back(glm::vec3(-4, 0.4, 1));
+			tar->interp.points.push_back(glm::vec3(-4, 0.4, -1));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
+			tar->interp.state = LINEAR;
+		}
 
 
 		tar->interp.buildCurve();
@@ -165,7 +212,8 @@ static void Render() {
     // clear everything
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+	
+	animatedMechGC->render();
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
 		ComponentGraphics* cg = static_cast<ComponentGraphics*>(goVec[i]->GetComponent(GRAPHICS));
@@ -173,23 +221,26 @@ static void Render() {
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			cc->renderHitbox();
+			//cc->renderHitbox();
 		}
 	}
 
 	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
 		ObjectManager::instance().pMap[i]->cg->render();
-		ObjectManager::instance().pMap[i]->cc->renderHitbox();
+		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
 	}
 
 	for (unsigned int i = 0, s = targets.size(); i < s; i++)
 	{
 		if (targets[i]->alive)
+		{
 			targets[i]->cg->render();
+			//targets[i]->cc->renderHitbox();
+		}
 	}
 
-	gCol->renderHitbox();
+	//gCol->renderHitbox();
 	if (gameState == MENU)
 	{
 		startscreen->render();
@@ -274,7 +325,7 @@ static void Update(float secondsElapsed) {
 		//Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
 		glfwSetCursorPos(gWindow, 0, 0);
 		rInput.x = mouseX * mouseSensitivity;
-		rInput.y = mouseY * mouseSensitivity;
+		rInput.y = -mouseY * mouseSensitivity;
 	}
 
 
@@ -309,6 +360,7 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
+			targets[i]->update(secondsElapsed/10);
 			if (targets[i]->hit && targets[i]->alive)
 			{
 				targets[i]->alive = false;
@@ -320,12 +372,7 @@ static void Update(float secondsElapsed) {
 		skull->update(secondsElapsed);
 
 		model->pos.y = 0.5;
-
-		for (int i = 0, s = targets.size(); i < s; i++)
-		{
-			targets[i]->update(secondsElapsed);
-		}
-
+		
 		playTime += secondsElapsed;
 		if (score >= 0)
 		{
@@ -346,7 +393,8 @@ static void Update(float secondsElapsed) {
 		//camInterp.speedControlInterp(secondsElapsed/40);
 		//cam->setPosition(camInterp.pos);
 		cam->lookAt(glm::vec3(1000, 0, 0));
-
+		//camInterp.speedControlInterp(secondsElapsed/40);
+		//cam->setPosition(camInterp.pos);
 		cam->offsetPosition(cam->right() * 0.1f);
 
 		if (c->Refresh())
@@ -367,7 +415,8 @@ static void Update(float secondsElapsed) {
 	std::vector<glm::mat4> trans;
 	shotcd += secondsElapsed;
 	tElap += secondsElapsed;
-	//gModel->BoneTransform(tElap, trans);
+	//Will need to uncomment the following and have gModel relate to the mech's graphics
+	//animatedMechGC->BoneTransform(tElap, trans);
 }
 
 // records how far the y axis has been scrolled
@@ -392,10 +441,10 @@ void AppMain() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
-    if(!gWindow)
-        throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.3?");
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", /*NULL*/ glfwGetPrimaryMonitor(), NULL);
+	if (!gWindow)
+		throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.3?");
 
     // GLFW settings
     glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -450,14 +499,14 @@ void AppMain() {
     CreateInstances();
 
     // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(1050, 10, 0));
+    Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-	Camera::getInstance().setNearAndFarPlanes(0.01f, 50.0f);
+	Camera::getInstance().setNearAndFarPlanes(1.f, 500.0f);
 	Camera::getInstance().setFieldOfView(179);
 
-	crosshair = new twodOverlay("../Debug/crosshair.png", 0, 0, 1);
-	skull = new twodOverlayAnim("../Debug/killSkull.png", 5, 0.5);
-	startscreen = new twodOverlay("../Debug/pressStart.png", 0, 0, 10);
+	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
+	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
+	startscreen = new twodOverlay("pressStart.png", 0, 0, 10);
 	skull->updatePos(-0.85f, -0.75f, 4);
 	skull ->cycle = true;
 	//MODEL INITS
@@ -468,7 +517,7 @@ void AppMain() {
 	model->SetName("Moving");
 	gModel = new ComponentGraphics();
 	gModel->setOwner(model);
-	gModel->loadModel("../Debug/models/TallCube.dae");
+	gModel->loadModel("models/TallCube.dae");
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 	gCol = new ComponentCollision();
@@ -499,7 +548,7 @@ void AppMain() {
 			if (i == 0)
 			{
 				gObject->SetName("Spawn Container 1");
-				cModel->loadModel("../Debug/models/Container.dae");
+				cModel->loadModel("models/Container.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
 				gObject->pos = glm::vec3(60, 0, -110);
@@ -507,23 +556,23 @@ void AppMain() {
 			else if (i == 1)
 			{
 				gObject->SetName("Water Tower");
-				cModel->loadModel("../Debug/models/Watertower.dae");
+				cModel->loadModel("models/Watertower.dae");
 
 				gObject->scale = glm::vec3(3, 3, 3);
 				gObject->pos = glm::vec3(-65, 0, -90);
 			}
 			else if (i == 2)
 			{
-				gObject->SetName("Building");
-				cModel->loadModel("../Debug/models/Dumpster.dae");
+				gObject->SetName("MenuScene");
+				cModel->loadModel("models/Warehouse_One_mesh_No_roof.dae");
 
 				gObject->scale = glm::vec3(1, 1, 1);// glm::vec3(1.6, 1.6, 1.6);
-				gObject->pos = glm::vec3(1000, 0, 0);
+				gObject->pos = glm::vec3(10000, 0, 0);
 			}
 			else if (i == 3)
 			{
 				gObject->SetName("Spawn Container 2");
-				cModel->loadModel("../Debug/models/Container90.dae");
+				cModel->loadModel("models/Container90.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
 				gObject->pos = glm::vec3(85, 0, -75);
@@ -531,7 +580,7 @@ void AppMain() {
 			else if (i == 4)
 			{
 				gObject->SetName("Middle Plus");
-				cModel->loadModel("../Debug/models/Container.dae");
+				cModel->loadModel("models/Container.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
 				gObject->pos = glm::vec3(15, 0, -20);
@@ -539,7 +588,7 @@ void AppMain() {
 			else if (i == 5)
 			{
 				gObject->SetName("North Wall");
-				cModel->loadModel("../Debug/models/Container_Wal_LPl.dae");
+				cModel->loadModel("models/Container_Wal_LPl.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
 				gObject->pos = glm::vec3(100, 0, 165);
@@ -547,14 +596,14 @@ void AppMain() {
 			else if (i == 6)
 			{
 				gObject->SetName("Dumbster");//Crane
-				cModel->loadModel("../Debug/models/Dumspter2.dae");
+				cModel->loadModel("models/Dumspter2.dae");
 				gObject->pos = glm::vec3(0, 0, -140);
 				gObject->scale = glm::vec3(0.4, 0.4, 0.4);
 			}
 			else if (i == 7)
 			{
 				gObject->SetName("Shack");
-				cModel->loadModel("../Debug/models/Shack.dae");
+				cModel->loadModel("models/Shack.dae");
 
 				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
 				gObject->pos = glm::vec3(0, 0, 120);
@@ -562,7 +611,7 @@ void AppMain() {
 			else if (i == 8)
 			{
 				gObject->SetName("Middle Plus");
-				cModel->loadModel("../Debug/models/Container.dae");
+				cModel->loadModel("models/Container.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
 				gObject->pos = glm::vec3(-5, 0, -20);
@@ -570,7 +619,7 @@ void AppMain() {
 			else if (i == 9)
 			{
 				gObject->SetName("Container 2");
-				cModel->loadModel("../Debug/models/Container.dae");
+				cModel->loadModel("models/Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(80, 0, 100);
@@ -578,7 +627,7 @@ void AppMain() {
 			else if (i == 10)
 			{
 				gObject->SetName("South Wall");
-				cModel->loadModel("../Debug/models/Container_Wal_LPl.dae");
+				cModel->loadModel("models/Container_Wal_LPl.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
 				gObject->pos = glm::vec3(-100, 0, 165);
@@ -586,7 +635,7 @@ void AppMain() {
 			else if (i == 11)
 			{
 				gObject->SetName("East Wall");
-				cModel->loadModel("../Debug/models/Container_Wal_LP90.dae");
+				cModel->loadModel("models/Container_Wal_LP90.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
 				gObject->pos = glm::vec3(50, 0, 145);
@@ -594,7 +643,7 @@ void AppMain() {
 			else if (i == 12)
 			{
 				gObject->SetName("West Wall");
-				cModel->loadModel("../Debug/models/Container_Wal_LP90.dae");
+				cModel->loadModel("models/Container_Wal_LP90.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
 				gObject->pos = glm::vec3(50, 0, -125);
@@ -602,7 +651,7 @@ void AppMain() {
 			else if (i == 13)
 			{
 				gObject->SetName("Container 2");
-				cModel->loadModel("../Debug/models/Container.dae");
+				cModel->loadModel("models/Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(60, 0, 100);
@@ -610,7 +659,7 @@ void AppMain() {
 			else if (i == 14)
 			{
 				gObject->SetName("Container 90");
-				cModel->loadModel("../Debug/models/Container90.dae");
+				cModel->loadModel("models/Container90.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(70, 0, 70);
@@ -618,7 +667,7 @@ void AppMain() {
 			else if (i == 15)
 			{
 				gObject->SetName("Shack");
-				cModel->loadModel("../Debug/models/Shack.dae");
+				cModel->loadModel("models/Shack.dae");
 
 				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
 				gObject->pos = glm::vec3(-30, 0, 120);
@@ -626,7 +675,7 @@ void AppMain() {
 			else if (i == 16)
 			{
 				gObject->SetName("Shack");
-				cModel->loadModel("../Debug/models/Shack.dae");
+				cModel->loadModel("models/Shack.dae");
 
 				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
 				gObject->pos = glm::vec3(30, 0, 120);
@@ -634,7 +683,7 @@ void AppMain() {
 			else if (i == 17)
 			{
 				gObject->SetName("Shack");
-				cModel->loadModel("../Debug/models/Shack.dae");
+				cModel->loadModel("models/Shack.dae");
 
 				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
 				gObject->pos = glm::vec3(-60, 0, 120);
@@ -642,7 +691,7 @@ void AppMain() {
 			else if (i == 18)
 			{
 				gObject->SetName("Middle Plus North");
-				cModel->loadModel("../Debug/models/Container90.dae");
+				cModel->loadModel("models/Container90.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
 				gObject->pos = glm::vec3(27, 0, -5);
@@ -650,7 +699,7 @@ void AppMain() {
 			else if (i == 19)
 			{
 				gObject->SetName("Middle Plus North");
-				cModel->loadModel("../Debug/models/Container90.dae");
+				cModel->loadModel("models/Container90.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
 				gObject->pos = glm::vec3(27, 0, 15);
@@ -658,7 +707,7 @@ void AppMain() {
 			else if (i == 20)
 			{
 				gObject->SetName("Middle Plus North");
-				cModel->loadModel("../Debug/models/Container90.dae");
+				cModel->loadModel("models/Container90.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
 				gObject->pos = glm::vec3(-20, 0, 15);
@@ -666,7 +715,7 @@ void AppMain() {
 			else if (i == 21)
 			{
 				gObject->SetName("Middle Plus North");
-				cModel->loadModel("../Debug/models/Container90.dae");
+				cModel->loadModel("models/Container90.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
 				gObject->pos = glm::vec3(-20, 0, -5);
@@ -689,27 +738,138 @@ void AppMain() {
 
 	LoadTargets();
 	
-	LightComponent* light = new LightComponent(lPOINT);
-	PointLight* lc = new PointLight;
-	lc->Atten.Constant = 1;
-	lc->Atten.Exp = 1;
-	lc->Atten.Linear = 1;
-	lc->Base.AmbientIntensity = 1;
-	lc->Base.Color = glm::vec3(0.1, 0.1, 0.1);
-	lc->Base.DiffuseIntensity = 1;
-	lc->Position = glm::vec3(0, 0, 100);
 
-	light->SetVars(lPOINT, lc);
+	spotLightColour = glm::normalize(spotLightColour);
+	for (int i = 0; i < 6; i++)
+	{
+		LightComponent* light;
+		if (i == 0)
+		{
+			light = new LightComponent(lSPOT);
+			SpotLight* lc = new SpotLight;
+			lc->Base.Base.Color = spotLightColour;
+			lc->Base.Base.AmbientIntensity = 1.f;
+			lc->Base.Base.DiffuseIntensity = 1.f;
+
+			lc->Base.Atten.Constant = 1.f;
+			lc->Base.Atten.Exp = 1.f;
+			lc->Base.Atten.Linear = 1.f;
+
+			lc->Cutoff = 0.95f;
+			lc->Base.Position = glm::vec3(-6, 1, 11);
+			lc->Direction = glm::vec3(0, 0, -1);
+
+			light->SetVars(lSPOT, lc);
+		}
+		if (i == 1)
+		{
+			light = new LightComponent(lSPOT);
+			SpotLight* lc = new SpotLight;
+			lc->Base.Base.Color = spotLightColour;
+			lc->Base.Base.AmbientIntensity = 0.5f;
+			lc->Base.Base.DiffuseIntensity = 0.5f;
+
+			lc->Base.Atten.Constant = 0.5f;
+			lc->Base.Atten.Exp = 0.5f;
+			lc->Base.Atten.Linear = 0.5f;
+
+			lc->Cutoff = 0.75f;
+			lc->Base.Position = glm::vec3(3, 1, 11);
+			lc->Direction = glm::vec3(3, 0, 12);
+
+			light->SetVars(lSPOT, lc);
+		}
+		if (i == 2)
+		{
+			light = new LightComponent(lSPOT);
+			SpotLight* lc = new SpotLight;
+			lc->Base.Base.Color = spotLightColour;
+			lc->Base.Base.AmbientIntensity = 0.5f;
+			lc->Base.Base.DiffuseIntensity = 0.5f;
+
+			lc->Base.Atten.Constant = 0.5f;
+			lc->Base.Atten.Exp = 0.5f;
+			lc->Base.Atten.Linear = 0.5f;
+
+			lc->Cutoff = 0.75f;
+			lc->Base.Position = glm::vec3(-3, 1, 11);
+			lc->Direction = glm::vec3(-3, 0, 12);
+
+			light->SetVars(lSPOT, lc);
+		}
+		if (i == 3)
+		{
+			light = new LightComponent(lSPOT);
+			SpotLight* lc = new SpotLight;
+			lc->Base.Base.Color = spotLightColour;
+			lc->Base.Base.AmbientIntensity = 0.5f;
+			lc->Base.Base.DiffuseIntensity = 0.5f;
+
+			lc->Base.Atten.Constant = 0.5f;
+			lc->Base.Atten.Exp = 0.5f;
+			lc->Base.Atten.Linear = 0.5f;
+
+			lc->Cutoff = 0.75f;
+			lc->Base.Position = glm::vec3(-6, 1, 11);
+			lc->Direction = glm::vec3(-6, 1, 12);
+
+			light->SetVars(lSPOT, lc);
+		}
+		if (i == 4)
+		{
+			light = new LightComponent(lSPOT);
+			SpotLight* lc = new SpotLight;
+			lc->Base.Base.Color = spotLightColour;
+			lc->Base.Base.AmbientIntensity = 0.5f;
+			lc->Base.Base.DiffuseIntensity = 0.5f;
+
+			lc->Base.Atten.Constant = 0.5f;
+			lc->Base.Atten.Exp = 0.5f;
+			lc->Base.Atten.Linear = 0.5f;
+
+			lc->Cutoff = 0.75f;
+			lc->Base.Position = glm::vec3(0, 1, 0);
+			lc->Direction = glm::vec3(0, 0, 0);
+
+			light->SetVars(lSPOT, lc);
+		}
+		if (i == 5)
+		{
+			light = new LightComponent(lSPOT);
+			SpotLight* lc = new SpotLight;
+			lc->Base.Base.Color = spotLightColour;
+			lc->Base.Base.AmbientIntensity = 0.5f;
+			lc->Base.Base.DiffuseIntensity = 0.5f;
+
+			lc->Base.Atten.Constant = 0.5f;
+			lc->Base.Atten.Exp = 0.5f;
+			lc->Base.Atten.Linear = 0.5f;
+
+			lc->Cutoff = 0.75f;
+			lc->Base.Position = glm::vec3(4, 1, 0);
+			lc->Direction = glm::vec3(5, 0, 0);
+
+			light->SetVars(lSPOT, lc);
+		}
+	}
+
+	animatedMech = new GameObject(100);
+	animatedMechGC = new ComponentGraphics();
+	animatedMechGC->loadModel("models/Dummy.dae");
+	Component* c = animatedMechGC;
+	animatedMech->AddComponent(GRAPHICS, c);
+	animatedMech->pos = glm::vec3(1000, 0, 0);
+
 	//END MODEL INITS
-	camInterp.points.push_back(glm::vec3(1005, 1, 0));
-	camInterp.points.push_back(glm::vec3(0, 1, 1005));
-	camInterp.points.push_back(glm::vec3(995, 1, 0));
-	camInterp.points.push_back(glm::vec3(0, 1, 995));
-	camInterp.points.push_back(glm::vec3(1005, 1, 0));
+	camInterp.points.push_back(glm::vec3(1025, 1, 0));
+	camInterp.points.push_back(glm::vec3(1000, 1, 25));
+	camInterp.points.push_back(glm::vec3(975, 1, 0));
+	camInterp.points.push_back(glm::vec3(1000, 1, -25));
+	camInterp.points.push_back(glm::vec3(1025, 1, 0));
 	camInterp.state = SLERP;
 	camInterp.buildCurve();
 
-	TextRendering::getInstance().initText2D("../Debug/MekFont.bmp");
+	TextRendering::getInstance().initText2D("MekFont.bmp");
 	fontColour = glm::normalize(fontColour);
 
 	wglSwapIntervalEXT(1);
@@ -750,6 +910,7 @@ int main(int argc, char *argv[]) {
     try {
         AppMain();
     } catch (const std::exception& e){
+		printf("Did you run from Visual Studio?\n Visual Studio runs the application from the wrong folder!\n Use the exe!");
 		std::cerr << "ERROR: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }

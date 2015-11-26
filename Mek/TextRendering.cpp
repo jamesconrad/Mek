@@ -28,8 +28,8 @@ void TextRendering::initText2D(char * texturePath){
 
 	// Initialize Shader
 	//Text2DShaderID = LoadShaders( "TextVertexShader.vertexshader", "TextVertexShader.fragmentshader" );
-	Program::getInstance().createShader("text", GL_VERTEX_SHADER, "text.vert");
-	Program::getInstance().createShader("text", GL_FRAGMENT_SHADER, "text.frag");
+	Program::getInstance().createShader("text", GL_VERTEX_SHADER, "shaders/text.vert");
+	Program::getInstance().createShader("text", GL_FRAGMENT_SHADER, "shaders/text.frag");
 	Text2DShaderID = Program::getInstance().object("text");
 	// Initialize uniforms' IDs
 	Text2DUniformID = glGetUniformLocation(Text2DShaderID, "myTextureSampler");
