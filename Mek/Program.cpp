@@ -187,6 +187,11 @@ void Program::updateLighting(char* shadername)
 
 void Program::createShader(char* name, GLenum type, char* filepath)
 {
+	std::string debfp = "../Debug/";
+	debfp.append(filepath);
+	filepath = (char*)debfp.c_str();
+	
+	
 	//std::map<char*, std::pair<std::map<GLenum, Shader*>, GLuint>> _shaderMap;
 	if (_shaderMap.find(name) == _shaderMap.end())
 	{

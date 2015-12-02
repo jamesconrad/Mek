@@ -108,7 +108,7 @@ vec4 CalcPointLight(PointLight l, VSOutput In)
 
 vec4 CalcSpotLight(SpotLight l, VSOutput In)
 {
-    vec3 LightToPixel = normalize(In.WorldPos - l.Base.Position);
+    vec3 LightToPixel = normalize(l.Base.Position - In.WorldPos);
     float SpotFactor = dot(LightToPixel, l.Direction);
 
     if (SpotFactor > l.Cutoff)
@@ -140,10 +140,11 @@ void main()
 
     for (int i = 0 ; i < gNumSpotLights ; i++)
 	{
-        TotalLight += CalcSpotLight(gSpotLights[i], In);
+        TotalLight += CalcSpotLight(gSpotLights[0], In);
     }
 
     FragColor = texture(gColorMap, In.TexCoord.xy) * TotalLight;
 	//FragColor = CalcSpotLight(gSpotLights[0], In);
-	//FragColor = vec4(gSpotLights[0].Base.Base.Color, 1);
+	//FragColor = vec4(gSpotLights[0].Base.Position, 1);
+	//FragColor = vec4(CalcPointLight(gSpotLights[0].Base, In).xyz, 1);
 }

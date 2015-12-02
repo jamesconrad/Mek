@@ -59,6 +59,7 @@ void ComponentCollision::setCollisionMask(const aiScene* m)
 	_scene = m;
 	//building the collision mesh
 	//puts each bone into a struct
+
 	for (int i = 0; i < m->mNumMeshes; i++)
 	{
 		if (m->mMeshes[i]->mNumBones != 0)

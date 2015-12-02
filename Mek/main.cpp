@@ -61,8 +61,8 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	// load skinning shaders
 	Program::getInstance().createShader("skinning", GL_VERTEX_SHADER, "shaders/skinning.vert");
 	Program::getInstance().createShader("skinning", GL_FRAGMENT_SHADER, "shaders/skinning.frag");
-	Program::getInstance().createShader("skinningAnim", GL_VERTEX_SHADER, "shaders/skinningA.vert");
-	Program::getInstance().createShader("skinningAnim", GL_FRAGMENT_SHADER, "shaders/skinningA.frag");
+	Program::getInstance().createShader("anim", GL_VERTEX_SHADER, "shaders/skinningA.vert");
+	Program::getInstance().createShader("anim", GL_FRAGMENT_SHADER, "shaders/skinningA.frag");
 	Program::getInstance().createShader("hud", GL_VERTEX_SHADER, "shaders/hud.vert");
 	Program::getInstance().createShader("hud", GL_FRAGMENT_SHADER, "shaders/hud.frag");
 }
@@ -259,6 +259,7 @@ static void Render() {
 			TextRendering::getInstance().printText2D(buffer, -0.38f, 0.85f, 0.075f, fontColour);
 		}
 
+
 	}
 	else if (gameState == GAME)
 	{
@@ -416,7 +417,7 @@ static void Update(float secondsElapsed) {
 	shotcd += secondsElapsed;
 	tElap += secondsElapsed;
 	//Will need to uncomment the following and have gModel relate to the mech's graphics
-	//animatedMechGC->BoneTransform(tElap, trans);
+	animatedMechGC->BoneTransform(tElap, trans);
 }
 
 // records how far the y axis has been scrolled
@@ -442,7 +443,7 @@ void AppMain() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", /*NULL*/ glfwGetPrimaryMonitor(), NULL);
+	gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
 	if (!gWindow)
 		throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.3?");
 
@@ -748,14 +749,14 @@ void AppMain() {
 			light = new LightComponent(lSPOT);
 			SpotLight* lc = new SpotLight;
 			lc->Base.Base.Color = spotLightColour;
-			lc->Base.Base.AmbientIntensity = 1.f;
-			lc->Base.Base.DiffuseIntensity = 1.f;
+			lc->Base.Base.AmbientIntensity = 0.51;
+			lc->Base.Base.DiffuseIntensity = 0.1f;
 
-			lc->Base.Atten.Constant = 1.f;
-			lc->Base.Atten.Exp = 1.f;
-			lc->Base.Atten.Linear = 1.f;
+			lc->Base.Atten.Constant = 0.1f;
+			lc->Base.Atten.Exp = 0.1f;
+			lc->Base.Atten.Linear = 0.1f;
 
-			lc->Cutoff = 0.95f;
+			lc->Cutoff = 0.75f;
 			lc->Base.Position = glm::vec3(-6, 1, 11);
 			lc->Direction = glm::vec3(0, 0, -1);
 
@@ -846,8 +847,8 @@ void AppMain() {
 			lc->Base.Atten.Linear = 0.5f;
 
 			lc->Cutoff = 0.75f;
-			lc->Base.Position = glm::vec3(4, 1, 0);
-			lc->Direction = glm::vec3(5, 0, 0);
+			lc->Base.Position = glm::vec3(1000, 5, 0);//4 1 0
+			lc->Direction = glm::vec3(0, -1, 0);// 5 0 0
 
 			light->SetVars(lSPOT, lc);
 		}
@@ -855,10 +856,11 @@ void AppMain() {
 
 	animatedMech = new GameObject(100);
 	animatedMechGC = new ComponentGraphics();
-	animatedMechGC->loadModel("models/Dummy.dae");
+	animatedMechGC->loadModel("models/Test_Animation_DAE.dae");
 	Component* c = animatedMechGC;
 	animatedMech->AddComponent(GRAPHICS, c);
-	animatedMech->pos = glm::vec3(1000, 0, 0);
+	animatedMech->pos = glm::vec3(0, 0, 0);
+	animatedMech->scale = glm::vec3(1, 1, 1);
 
 	//END MODEL INITS
 	camInterp.points.push_back(glm::vec3(1025, 1, 0));
@@ -912,7 +914,7 @@ int main(int argc, char *argv[]) {
     } catch (const std::exception& e){
 		printf("Did you run from Visual Studio?\n Visual Studio runs the application from the wrong folder!\n Use the exe!");
 		std::cerr << "ERROR: " << e.what() << std::endl;
-        return EXIT_FAILURE;
+	    return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;

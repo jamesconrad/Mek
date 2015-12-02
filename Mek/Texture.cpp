@@ -16,6 +16,10 @@ static GLenum TextureFormatForBitmapFormat(Bitmap::Format format, bool srgb)
 
 Texture::Texture(char* filepath, GLint minMagFiler, GLint wrapMode)
 {
+	std::string debfp = "../Debug/";
+	debfp.append(filepath);
+	filepath = (char*)debfp.c_str();
+
 	Bitmap bmp;
 	bmp.bitmapFromFile(filepath);
 	bmp.flipVertically();

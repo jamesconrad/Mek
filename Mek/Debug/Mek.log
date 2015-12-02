@@ -1,4 +1,4 @@
-﻿Build started 11/26/2015 12:13:09 PM.
+﻿Build started 12/1/2015 7:26:58 PM.
      1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
      1>PreBuildEvent:
          echo C:\Users\100559437\Documents\Mek\Mek\
@@ -17,6 +17,7 @@
      1>c:\users\100559437\documents\mek\mek\main.cpp(384): warning C4553: '==' : operator has no effect; did you intend '='?
      1>c:\users\100559437\documents\mek\mek\main.cpp(528): warning C4305: '=' : truncation from 'double' to 'float'
      1>c:\users\100559437\documents\mek\mek\main.cpp(535): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>c:\users\100559437\documents\mek\mek\main.cpp(752): warning C4305: '=' : truncation from 'double' to 'float'
          GLM: rotateX function taking degrees as parameters is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
          GLM: rotateY function taking degrees as parameters is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
        Link:
@@ -41,4 +42,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:06.09
+Time Elapsed 00:00:01.99

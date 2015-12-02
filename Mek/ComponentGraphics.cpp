@@ -46,6 +46,11 @@ void ComponentGraphics::VertexBoneData::AddBoneData(unsigned int BoneID, float W
 
 void ComponentGraphics::loadModel(char* filepath)
 {
+	std::string debfp = "../Debug/";
+	debfp.append(filepath);
+	filepath = (char*)debfp.c_str();
+
+
 	// Create the VAO
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
@@ -298,13 +303,18 @@ void ComponentGraphics::render()
 {
 	//
 	if (_scene->mMeshes[0]->mNumBones > 0)
-		Program::getInstance().use("skinningAnim");
+	{
+		Program::getInstance().use("anim");
+		Program::getInstance().updateLighting("anim");
+	}
 	else
+	{
 		Program::getInstance().use("skinning");
+		Program::getInstance().updateLighting("skinning");
+	}
 	updateShader();
 	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
 		glUniformMatrix4fv(_boneLocation[i], 1, GL_FALSE, (const GLfloat*)&_frameBoneTransforms[i]);
-	Program::getInstance().updateLighting("skinning");
 	//
 	glBindVertexArray(_vao);
 	for (unsigned int i = 0; i < _entries.size(); i++)
@@ -333,7 +343,7 @@ void ComponentGraphics::render()
 	glBindVertexArray(0);
 
 	if (_scene->mMeshes[0]->mNumBones > 0)
-		Program::getInstance().stopUsing("skinningAnim");
+		Program::getInstance().stopUsing("anim");
 	else
 		Program::getInstance().stopUsing("skinning");
 }
@@ -538,13 +548,21 @@ void ComponentGraphics::updateShader()
 	//W = glm::rotate(W, _owner->rot);
 	//W = glm::scale(W, _owner->scale);
 	W = glm::scale(W, 0.1f * _owner->scale);
-
+	
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
 
 	glm::mat4 WVP = VP * W;
-	
-	Program::getInstance().setUniform("skinning", "gWVP", WVP);
-	Program::getInstance().setUniform("skinning", "gWorld", W);
-	Program::getInstance().updateLighting("skinning");
+	if (_scene->mMeshes[0]->mNumBones > 0)
+	{
+		Program::getInstance().setUniform("anim", "gWVP", WVP);
+		Program::getInstance().setUniform("anim", "gWorld", W);
+		Program::getInstance().updateLighting("anim");
+	}
+	else
+	{
+		Program::getInstance().setUniform("skinning", "gWVP", WVP);
+		Program::getInstance().setUniform("skinning", "gWorld", W);
+		Program::getInstance().updateLighting("skinning");
+	}
 }
