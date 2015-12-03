@@ -749,17 +749,17 @@ void AppMain() {
 			light = new LightComponent(lSPOT);
 			SpotLight* lc = new SpotLight;
 			lc->Base.Base.Color = spotLightColour;
-			lc->Base.Base.AmbientIntensity = 0.51;
+			lc->Base.Base.AmbientIntensity = 0.1f;
 			lc->Base.Base.DiffuseIntensity = 0.1f;
-
+			
 			lc->Base.Atten.Constant = 0.1f;
 			lc->Base.Atten.Exp = 0.1f;
 			lc->Base.Atten.Linear = 0.1f;
-
+			
 			lc->Cutoff = 0.75f;
 			lc->Base.Position = glm::vec3(-6, 1, 11);
 			lc->Direction = glm::vec3(0, 0, -1);
-
+			
 			light->SetVars(lSPOT, lc);
 		}
 		if (i == 1)
@@ -769,70 +769,70 @@ void AppMain() {
 			lc->Base.Base.Color = spotLightColour;
 			lc->Base.Base.AmbientIntensity = 0.5f;
 			lc->Base.Base.DiffuseIntensity = 0.5f;
-
+			
 			lc->Base.Atten.Constant = 0.5f;
 			lc->Base.Atten.Exp = 0.5f;
 			lc->Base.Atten.Linear = 0.5f;
-
+			
 			lc->Cutoff = 0.75f;
 			lc->Base.Position = glm::vec3(3, 1, 11);
-			lc->Direction = glm::vec3(3, 0, 12);
-
+			lc->Direction = (glm::vec3(0, 0, 10));
+			
 			light->SetVars(lSPOT, lc);
 		}
 		if (i == 2)
 		{
-			light = new LightComponent(lSPOT);
-			SpotLight* lc = new SpotLight;
-			lc->Base.Base.Color = spotLightColour;
-			lc->Base.Base.AmbientIntensity = 0.5f;
-			lc->Base.Base.DiffuseIntensity = 0.5f;
-
-			lc->Base.Atten.Constant = 0.5f;
-			lc->Base.Atten.Exp = 0.5f;
-			lc->Base.Atten.Linear = 0.5f;
-
-			lc->Cutoff = 0.75f;
-			lc->Base.Position = glm::vec3(-3, 1, 11);
-			lc->Direction = glm::vec3(-3, 0, 12);
-
-			light->SetVars(lSPOT, lc);
+			//light = new LightComponent(lSPOT);
+			//SpotLight* lc = new SpotLight;
+			//lc->Base.Base.Color = glm::vec3(0,0.1,0);
+			//lc->Base.Base.AmbientIntensity = 0.5f;
+			//lc->Base.Base.DiffuseIntensity = 0.5f;
+			//
+			//lc->Base.Atten.Constant = 0.5f;
+			//lc->Base.Atten.Exp = 0.5f;
+			//lc->Base.Atten.Linear = 0.5f;
+			//
+			//lc->Cutoff = 0.75f;
+			//lc->Base.Position = glm::vec3(-3, 1, 11);
+			//lc->Direction = (glm::vec3(-3, 0, 12));
+			//
+			//light->SetVars(lSPOT, lc);
 		}
 		if (i == 3)
 		{
-			light = new LightComponent(lSPOT);
-			SpotLight* lc = new SpotLight;
-			lc->Base.Base.Color = spotLightColour;
-			lc->Base.Base.AmbientIntensity = 0.5f;
-			lc->Base.Base.DiffuseIntensity = 0.5f;
-
-			lc->Base.Atten.Constant = 0.5f;
-			lc->Base.Atten.Exp = 0.5f;
-			lc->Base.Atten.Linear = 0.5f;
-
-			lc->Cutoff = 0.75f;
-			lc->Base.Position = glm::vec3(-6, 1, 11);
-			lc->Direction = glm::vec3(-6, 1, 12);
-
-			light->SetVars(lSPOT, lc);
+			//light = new LightComponent(lSPOT);
+			//SpotLight* lc = new SpotLight;
+			//lc->Base.Base.Color = spotLightColour;
+			//lc->Base.Base.AmbientIntensity = 0.5f;
+			//lc->Base.Base.DiffuseIntensity = 0.5f;
+			//
+			//lc->Base.Atten.Constant = 0.5f;
+			//lc->Base.Atten.Exp = 0.5f;
+			//lc->Base.Atten.Linear = 0.5f;
+			//
+			//lc->Cutoff = 0.75f;
+			//lc->Base.Position = glm::vec3(-6, 1, 11);
+			//lc->Direction = (glm::vec3(-6, 1, 12));
+			//
+			//light->SetVars(lSPOT, lc);
 		}
 		if (i == 4)
 		{
-			light = new LightComponent(lSPOT);
-			SpotLight* lc = new SpotLight;
-			lc->Base.Base.Color = spotLightColour;
-			lc->Base.Base.AmbientIntensity = 0.5f;
-			lc->Base.Base.DiffuseIntensity = 0.5f;
-
-			lc->Base.Atten.Constant = 0.5f;
-			lc->Base.Atten.Exp = 0.5f;
-			lc->Base.Atten.Linear = 0.5f;
-
-			lc->Cutoff = 0.75f;
-			lc->Base.Position = glm::vec3(0, 1, 0);
-			lc->Direction = glm::vec3(0, 0, 0);
-
-			light->SetVars(lSPOT, lc);
+			//light = new LightComponent(lSPOT);
+			//SpotLight* lc = new SpotLight;
+			//lc->Base.Base.Color = spotLightColour;
+			//lc->Base.Base.AmbientIntensity = 0.1f;
+			//lc->Base.Base.DiffuseIntensity = 0.1f;
+			//
+			//lc->Base.Atten.Constant = 0.1f;
+			//lc->Base.Atten.Exp = 0.1f;
+			//lc->Base.Atten.Linear = 0.1f;
+			//
+			//lc->Cutoff = 0.75f;
+			//lc->Base.Position = glm::vec3(0, 1, 0);
+			//lc->Direction = glm::vec3(0, -1, 0);
+			//
+			//light->SetVars(lSPOT, lc);
 		}
 		if (i == 5)
 		{
@@ -846,8 +846,8 @@ void AppMain() {
 			lc->Base.Atten.Exp = 0.5f;
 			lc->Base.Atten.Linear = 0.5f;
 
-			lc->Cutoff = 0.75f;
-			lc->Base.Position = glm::vec3(1000, 5, 0);//4 1 0
+			lc->Cutoff = 0.5f;
+			lc->Base.Position = glm::vec3(1000, 1, 0);//4 1 0
 			lc->Direction = glm::vec3(0, -1, 0);// 5 0 0
 
 			light->SetVars(lSPOT, lc);

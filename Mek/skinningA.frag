@@ -140,9 +140,11 @@ void main()
 
     for (int i = 0 ; i < gNumSpotLights ; i++)
 	{
-        TotalLight += CalcSpotLight(gSpotLights[i], In);
+        TotalLight += CalcSpotLight(gSpotLights[0], In);
     }
 
     FragColor = texture(gColorMap, In.TexCoord.xy) * TotalLight;
-	//FragColor = vec4(In.Normal,1);
+	//FragColor = CalcSpotLight(gSpotLights[0], In);
+	//FragColor = vec4(gSpotLights[0].Base.Position, 1);
+	//FragColor = vec4(CalcPointLight(gSpotLights[0].Base, In).xyz, 1);
 }
