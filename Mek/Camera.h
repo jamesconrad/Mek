@@ -2,14 +2,6 @@
 
 #include "lib\glm\glm.hpp"
 
-/**
- A first-person shooter type of camera.
-
- Set the properties of the camera, then use the `matrix` method to get the camera matrix for
- use in the vertex shader.
-
- Includes the perspective projection matrix.
- */
 class Camera {
 public:
 	/**

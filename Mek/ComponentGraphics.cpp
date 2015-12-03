@@ -46,8 +46,12 @@ void ComponentGraphics::VertexBoneData::AddBoneData(unsigned int BoneID, float W
 
 void ComponentGraphics::loadModel(char* filepath)
 {
+	std::string debfp = "../Debug/";
+	debfp.append(filepath);
+	filepath = (char*)debfp.c_str();
+
+
 	// Create the VAO
-	glGenBuffers(1, &_vbo);
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
 
@@ -66,6 +70,33 @@ void ComponentGraphics::loadModel(char* filepath)
 	else
 	{
 		printf("Error parsing '%s': '%s'\n", filepath, _importer.GetErrorString());
+	}
+
+	// Make sure the VAO is not changed from the outside
+	glBindVertexArray(0);
+}
+
+void ComponentGraphics::loadModel(aiScene* scene)
+{
+	// Create the VAO
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+
+	// Create the buffers for the vertices attributes
+	glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(_buffers), _buffers);
+
+	
+	_scene = scene;
+
+	if (_scene)
+	{
+		CopyaiMat(&_scene->mRootNode->mTransformation, _transform);
+		_transform = glm::inverse(_transform);
+		initFromScene(_scene, "");
+	}
+	else
+	{
+		printf("Error parsing '%s': '%s'\n", "Pre-Defined Scene", _importer.GetErrorString());
 	}
 
 	// Make sure the VAO is not changed from the outside
@@ -114,7 +145,7 @@ void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath
 
 	initMaterials(scene);
 
-	Program::getInstance().use("skinning");
+	//Program::getInstance().use("skinning");
 	
 	// Generate and populate the buffers with vertex attributes and the indices
 	glBindBuffer(GL_ARRAY_BUFFER, _buffers[POS_VB]);
@@ -142,7 +173,7 @@ void ComponentGraphics::initFromScene(const aiScene* scene, const char* filepath
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffers[INDEX_BUFFER]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices[0]) * Indices.size(), &Indices[0], GL_STATIC_DRAW);
 
-	Program::getInstance().stopUsing("skinning");
+	//Program::getInstance().stopUsing("skinning");
 }
 
 void ComponentGraphics::initMesh(unsigned int MeshIndex,
@@ -248,16 +279,22 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 
 			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &Path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) 
 			{
-				std::string p(Path.data);
-
 				Bitmap bmp;
-				_textures[i] = new Texture("../Debug/wooden-crate.jpg");
+				std::string fp = "";
+				fp.append(Path.data);
+				_textures[i] = new Texture((char*)fp.c_str());
+				if (_textures[i]->originalWidth() == 0)
+				{
+					GLuint o = _textures[i]->object();
+					glDeleteTextures(1, &o);
+					free(_textures[i]);
+					_textures[i] = new Texture("missingtexture.png");
+				}
 			}
 		}
 		else
 		{
-			std::string p("../Debug/wooden-crate.jpg");
-			_textures[i] = new Texture((char*)p.c_str());
+			_textures[i] = new Texture("missingtexture.png");
 		}
 	}
 }
@@ -265,10 +302,19 @@ void ComponentGraphics::initMaterials(const aiScene* pScene)
 void ComponentGraphics::render()
 {
 	//
-	Program::getInstance().use("skinning");
+	if (_scene->mMeshes[0]->mNumBones > 0)
+	{
+		Program::getInstance().use("anim");
+		Program::getInstance().updateLighting("anim");
+	}
+	else
+	{
+		Program::getInstance().use("skinning");
+		Program::getInstance().updateLighting("skinning");
+	}
 	updateShader();
 	for (unsigned i = 0, s = _frameBoneTransforms.size(); i < s; ++i)
-		glUniformMatrix4fv(_boneLocation[i], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(_frameBoneTransforms[i]));
+		glUniformMatrix4fv(_boneLocation[i], 1, GL_FALSE, (const GLfloat*)&_frameBoneTransforms[i]);
 	//
 	glBindVertexArray(_vao);
 	for (unsigned int i = 0; i < _entries.size(); i++)
@@ -295,7 +341,11 @@ void ComponentGraphics::render()
 
 	// Make sure the VAO is not changed from the outside
 	glBindVertexArray(0);
-	Program::getInstance().stopUsing("skinning");
+
+	if (_scene->mMeshes[0]->mNumBones > 0)
+		Program::getInstance().stopUsing("anim");
+	else
+		Program::getInstance().stopUsing("skinning");
 }
 
 unsigned int ComponentGraphics::FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
@@ -424,7 +474,7 @@ void ComponentGraphics::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNo
 		aiVector3D Scaling;
 		CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
 		glm::mat4 ScalingM;
-		glm::scale(ScalingM, glm::vec3(Scaling.x, Scaling.y, Scaling.z));
+		ScalingM = glm::scale(ScalingM, glm::vec3(Scaling.x, Scaling.y, Scaling.z));
 
 		// Interpolate rotation and generate rotation transformation matrix
 		aiQuaternion RotationQ;
@@ -436,17 +486,18 @@ void ComponentGraphics::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNo
 		aiVector3D Translation;
 		CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
 		glm::mat4 TranslationM;
-		glm::translate(TranslationM, glm::vec3(Translation.x, Translation.y, Translation.z));
+		TranslationM = glm::translate(TranslationM, glm::vec3(Translation.x, Translation.y, Translation.z));
+		
 		// Combine the above transformations
 		NodeTransformation = TranslationM * RotationM * ScalingM;
 	}
 
 	glm::mat4 GlobalTransformation = ParentTransform * NodeTransformation;
-
+	
 	if (_boneMapping.find(NodeName) != _boneMapping.end())
 	{
 		unsigned int BoneIndex = _boneMapping[NodeName];
-		_boneInfo[BoneIndex].FinalTransformation = _transform * GlobalTransformation * _boneInfo[BoneIndex].BoneOffset;
+		_boneInfo[BoneIndex].FinalTransformation = GlobalTransformation * _boneInfo[BoneIndex].BoneOffset;
 	}
 
 	for (unsigned int i = 0; i < pNode->mNumChildren; i++)
@@ -492,17 +543,26 @@ const aiNodeAnim* ComponentGraphics::FindNodeAnim(const aiAnimation* pAnimation,
 
 void ComponentGraphics::updateShader()
 {
-	glm::mat4 W;
-	glm::translate(W, _owner->GetPos());
-	//glm::rotate(W, _owner->GetRot());
-	//glm::scale(W, _owner->GetScale());
-	glm::scale(W, glm::vec3(0.1, 0.1, 0.1));
-
+	glm::mat4 W;// = _transform;
+	W = glm::translate(W, _owner->pos);
+	//W = glm::rotate(W, _owner->rot);
+	//W = glm::scale(W, _owner->scale);
+	W = glm::scale(W, 0.1f * _owner->scale);
+	
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
 
 	glm::mat4 WVP = VP * W;
-	
-	Program::getInstance().setUniform("skinning", "gWVP", WVP);
-	Program::getInstance().setUniform("skinning", "gWorld", W);
+	if (_scene->mMeshes[0]->mNumBones > 0)
+	{
+		Program::getInstance().setUniform("anim", "gWVP", WVP);
+		Program::getInstance().setUniform("anim", "gWorld", W);
+		Program::getInstance().updateLighting("anim");
+	}
+	else
+	{
+		Program::getInstance().setUniform("skinning", "gWVP", WVP);
+		Program::getInstance().setUniform("skinning", "gWorld", W);
+		Program::getInstance().updateLighting("skinning");
+	}
 }

@@ -8,15 +8,56 @@
 #include "Camera.h"
 
 class LightComponent;
+struct PointLight;
 
-/**
- Represents an OpenGL program made by linking shaders.
- */
+struct LocBaseLight
+{
+	GLint Color;
+	GLint AmbientIntensity;
+	GLint DiffuseIntensity;
+};
+
+struct LocDirectionalLight
+{
+	LocBaseLight Base;
+	GLint Direction;
+};
+
+struct LocAttenuation
+{
+	GLint Constant;
+	GLint Linear;
+	GLint Exp;
+};
+
+struct LocPointLight
+{
+	LocBaseLight Base;
+	GLint Position;
+	LocAttenuation Atten;
+};
+
+struct LocSpotLight
+{
+	LocPointLight Base;
+	GLint Direction;
+	GLint Cutoff;
+};
+
+enum SkinningShaderIndex
+{
+	gNumPointLights = 0,
+	gNumSpotLights = 1,
+	gDirectionalLightBaseColor = 2,
+	gDirectionalLightDirection = 3,
+	gDirectionalLightBaseAmbientIntensity = 4,
+	gDirectionalLightBaseDiffuseIntensity = 5,
+	gMatSpecularIntensity = 6,
+	gSpecularPower = 7
+};
+
 class Program {
 public:
-	 /**
-	 The program's object ID, as returned from glCreateProgram
-	  */
 	GLuint object(char* name) const;
 
 	void use(char* name) const;
@@ -27,15 +68,8 @@ public:
 
 	void createShader(char* name, GLenum type, char* filepath);
 
-	/**
-	The attribute index for the given name, as returned from glGetAttribLocation.
-	 */
 	GLint attrib(char* shaderName, const GLchar* attribName) const;
 
-
-	/**
-	 The uniform index for the given name, as returned from glGetUniformLocation.
-	 */
 	GLint uniform(char* shaderName, const GLchar* uniformName) const;
 
 	//NO DELETE FUNCTION YET TODO:: DELETE FUNCTION ON LIGHTCOMPONENT DECONSTRUCTOR ALSO ADD THE LIGHTSOURCE ON CONSTRUCTOR
@@ -44,12 +78,8 @@ public:
 
 	void updateSkinning();
 
+	void updateLighting(char* shadername);
 
-	/**
-	 Setters for attribute and uniform variables.
-
-	 These are convenience methods for the glVertexAttrib* and glUniform* functions.
-	 */
 #define _TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(SHADER_NAME, OGL_TYPE) \
         void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0); \
         void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1); \
@@ -96,9 +126,17 @@ private:
 	Program() {};
 
 	// 3 spooky 5 me
-	std::map<char*, std::pair<std::map<GLenum, Shader>, GLuint>> _shaderMap;
+	std::map<char*, std::pair<std::map<GLenum, Shader*>, GLuint>> _shaderMap;
 
 	std::vector<LightComponent*> _lightMap;
+	std::vector<void *> _vlightMapLoc;
+	std::vector<int> _vlightVarLoc;
+	
+	unsigned int numPointLights;
+	unsigned int numSpotLights;
+	
+	void setPointLight(PointLight* l, char* shadername, std::string &base);
+	void updateLightLocations(char* shadername);
 
 	//copying disabled
 	Program(const Program&);

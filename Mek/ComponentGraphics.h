@@ -28,11 +28,22 @@ class ComponentGraphics : public Component
 public:
 	void update();
 	void loadModel(char* model);
+	void loadModel(aiScene* scene);
 	void render();
 	void updateShader();
 
+	void* getBoneInfoRef()
+	{
+		if (_scene->mMeshes[0]->mNumBones > 0)
+			return (void*)_boneInfo.data();
+		else
+			return (void*)new BoneInfo;
+	}
+
 
 	void BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& Transforms);
+
+	const aiScene* getScene() { return _scene; }
 
 private:
 	// skeleton structs
@@ -110,7 +121,6 @@ private:
 	Assimp::Importer _importer;
 
 	// model rendering vars
-	GLuint _vbo;
 	GLuint _vao;
 	GLuint _buffers[NUM_VBs];
 	unsigned int _numBones;
@@ -121,9 +131,6 @@ private:
 	glm::mat4 _transform;
 	std::vector<glm::mat4> _frameBoneTransforms;
 	GLint _boneLocation[MAX_BONES];
-
-
-
 
 	std::vector<unsigned int> _indices;
 };

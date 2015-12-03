@@ -4,6 +4,8 @@
 #include "Component.h"
 #include <unordered_map>
 
+class Projectile;
+
 class GameObject;
 
 enum ComponentId
@@ -18,11 +20,13 @@ class Component
 {
 public:
 	virtual void update() = 0;
+	virtual void* getBoneInfoRef() { return 0; }
 	void setOwner(GameObject* owner) 
 	{ 
 		_owner = owner;
 	}
 	GameObject* getOwner() { return _owner; }
+	glm::vec3 getPos();
 protected:
 	GameObject* _owner;
 };
@@ -35,13 +39,38 @@ public:
 	bool HasComponent(ComponentId);
 	Component* GetComponent(ComponentId);
 	void UpdateAll();
-	glm::vec3 GetPos();
-	glm::vec3 GetScale();
-	glm::vec3 GetRot();
+	void SetName(char* name) { _n = name; }
+	char* GetName() { return _n; }
 
+	glm::vec3 pos, scale, rot, dir;
+	float vel;
+	int handle;
 private:
-	glm::vec3 pos, scale, rot;
-	int _handle;
+	char* _n;
 	std::string _objStr;
 	std::unordered_multimap<ComponentId, Component*> _components;
+};
+
+class ObjectManager
+{
+public:
+	int addObject(GameObject*);
+	void addComponent(ComponentId ctype, Component* c, int handle);
+	void addToMap(ComponentId ctype, int handle);
+
+	void addProjectile(Projectile*);
+	void updateProjectile(float dTime);
+
+	//singleton
+	static ObjectManager& instance()
+	{
+		static ObjectManager instance;
+		return instance;
+	}
+
+	std::vector<GameObject*> gMap;
+	std::vector<unsigned int> colMap;
+	std::vector<Projectile*> pMap;
+private:
+	ObjectManager() {}
 };
