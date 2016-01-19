@@ -22,6 +22,7 @@
 #include "Texture.h"
 #include "Camera.h"
 #include "ComponentInput.h"
+#include "Terrain.h"
 
 #include "TextRendering.h"
 #include "2dOverlayAnim.h"
@@ -50,7 +51,7 @@ float playTime = 0;
 
 GameObject* animatedMech;
 ComponentGraphics* animatedMechGC;
-
+Terrain* ground;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
@@ -213,6 +214,7 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	ground->Render();
 	animatedMechGC->render();
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
@@ -304,7 +306,7 @@ static void Update(float secondsElapsed) {
 	}
 	else
 	{
-		const float moveSpeed = 0.2f; //units per second
+		const float moveSpeed = 1.f; //units per second
 		if (glfwGetKey(gWindow, 'S'))
 			lInput.z = -1;
 		else if (glfwGetKey(gWindow, 'W'))
@@ -320,7 +322,7 @@ static void Update(float secondsElapsed) {
 		}
 
 		//rotate camera based on mouse movement
-		const float mouseSensitivity = 0.005f;
+		const float mouseSensitivity = 0.05f;
 		double mouseX, mouseY;
 		glfwGetCursorPos(gWindow, &mouseX, &mouseY);
 		//Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
@@ -503,13 +505,18 @@ void AppMain() {
     Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
 	Camera::getInstance().setNearAndFarPlanes(1.f, 500.0f);
-	Camera::getInstance().setFieldOfView(179);
+	Camera::getInstance().setFieldOfView(50);
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
 	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
 	startscreen = new twodOverlay("pressStart.png", 0, 0, 10);
 	skull->updatePos(-0.85f, -0.75f, 4);
-	skull ->cycle = true;
+	skull->cycle = true;
+
+	ground = new Terrain();
+	ground->LoadHeightMap("C:/Users/100559437/Documents/Mek/Mek/heightmap.png",0.001);
+	ground->InitRender();
+
 	//MODEL INITS
 
 	prepProjectiles();
@@ -892,7 +899,7 @@ void AppMain() {
         Render();
 
         // check for errors
-        GLenum error = glGetError();
+		GLenum error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
 			std::cerr << "OpenGL Error " << error << " - " << glewGetErrorString(error) << std::endl;
@@ -912,7 +919,6 @@ int main(int argc, char *argv[]) {
     try {
         AppMain();
     } catch (const std::exception& e){
-		printf("Did you run from Visual Studio?\n Visual Studio runs the application from the wrong folder!\n Use the exe!");
 		std::cerr << "ERROR: " << e.what() << std::endl;
 	    return EXIT_FAILURE;
     }

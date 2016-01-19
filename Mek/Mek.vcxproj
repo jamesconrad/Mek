@@ -23,8 +23,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="RayVsTriangle.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Target.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TextRendering.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
@@ -38,19 +41,19 @@
     <ClInclude Include="ComponentGraphics.h" />
     <ClInclude Include="ComponentPhysics.h" />
     <ClInclude Include="GameObject.h" />
-<<<<<<< HEAD
     <ClInclude Include="ComponentInput.h" />
     <ClInclude Include="ComponentLight.h" />
-=======
     <ClInclude Include="ComponentForce.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="LightComponent.h" />
->>>>>>> origin/master
     <ClInclude Include="Program.h" />
     <ClInclude Include="Projectile.h" />
+    <ClInclude Include="RayVsTriangle.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Interpolation.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="Target.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="TextRendering.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
@@ -65,6 +68,10 @@
     <None Include="skinning.vert" />
     <None Include="skinningA.frag" />
     <None Include="skinningA.vert" />
+    <None Include="skybox.frag" />
+    <None Include="skybox.vert" />
+    <None Include="terrain.frag" />
+    <None Include="terrain.vert" />
     <None Include="text.frag" />
     <None Include="text.vert" />
   </ItemGroup>
@@ -78,7 +85,6 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -113,11 +119,8 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-<<<<<<< HEAD
       <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;xinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
-=======
-      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3vs2015.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
->>>>>>> origin/master
+      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)\lib</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>

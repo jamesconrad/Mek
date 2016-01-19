@@ -1,44 +1,37 @@
-﻿Build started 12/3/2015 12:29:56 PM.
+﻿Build started 1/19/2016 10:35:54 AM.
      1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
      1>PreBuildEvent:
          echo C:\Users\100559437\Documents\Mek\Mek\
          :VCEnd
          C:\Users\100559437\Documents\Mek\Mek\
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
-         main.cpp
-     1>c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY' : macro redefinition
-                 c:\users\100559437\documents\mek\mek\include\gl\glfw3.h(85) : see previous definition of 'APIENTRY'
-     1>c:\program files (x86)\microsoft visual studio 12.0\vc\include\crtdbg.h(586): warning C4005: '_malloca' : macro redefinition
-                 c:\program files (x86)\microsoft visual studio 12.0\vc\include\malloc.h(224) : see previous definition of '_malloca'
-     1>c:\users\100559437\documents\mek\mek\main.cpp(328): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\main.cpp(329): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\main.cpp(381): warning C4244: '=' : conversion from 'float' to 'unsigned int', possible loss of data
-     1>c:\users\100559437\documents\mek\mek\main.cpp(384): warning C4553: '==' : operator has no effect; did you intend '='?
-     1>c:\users\100559437\documents\mek\mek\main.cpp(528): warning C4305: '=' : truncation from 'double' to 'float'
-     1>c:\users\100559437\documents\mek\mek\main.cpp(535): warning C4305: 'argument' : truncation from 'double' to 'float'
-         GLM: rotateX function taking degrees as parameters is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
-         GLM: rotateY function taking degrees as parameters is deprecated. #define GLM_FORCE_RADIANS before including GLM headers to remove this message.
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\100559437\Documents\Mek\Debug\Mek.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\100559437\Documents\Mek\Mek\\lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib xinput.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\100559437\Documents\Mek\Debug\Mek.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\100559437\Documents\Mek\Debug\Mek.lib" /MACHINE:X86 Debug\2dOverlay.obj
-         Debug\2dOverlayAnim.obj
-         Debug\Bitmap.obj
-         Debug\Camera.obj
-         Debug\ComponentCollision.obj
-         Debug\ComponentGraphics.obj
-         Debug\GameObject.obj
-         Debug\ComponentInput.obj
-         Debug\Interpolation.obj
-         Debug\main.obj
-         Debug\Program.obj
-         Debug\Projectile.obj
-         Debug\Shader.obj
-         Debug\Target.obj
-         Debug\TextRendering.obj
-         Debug\Texture.obj
-         Mek.vcxproj -> C:\Users\100559437\Documents\Mek\Debug\Mek.exe
-     1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)).
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt RayVsTriangle.cpp Skybox.cpp
+         Skybox.cpp
+     1>c:\users\100559437\documents\mek\mek\include\gl\glew.h(85): fatal error C1189: #error :  gl.h included before glew.h
+         RayVsTriangle.cpp
+     1>c:\users\100559437\documents\mek\mek\lib\glm\detail\type_vec3.inl(117): error C2440: 'static_cast' : cannot convert from 'const glm::detail::tvec3<float,0>' to 'float'
+                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+                 c:\users\100559437\documents\mek\mek\rayvstriangle.cpp(30) : see reference to function template instantiation 'glm::detail::tvec3<float,0>::tvec3<glm::detail::tvec3<float,0>,glm::detail::tvec3<float,0>,glm::detail::tvec3<float,0>>(const A &,const B &,const C &)' being compiled
+                 with
+                 [
+                     A=glm::detail::tvec3<float,0>
+         ,            B=glm::detail::tvec3<float,0>
+         ,            C=glm::detail::tvec3<float,0>
+                 ]
+                 c:\users\100559437\documents\mek\mek\rayvstriangle.cpp(30) : see reference to function template instantiation 'glm::detail::tvec3<float,0>::tvec3<glm::detail::tvec3<float,0>,glm::detail::tvec3<float,0>,glm::detail::tvec3<float,0>>(const A &,const B &,const C &)' being compiled
+                 with
+                 [
+                     A=glm::detail::tvec3<float,0>
+         ,            B=glm::detail::tvec3<float,0>
+         ,            C=glm::detail::tvec3<float,0>
+                 ]
+     1>c:\users\100559437\documents\mek\mek\lib\glm\detail\type_vec3.inl(118): error C2440: 'static_cast' : cannot convert from 'const glm::detail::tvec3<float,0>' to 'float'
+                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+     1>c:\users\100559437\documents\mek\mek\lib\glm\detail\type_vec3.inl(119): error C2440: 'static_cast' : cannot convert from 'const glm::detail::tvec3<float,0>' to 'float'
+                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+         Generating Code...
+     1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:02.48
+Time Elapsed 00:00:00.40
