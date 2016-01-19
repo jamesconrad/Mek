@@ -25,9 +25,9 @@ bool RayVsTriangle(glm::vec3 ray, glm::vec3 origin, glm::vec3 p0, glm::vec3 p1, 
 
 	//Now we have a collision
 	//Convert from barycentric
-	out->intersection = glm::vec3(out->barycoords.x * p0,
-		out->barycoords.y * p1,
-		(1 - out->barycoords.x - out->barycoords.y) * p2);
+	out->intersection = (out->barycoords.x * p0) +
+		(out->barycoords.y * p1) +
+		((1 - out->barycoords.x - out->barycoords.y) * p2);
 	//And calculate distance
 	out->distance = glm::dot(edge1, Q) * invdet;
 	return true;

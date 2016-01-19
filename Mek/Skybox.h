@@ -1,4 +1,4 @@
-#include "include\GL\glfw3.h"
+#include "include\GL\glew.h"
 #include "lib\glm\common.hpp"
 #include "Texture.h"
 #include "Camera.h"

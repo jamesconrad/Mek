@@ -1,37 +1,35 @@
-﻿Build started 1/19/2016 10:35:54 AM.
+﻿Build started 1/19/2016 11:11:16 AM.
      1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
      1>PreBuildEvent:
          echo C:\Users\100559437\Documents\Mek\Mek\
          :VCEnd
          C:\Users\100559437\Documents\Mek\Mek\
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt RayVsTriangle.cpp Skybox.cpp
-         Skybox.cpp
-     1>c:\users\100559437\documents\mek\mek\include\gl\glew.h(85): fatal error C1189: #error :  gl.h included before glew.h
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt RayVsTriangle.cpp
          RayVsTriangle.cpp
-     1>c:\users\100559437\documents\mek\mek\lib\glm\detail\type_vec3.inl(117): error C2440: 'static_cast' : cannot convert from 'const glm::detail::tvec3<float,0>' to 'float'
-                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-                 c:\users\100559437\documents\mek\mek\rayvstriangle.cpp(30) : see reference to function template instantiation 'glm::detail::tvec3<float,0>::tvec3<glm::detail::tvec3<float,0>,glm::detail::tvec3<float,0>,glm::detail::tvec3<float,0>>(const A &,const B &,const C &)' being compiled
-                 with
-                 [
-                     A=glm::detail::tvec3<float,0>
-         ,            B=glm::detail::tvec3<float,0>
-         ,            C=glm::detail::tvec3<float,0>
-                 ]
-                 c:\users\100559437\documents\mek\mek\rayvstriangle.cpp(30) : see reference to function template instantiation 'glm::detail::tvec3<float,0>::tvec3<glm::detail::tvec3<float,0>,glm::detail::tvec3<float,0>,glm::detail::tvec3<float,0>>(const A &,const B &,const C &)' being compiled
-                 with
-                 [
-                     A=glm::detail::tvec3<float,0>
-         ,            B=glm::detail::tvec3<float,0>
-         ,            C=glm::detail::tvec3<float,0>
-                 ]
-     1>c:\users\100559437\documents\mek\mek\lib\glm\detail\type_vec3.inl(118): error C2440: 'static_cast' : cannot convert from 'const glm::detail::tvec3<float,0>' to 'float'
-                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-     1>c:\users\100559437\documents\mek\mek\lib\glm\detail\type_vec3.inl(119): error C2440: 'static_cast' : cannot convert from 'const glm::detail::tvec3<float,0>' to 'float'
-                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-         Generating Code...
-     1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)) -- FAILED.
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\100559437\Documents\Mek\Debug\Mek.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\100559437\Documents\Mek\Mek\\lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib xinput.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\100559437\Documents\Mek\Debug\Mek.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\100559437\Documents\Mek\Debug\Mek.lib" /MACHINE:X86 Debug\2dOverlay.obj
+         Debug\2dOverlayAnim.obj
+         Debug\Bitmap.obj
+         Debug\Camera.obj
+         Debug\ComponentCollision.obj
+         Debug\ComponentGraphics.obj
+         Debug\GameObject.obj
+         Debug\ComponentInput.obj
+         Debug\Interpolation.obj
+         Debug\main.obj
+         Debug\Program.obj
+         Debug\Projectile.obj
+         Debug\RayVsTriangle.obj
+         Debug\Shader.obj
+         Debug\Skybox.obj
+         Debug\Target.obj
+         Debug\Terrain.obj
+         Debug\TextRendering.obj
+         Debug\Texture.obj
+         Mek.vcxproj -> C:\Users\100559437\Documents\Mek\Debug\Mek.exe
+     1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:00.40
+Time Elapsed 00:00:00.46
