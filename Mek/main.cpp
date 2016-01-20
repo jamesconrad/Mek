@@ -23,6 +23,7 @@
 #include "Camera.h"
 #include "ComponentInput.h"
 #include "Terrain.h"
+#include "Skybox.h"
 
 #include "TextRendering.h"
 #include "2dOverlayAnim.h"
@@ -52,6 +53,7 @@ float playTime = 0;
 GameObject* animatedMech;
 ComponentGraphics* animatedMechGC;
 Terrain* ground;
+Skybox* sky;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
@@ -214,6 +216,7 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	sky->render();
 	ground->Render();
 	animatedMechGC->render();
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
@@ -504,7 +507,7 @@ void AppMain() {
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-	Camera::getInstance().setNearAndFarPlanes(1.f, 500.0f);
+	Camera::getInstance().setNearAndFarPlanes(1.f, 1024.0f);
 	Camera::getInstance().setFieldOfView(50);
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
@@ -514,9 +517,10 @@ void AppMain() {
 	skull->cycle = true;
 
 	ground = new Terrain();
-	ground->LoadHeightMap("C:/Users/100559437/Documents/Mek/Mek/heightmap.png",0.001);
+	ground->LoadHeightMap("heightmap.png",0.001);
 	ground->InitRender();
-
+	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
+	sky = new Skybox(sb);
 	//MODEL INITS
 
 	prepProjectiles();

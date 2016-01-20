@@ -1,12 +1,14 @@
 #version 330
 
 layout (location = 0) in vec3 position;
-out vec3 uv;
+out vec3 uvw;
 
-uniform mat4 camera;
+uniform mat4 m;
+vec4 p;
 
 void main()
 {
-	gl_Position = mat3(camera) * (position * 500);
-	uv = position;
+	p = vec4(position * 16, 1.0);
+	gl_Position = m * p;
+	uvw = position;
 }
