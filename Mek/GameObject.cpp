@@ -86,7 +86,7 @@ void ObjectManager::updateProjectile(float dTime)
 {
 	//Determine which targets to remove
 	std::vector<unsigned int> todel;
-	for (int i = 0, s = pMap.size(); i < s; i++)
+	for (unsigned int i = 0, s = pMap.size(); i < s; i++)
 	{
 		pMap[i]->update(dTime);
 		if (pMap[i]->alive == false)

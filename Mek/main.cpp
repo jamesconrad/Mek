@@ -24,6 +24,7 @@
 #include "ComponentInput.h"
 #include "Terrain.h"
 #include "Skybox.h"
+#include "Framebuffer.h"
 
 #include "TextRendering.h"
 #include "2dOverlayAnim.h"
@@ -49,6 +50,8 @@ glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
 float playTime = 0;
+
+Framebuffer* fb;
 
 GameObject* animatedMech;
 ComponentGraphics* animatedMechGC;
@@ -212,6 +215,8 @@ void LoadTargets()
 
 // draws a single frame
 static void Render() {
+	//fb->Bind();
+
     // clear everything
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -504,6 +509,10 @@ void AppMain() {
     // create all the instances in the 3D scene based on the gWoodenCrate asset
     CreateInstances();
 
+	//fb = new Framebuffer();
+	//fb->CreateDepthTexture(1920, 1080);
+	//fb->CreateColorTexture(1920, 1080);
+
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
@@ -536,7 +545,7 @@ void AppMain() {
 	gCol->setCollisionMask(gModel->getScene());
 	gCol->setOwner(model);
 	model->pos = glm::vec3(7.5, 0.5, -11);
-	model->vel = 0.01;
+	model->vel = 0.1;
 	model->dir = glm::vec3(1, 0, 0);
 	model->scale = glm::vec3(5, 5, 5);
 	gCol->type = MOVING;

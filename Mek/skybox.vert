@@ -8,7 +8,7 @@ vec4 p;
 
 void main()
 {
-	p = vec4(position * 16, 1.0);
-	gl_Position = m * p;
+	p = m * vec4(position, 1.0);
+	gl_Position = p.xyzw;
 	uvw = position;
 }

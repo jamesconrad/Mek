@@ -20,7 +20,8 @@ void Terrain::InitRender()
 	printf("%i,%i\n", _vbo[0], _vbo[1]);
 	
 	//Prep the indicies
-	for (int srow = 0; srow < _height; srow++)
+	//Sloppy triangle strip method
+	for (int srow = 0; srow < _height - 1; srow++)
 	{
 		for (int i = 0; i < _width; i++)
 		{
@@ -29,6 +30,22 @@ void Terrain::InitRender()
 			_indices.push_back(rmod + i + _width);
 		}
 	}
+	//Triangle method
+	//Think quads
+	//for (int r = 0; r < _height - 1; r++)
+	//{
+	//	for (int c = 0; c < _width - 1; c++)
+	//	{
+	//		_indices.push_back(IndexAt(r,c));
+	//		_indices.push_back(IndexAt(r, c + 1));
+	//		_indices.push_back(IndexAt(r + 1, c));
+	//
+	//		_indices.push_back(IndexAt(r, c));
+	//		_indices.push_back(IndexAt(r + 1, c + 1));
+	//		_indices.push_back(IndexAt(r + 1, c));
+	//		
+	//	}
+	//}
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(_heightMap[0]) * _heightMap.size(), &_heightMap[0], GL_STATIC_DRAW);

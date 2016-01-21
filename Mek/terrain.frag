@@ -1,5 +1,7 @@
 #version 330
 
+//layout (location = 0) out float fragDepth;
+
 uniform float _min;
 uniform float _max;
 
@@ -11,4 +13,5 @@ void main()
 	float a = (h / _max) + _min;
 	colour = mix(vec4(0,0,1,1), vec4(1,0,0,1), a);
 	//colour = vec4(_max * 10000,0,0,1);
+	//fragDepth = gl_FragCoord.z;
 }

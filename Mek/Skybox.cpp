@@ -65,7 +65,9 @@ Skybox::Skybox(char* fp[6])
 	_bmp[0].bitmapFromFile(fp[0]);
 	_bmp[1].bitmapFromFile(fp[1]);
 	_bmp[2].bitmapFromFile(fp[2]);
+	_bmp[2].rotate90CounterClockwise();
 	_bmp[3].bitmapFromFile(fp[3]);
+	_bmp[3].rotate90CounterClockwise();
 	_bmp[4].bitmapFromFile(fp[4]);
 	_bmp[5].bitmapFromFile(fp[5]);
 
@@ -102,7 +104,7 @@ void Skybox::render()
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _cubeMapID);
 	//glBindBuffer(GL_ARRAY_BUFFER, _vbo[i]);
-	glDrawArrays(GL_TRIANGLES, 0, 109);
+	glDrawArrays(GL_TRIANGLES, 0, 108);
 	glBindVertexArray(0);
 
 	glDepthMask(GL_TRUE);
