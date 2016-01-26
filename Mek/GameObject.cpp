@@ -94,8 +94,9 @@ void ObjectManager::updateProjectile(float dTime)
 			todel.push_back(i);
 		}
 	}
+	//check if todel.end() > pmap.size(); If yes, check what the fuck pmap[todel.end()] is. somehow.
 	//remove targets
-	for (int i = 0, s = todel.size(); i < s; i++)
+	for (unsigned int i = 0, s = todel.size(); i < s; i++)
 	{
 		free(pMap[todel[i]]);
 		pMap.erase(pMap.begin() + todel[i]);
@@ -103,7 +104,7 @@ void ObjectManager::updateProjectile(float dTime)
 	//redetermine handles
 	if (todel.size() > 0)
 	{
-		for (int i = 0, s = pMap.size(); i < s; i++)
+		for (unsigned int i = 0, s = pMap.size(); i < s; i++)
 		{
 			pMap[i]->go->handle = i;
 		}
