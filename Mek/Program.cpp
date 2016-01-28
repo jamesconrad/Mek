@@ -118,10 +118,10 @@ void Program::updateSkinning()
 	//
 	//setUniform("skinning", "materialShininess", 0.5f);
 	//setUniform("skinning", "meterialSpecularColor", glm::vec3(0.5,0.5,0.5));
-
-	setUniform("skinning", "gWVP", Camera::getInstance().matrix());
+	bind("skinning");
+	setUniform("gWVP", Camera::getInstance().matrix());
 //	setUniform("skinning", "cameraPosition", Camera::getInstance().position());
-	setUniform("skinning", "gWorld", glm::translate(glm::mat4(), glm::vec3(0, 0, 0)));
+	setUniform("gWorld", glm::translate(glm::mat4(), glm::vec3(0, 0, 0)));
 
 }
 //helper function
@@ -269,7 +269,20 @@ GLuint Program::object(char* name)
 
 void Program::use(char* name)
 {
-    glUseProgram(_smap.at(name).programid);
+	_bound = &_smap.at(name);
+    glUseProgram(_bound->programid);
+}
+
+void Program::bind(char* name)
+{
+	_bound = &_smap.at(name);
+	glUseProgram(_bound->programid);
+}
+
+void Program::unbind()
+{
+	_bound = nullptr;
+	glUseProgram(0);
 }
 
 bool Program::isInUse(char* name)
@@ -284,42 +297,42 @@ void Program::stopUsing(char* name)
     glUseProgram(0);
 }
 
-GLint Program::attrib(char* name, char* attribName)
+GLint Program::attrib(char* attribName)
 {
     if(!attribName)
         throw std::runtime_error("attribName was NULL");
-	if (_smap.at(name).attribLoc.find((char*)attribName) == _smap.at(name).attribLoc.end())
+	if (_bound->attribLoc.find((char*)attribName) == _bound->attribLoc.end())
 	{
-		GLint attrib = glGetAttribLocation(object(name), attribName);
+		GLint attrib = glGetAttribLocation(_bound->programid, attribName);
 		if (attrib == -1)
 			throw std::runtime_error(std::string("Program attribute not found: ") + attribName);
 
 		//cache the result
-		_smap.at(name).attribLoc.emplace(attribName, attrib);
+		_bound->attribLoc.emplace(attribName, attrib);
 		return attrib;
 	}
 	else
-		return _smap.at(name).attribLoc.at(attribName);
+		return _bound->attribLoc.at(attribName);
 }
 
-GLint Program::uniform(char* shadername, char* uniformName)
+GLint Program::uniform(char* uniformName)
 {
     if(!uniformName)
         throw std::runtime_error("uniformName was NULL");
     
 
-	if (_smap.at(shadername).uniformLoc.find(uniformName) == _smap.at(shadername).uniformLoc.end())
+	if (_bound->uniformLoc.find(uniformName) == _bound->uniformLoc.end())
 	{
-		GLint uniform = glGetUniformLocation(object(shadername), uniformName);
+		GLint uniform = glGetUniformLocation(_bound->programid, uniformName);
 		//if (uniform == -1)
 		//	throw std::runtime_error(std::string("Program uniform not found: ") + uniformName);
 
 		//cache the result
-		_smap.at(shadername).uniformLoc.emplace(uniformName, uniform);
+		_bound->uniformLoc.emplace(uniformName, uniform);
 		return uniform;
 	}
 	else
-		return _smap.at(shadername).uniformLoc.at(uniformName);
+		return _bound->uniformLoc.at(uniformName);
 }
 
 /*
@@ -337,67 +350,67 @@ Complete:
 	unsigned int
 
 */
-void Program::setUniformMatrix2(char* shaderName, char* name, const GLfloat* v, GLsizei count, GLboolean transpose)
+void Program::setUniformMatrix2(char* name, const GLfloat* v, GLsizei count, GLboolean transpose)
 {
-    glUniformMatrix2fv(uniform(shaderName, name), count, transpose, v);
+    glUniformMatrix2fv(uniform(name), count, transpose, v);
 }
 
-void Program::setUniformMatrix3(char* shaderName, char* name, const GLfloat* v, GLsizei count, GLboolean transpose)
+void Program::setUniformMatrix3(char* name, const GLfloat* v, GLsizei count, GLboolean transpose)
 {
-    glUniformMatrix3fv(uniform(shaderName, name), count, transpose, v);
+    glUniformMatrix3fv(uniform(name), count, transpose, v);
 }
 
-void Program::setUniformMatrix4(char* shaderName, char* name, const GLfloat* v, GLsizei count, GLboolean transpose)
+void Program::setUniformMatrix4(char* name, const GLfloat* v, GLsizei count, GLboolean transpose)
 {
-    glUniformMatrix4fv(uniform(shaderName, name), count, transpose, v);
+    glUniformMatrix4fv(uniform(name), count, transpose, v);
 }
 
-void Program::setUniform(char* shaderName, char* name, const glm::mat2& m, GLboolean transpose)
+void Program::setUniform(char* name, const glm::mat2& m, GLboolean transpose)
 {
-    glUniformMatrix2fv(uniform(shaderName, name), 1, transpose, glm::value_ptr(m));
+    glUniformMatrix2fv(uniform(name), 1, transpose, glm::value_ptr(m));
 }
 
-void Program::setUniform(char* shaderName, char* name, const glm::mat3& m, GLboolean transpose)
+void Program::setUniform(char* name, const glm::mat3& m, GLboolean transpose)
 {
-    glUniformMatrix3fv(uniform(shaderName, name), 1, transpose, glm::value_ptr(m));
+    glUniformMatrix3fv(uniform(name), 1, transpose, glm::value_ptr(m));
 }
 
-void Program::setUniform(char* shaderName, char* name, const glm::mat4& m, GLboolean transpose)
+void Program::setUniform(char* name, const glm::mat4& m, GLboolean transpose)
 {
-    glUniformMatrix4fv(uniform(shaderName, name), 1, transpose, glm::value_ptr(m));
+    glUniformMatrix4fv(uniform(name), 1, transpose, glm::value_ptr(m));
 }
 
-void Program::setUniform(char* shaderName, char* uniformName, const glm::vec2& v)
+void Program::setUniform(char* uniformName, const glm::vec2& v)
 {
-	glUniform2fv(uniform(shaderName, uniformName), 1, glm::value_ptr(v));
+	glUniform2fv(uniform(uniformName), 1, glm::value_ptr(v));
 }
 
-void Program::setUniform(char* shaderName, char* uniformName, const glm::vec3& v)
+void Program::setUniform(char* uniformName, const glm::vec3& v)
 {
-	glUniform3fv(uniform(shaderName, uniformName), 1, glm::value_ptr(v));
+	glUniform3fv(uniform(uniformName), 1, glm::value_ptr(v));
 }
 
-void Program::setUniform(char* shaderName, char* uniformName, const glm::vec4& v)
+void Program::setUniform(char* uniformName, const glm::vec4& v)
 {
-	glUniform4fv(uniform(shaderName, uniformName), 1, glm::value_ptr(v));
+	glUniform4fv(uniform(uniformName), 1, glm::value_ptr(v));
 }
 
-void Program::setUniform(char* shaderName, char* uniformName, const GLfloat& d)
+void Program::setUniform(char* uniformName, const GLfloat& d)
 {
-	glUniform1f(uniform(shaderName, uniformName), d);
+	glUniform1f(uniform(uniformName), d);
 }
 
-void Program::setUniform(char* shaderName, char* uniformName, const GLdouble& d)
+void Program::setUniform(char* uniformName, const GLdouble& d)
 {
-	glUniform1d(uniform(shaderName, uniformName), d);
+	glUniform1d(uniform(uniformName), d);
 }
 
-void Program::setUniform(char* shaderName, char* uniformName, const GLint& d)
+void Program::setUniform(char* uniformName, const GLint& d)
 {
-	glUniform1i(uniform(shaderName, uniformName), d);
+	glUniform1i(uniform(uniformName), d);
 }
 
-void Program::setUniform(char* shaderName, char* uniformName, const GLuint& d)
+void Program::setUniform(char* uniformName, const GLuint& d)
 {
-	glUniform1ui(uniform(shaderName, uniformName), d);
+	glUniform1ui(uniform(uniformName), d);
 }

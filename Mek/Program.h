@@ -69,6 +69,8 @@ public:
 	GLuint object(char* name);
 
 	void use(char* name);
+	void bind(char* name);
+	void unbind();
 
 	bool isInUse(char* name);
 
@@ -76,9 +78,9 @@ public:
 
 	void createShader(char* name, GLenum type, char* filepath);
 
-	GLint attrib(char* shaderName, char* attribName);
+	GLint attrib(char* attribName);
 
-	GLint uniform(char* shaderName, char* uniformName);
+	GLint uniform(char* uniformName);
 
 	//NO DELETE FUNCTION YET TODO:: DELETE FUNCTION ON LIGHTCOMPONENT DECONSTRUCTOR ALSO ADD THE LIGHTSOURCE ON CONSTRUCTOR
 	int addLightSource(LightComponent*);
@@ -88,19 +90,19 @@ public:
 
 	void updateLighting(char* shadername);
 
-	void setUniformMatrix2(char* shaderName, char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniformMatrix3(char* shaderName, char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniformMatrix4(char* shaderName, char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniform(char* shaderName, char* uniformName, const glm::mat2& m, GLboolean transpose = GL_FALSE);
-	void setUniform(char* shaderName, char* uniformName, const glm::mat3& m, GLboolean transpose = GL_FALSE);
-	void setUniform(char* shaderName, char* uniformName, const glm::mat4& m, GLboolean transpose = GL_FALSE);
-	void setUniform(char* shaderName, char* uniformName, const glm::vec2& v);
-	void setUniform(char* shaderName, char* uniformName, const glm::vec3& v);
-	void setUniform(char* shaderName, char* uniformName, const glm::vec4& v);
-	void setUniform(char* shaderName, char* uniformName, const GLfloat& d);
-	void setUniform(char* shaderName, char* uniformName, const GLdouble& d);
-	void setUniform(char* shaderName, char* uniformName, const GLint& d);
-	void setUniform(char* shaderName, char* uniformName, const GLuint& d);
+	void setUniformMatrix2(char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniformMatrix3(char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniformMatrix4(char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniform(char* uniformName, const glm::mat2& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* uniformName, const glm::mat3& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* uniformName, const glm::mat4& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* uniformName, const glm::vec2& v);
+	void setUniform(char* uniformName, const glm::vec3& v);
+	void setUniform(char* uniformName, const glm::vec4& v);
+	void setUniform(char* uniformName, const GLfloat& d);
+	void setUniform(char* uniformName, const GLdouble& d);
+	void setUniform(char* uniformName, const GLint& d);
+	void setUniform(char* uniformName, const GLuint& d);
 	
 	static Program& getInstance()
 	{
@@ -114,6 +116,7 @@ private:
 
 	// 3 spooky 5 me
 	std::map<char*, CompiledShader> _smap;
+	CompiledShader* _bound;
 
 	std::vector<LightComponent*> _lightMap;
 	std::vector<void *> _vlightMapLoc;

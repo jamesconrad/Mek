@@ -1,29 +1,37 @@
-<<<<<<< HEAD
-﻿Build started 1/27/2016 7:19:31 PM.
+﻿Build started 1/28/2016 12:09:07 PM.
      1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
-=======
-﻿Build started 1/23/2016 11:50:27 PM.
-     1>Project "C:\Users\100559819\Desktop\Mek Game Folder\Mek\Mek.vcxproj" on node 2 (Build target(s)).
->>>>>>> origin/dev
      1>PreBuildEvent:
-         echo C:\Users\100559819\Desktop\Mek Game Folder\Mek\
+         echo C:\Users\100559437\Documents\Mek\Mek\
          :VCEnd
-<<<<<<< HEAD
          C:\Users\100559437\Documents\Mek\Mek\
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Shader.cpp
+         Shader.cpp
        Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\100559437\Documents\Mek\Debug\Mek.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\100559437\Documents\Mek\Mek\\lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib Win32\assimp.lib Win32\glew32.lib glfw3.lib DevIL.lib ILU.lib ILUT.lib opengl32.lib xinput.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\100559437\Documents\Mek\Debug\Mek.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\100559437\Documents\Mek\Debug\Mek.lib" /MACHINE:X86 Debug\2dOverlay.obj
+         Debug\2dOverlayAnim.obj
+         Debug\Bitmap.obj
+         Debug\Camera.obj
+         Debug\ComponentCollision.obj
+         Debug\ComponentGraphics.obj
+         Debug\Framebuffer.obj
+         Debug\GameObject.obj
+         Debug\ComponentInput.obj
+         Debug\Interpolation.obj
+         Debug\main.obj
+         Debug\Program.obj
+         Debug\Projectile.obj
+         Debug\RayVsTriangle.obj
+         Debug\Render.obj
+         Debug\Shader.obj
+         Debug\Skybox.obj
+         Debug\Target.obj
+         Debug\Terrain.obj
+         Debug\TextRendering.obj
+         Debug\Texture.obj
          Mek.vcxproj -> C:\Users\100559437\Documents\Mek\Debug\Mek.exe
      1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.15
-=======
-         C:\Users\100559819\Desktop\Mek Game Folder\Mek\
-       Link:
-         Mek.vcxproj -> C:\Users\100559819\Desktop\Mek Game Folder\Debug\Mek.exe
-     1>Done Building Project "C:\Users\100559819\Desktop\Mek Game Folder\Mek\Mek.vcxproj" (Build target(s)).
-
-Build succeeded.
-
-Time Elapsed 00:00:00.13
->>>>>>> origin/dev
+Time Elapsed 00:00:00.76

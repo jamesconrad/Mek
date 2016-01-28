@@ -559,9 +559,9 @@ void ComponentCollision::renderHitbox()
 		for (int i = 0, s = gHitboxes.size(); i < s; i++)
 		{
 			glm::mat4 m = glm::translate(glm::mat4(), _owner->pos) * glm::scale(glm::mat4(), _owner->scale);
-			Program::getInstance().setUniform("hitbox", "model", m);
-			Program::getInstance().setUniform("hitbox", "camera", Camera::getInstance().matrix());
-			Program::getInstance().setUniform("hitbox", "colour", glm::normalize(_owner->pos));
+			Program::getInstance().setUniform("model", m);
+			Program::getInstance().setUniform("camera", Camera::getInstance().matrix());
+			Program::getInstance().setUniform("colour", glm::normalize(_owner->pos));
 
 			//glBindBuffer(GL_ARRAY_BUFFER, _vbo[i]);
 			glDrawArrays(GL_LINE_STRIP, 0, 108);

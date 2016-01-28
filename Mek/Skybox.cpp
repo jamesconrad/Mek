@@ -100,7 +100,7 @@ void Skybox::render()
 
 	glm::mat4 skyMap = glm::translate(Camera::getInstance().projection() * Camera::getInstance().view(), Camera::getInstance().position());
 
-	Program::getInstance().setUniform("skybox", "m", skyMap);
+	Program::getInstance().setUniform("m", skyMap);
 
 	glDepthMask(GL_FALSE);
 

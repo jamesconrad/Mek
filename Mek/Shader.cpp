@@ -66,20 +66,54 @@ Shader& Shader::operator = (const Shader& other) {
     return *this;
 }
 
+std::string ReadShader(char* filepath)
+{
+	std::fstream f;
+	f.open(filepath, std::ios::in | std::ios::binary);
+	if (!f.is_open())
+		throw std::runtime_error(std::string("Failed to open file : ") + filepath);
+	std::stringstream buffer;
+	buffer << f.rdbuf();
+	std::string shader;
+	shader = buffer.str();
+	
+	//Read my file and look for a "#include "
+	size_t pos = shader.find("#include", 0);
+	while (pos != std::string::npos)
+	{
+		//search for the ">" tag
+		size_t ebrace = shader.find(">", pos + 1);
+		//grab the filepath then the subfile
+		std::string subfilepath = shader.substr(pos + 10, ebrace - (pos + 10));
+		//recusivley include incase of a tree
+		std::string subfile = ReadShader((char*)subfilepath.c_str());
+
+		//expand/insert ontop of the #include
+		shader.replace(pos, ebrace - pos, subfile);
+
+		pos = shader.find("#include", pos + 1);
+	}
+	
+	return shader;
+}
+
 Shader* Shader::shaderFromFile(const std::string& filePath, GLenum shaderType) {
     //open file
-    std::ifstream f;
-    f.open(filePath.c_str(), std::ios::in | std::ios::binary);
-    if(!f.is_open()){
-        throw std::runtime_error(std::string("Failed to open file: ") + filePath);
-    }
-
-    //read whole file into stringstream buffer
-    std::stringstream buffer;
-    buffer << f.rdbuf();
-
-    //return new shader
-    Shader* shader = new Shader(buffer.str(), shaderType);
+    //std::ifstream f;
+    //f.open(filePath.c_str(), std::ios::in | std::ios::binary);
+    //if(!f.is_open()){
+    //    throw std::runtime_error(std::string("Failed to open file: ") + filePath);
+    //}
+	//
+    ////read whole file into stringstream buffer
+    //std::stringstream buffer;
+    //buffer << f.rdbuf();
+	//
+	//
+    ////return new shader
+	
+	//get shader code
+    Shader* shader = new Shader(ReadShader((char*)filePath.c_str()), shaderType);
     return shader;
 }
 

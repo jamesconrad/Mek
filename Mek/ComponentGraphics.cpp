@@ -555,16 +555,18 @@ void ComponentGraphics::updateShader()
 	glm::mat4 WVP = VP * W;
 	if (_scene->mMeshes[0]->mNumBones > 0)
 	{
-		Program::getInstance().setUniform("anim", "gWVP", WVP);
-		Program::getInstance().setUniform("anim", "gWorld", W);
+		Program::getInstance().bind("anim");
+		Program::getInstance().setUniform("gWVP", WVP);
+		Program::getInstance().setUniform("gWorld", W);
 		Program::getInstance().updateLighting("anim");
 	}
 	else
 	{
-		Program::getInstance().setUniform("skinning", "gWVP", WVP);
-		Program::getInstance().setUniform("skinning", "gWorld", W);
-		Program::getInstance().setUniform("skinning", "gEyeWorldPos", Camera::getInstance().position());
-		Program::getInstance().setUniform("skinning", "EyeViewVec", Camera::getInstance().forward());
+		Program::getInstance().bind("skinning");
+		Program::getInstance().setUniform("gWVP", WVP);
+		Program::getInstance().setUniform("gWorld", W);
+		Program::getInstance().setUniform("gEyeWorldPos", Camera::getInstance().position());
+		Program::getInstance().setUniform("EyeViewVec", Camera::getInstance().forward());
 		Program::getInstance().updateLighting("skinning");
 	}
 }

@@ -118,18 +118,18 @@ void Terrain::InitRender()
 void Terrain::Render()
 {
 	Program::getInstance().use("terrain");
-	Program::getInstance().setUniform("terrain", "gWVP", Camera::getInstance().matrix());
-	Program::getInstance().setUniform("terrain", "_min", _min);
-	Program::getInstance().setUniform("terrain", "_max", _max);
+	Program::getInstance().setUniform("gWVP", Camera::getInstance().matrix());
+	Program::getInstance().setUniform("_min", _min);
+	Program::getInstance().setUniform("_max", _max);
 	glBindVertexArray(_vao);
 
 	//bind ground
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, _textures[0]->object());
-	Program::getInstance().setUniform("terrain", "t0", 0);
+	Program::getInstance().setUniform("t0", 0);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, _textures[1]->object());
-	Program::getInstance().setUniform("terrain", "t1", 1);
+	Program::getInstance().setUniform("t1", 1);
 
 	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
