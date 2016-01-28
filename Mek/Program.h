@@ -55,22 +55,30 @@ enum SkinningShaderIndex
 	gMatSpecularIntensity = 6,
 	gSpecularPower = 7
 };
+//Represents a compiled shader program.
+struct CompiledShader
+{
+	GLuint programid;//The id of the program
+	std::map<GLenum, Shader*> shaders;//List of shaders indexed by type
+	std::map<char*, GLint> uniformLoc;//List of uniform locations indexed by name
+	std::map<char*, GLint> attribLoc;//List of attributes, currently unused
+};
 
 class Program {
 public:
-	GLuint object(char* name) const;
+	GLuint object(char* name);
 
-	void use(char* name) const;
+	void use(char* name);
 
-	bool isInUse(char* name) const;
+	bool isInUse(char* name);
 
-	void stopUsing(char* name) const;
+	void stopUsing(char* name);
 
 	void createShader(char* name, GLenum type, char* filepath);
 
-	GLint attrib(char* shaderName, const GLchar* attribName) const;
+	GLint attrib(char* shaderName, char* attribName);
 
-	GLint uniform(char* shaderName, const GLchar* uniformName) const;
+	GLint uniform(char* shaderName, char* uniformName);
 
 	//NO DELETE FUNCTION YET TODO:: DELETE FUNCTION ON LIGHTCOMPONENT DECONSTRUCTOR ALSO ADD THE LIGHTSOURCE ON CONSTRUCTOR
 	int addLightSource(LightComponent*);
@@ -80,40 +88,19 @@ public:
 
 	void updateLighting(char* shadername);
 
-#define _TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(SHADER_NAME, OGL_TYPE) \
-        void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0); \
-        void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1); \
-        void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2); \
-        void setAttrib(char*, const GLchar* attribName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2, OGL_TYPE v3); \
-\
-        void setAttrib1v(char*, const GLchar* attribName, const OGL_TYPE* v); \
-        void setAttrib2v(char*, const GLchar* attribName, const OGL_TYPE* v); \
-        void setAttrib3v(char*, const GLchar* attribName, const OGL_TYPE* v); \
-        void setAttrib4v(char*, const GLchar* attribName, const OGL_TYPE* v); \
-\
-        void setUniform(char*, const GLchar* uniformName, OGL_TYPE v0); \
-        void setUniform(char*, const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1); \
-        void setUniform(char*, const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2); \
-        void setUniform(char*, const GLchar* uniformName, OGL_TYPE v0, OGL_TYPE v1, OGL_TYPE v2, OGL_TYPE v3); \
-\
-        void setUniform1v(char*, const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
-        void setUniform2v(char*, const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
-        void setUniform3v(char*, const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
-        void setUniform4v(char*, const GLchar* uniformName, const OGL_TYPE* v, GLsizei count=1); \
-
-	_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(char*, GLfloat)
-		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(char*, GLdouble)
-		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(char*, GLint)
-		_TDOGL_PROGRAM_ATTRIB_N_UNIFORM_SETTERS(char*, GLuint)
-
-		void setUniformMatrix2(char* shaderName, const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniformMatrix3(char* shaderName, const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniformMatrix4(char* shaderName, const GLchar* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
-	void setUniform(char* shaderName, const GLchar* uniformName, const glm::mat2& m, GLboolean transpose = GL_FALSE);
-	void setUniform(char* shaderName, const GLchar* uniformName, const glm::mat3& m, GLboolean transpose = GL_FALSE);
-	void setUniform(char* shaderName, const GLchar* uniformName, const glm::mat4& m, GLboolean transpose = GL_FALSE);
-	void setUniform(char* shaderName, const GLchar* uniformName, const glm::vec3& v);
-	void setUniform(char* shaderName, const GLchar* uniformName, const glm::vec4& v);
+	void setUniformMatrix2(char* shaderName, char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniformMatrix3(char* shaderName, char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniformMatrix4(char* shaderName, char* uniformName, const GLfloat* v, GLsizei count = 1, GLboolean transpose = GL_FALSE);
+	void setUniform(char* shaderName, char* uniformName, const glm::mat2& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* shaderName, char* uniformName, const glm::mat3& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* shaderName, char* uniformName, const glm::mat4& m, GLboolean transpose = GL_FALSE);
+	void setUniform(char* shaderName, char* uniformName, const glm::vec2& v);
+	void setUniform(char* shaderName, char* uniformName, const glm::vec3& v);
+	void setUniform(char* shaderName, char* uniformName, const glm::vec4& v);
+	void setUniform(char* shaderName, char* uniformName, const GLfloat& d);
+	void setUniform(char* shaderName, char* uniformName, const GLdouble& d);
+	void setUniform(char* shaderName, char* uniformName, const GLint& d);
+	void setUniform(char* shaderName, char* uniformName, const GLuint& d);
 	
 	static Program& getInstance()
 	{
@@ -126,7 +113,7 @@ private:
 	Program() {};
 
 	// 3 spooky 5 me
-	std::map<char*, std::pair<std::map<GLenum, Shader*>, GLuint>> _shaderMap;
+	std::map<char*, CompiledShader> _smap;
 
 	std::vector<LightComponent*> _lightMap;
 	std::vector<void *> _vlightMapLoc;

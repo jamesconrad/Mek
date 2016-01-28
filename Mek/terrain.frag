@@ -1,17 +1,21 @@
 #version 330
 
-//layout (location = 0) out float fragDepth;
-
-uniform float _min;
-uniform float _max;
+uniform sampler2D t0;
+uniform sampler2D t1;
 
 out vec4 colour;
+in vec3 p;
+in vec3 n;
 in float h;
+
 
 void main()
 {
-	float a = (h / _max) + _min;
-	colour = mix(vec4(0,0,1,1), vec4(1,0,0,1), a);
-	//colour = vec4(_max * 10000,0,0,1);
-	//fragDepth = gl_FragCoord.z;
+	vec2 uv;
+	uv.x = abs(p.x) - floor(abs(p.x));
+	uv.y = abs(p.z) - floor(abs(p.z));
+	vec4 c0 = texture(t0, uv);
+	vec4 c1 = texture(t1, uv);
+	colour = mix(c0, c1, h);
+	//colour = vec4(n, 1);
 }

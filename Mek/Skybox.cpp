@@ -68,6 +68,8 @@ Skybox::Skybox(char* fp[6])
 	_bmp[2].rotate90CounterClockwise();
 	_bmp[3].bitmapFromFile(fp[3]);
 	_bmp[3].rotate90CounterClockwise();
+	_bmp[3].rotate90CounterClockwise();
+	_bmp[3].rotate90CounterClockwise();
 	_bmp[4].bitmapFromFile(fp[4]);
 	_bmp[5].bitmapFromFile(fp[5]);
 

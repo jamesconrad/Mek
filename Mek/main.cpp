@@ -383,7 +383,8 @@ static void Update(float secondsElapsed) {
 		skull->update(secondsElapsed);
 
 		model->pos.y = 0.5;
-		
+		//model->pos.y = ground->HeightAtLocation(model->pos);
+
 		playTime += secondsElapsed;
 		if (score >= 0)
 		{
@@ -526,7 +527,7 @@ void AppMain() {
 	skull->cycle = true;
 
 	ground = new Terrain();
-	ground->LoadHeightMap("heightmap.png",0.001);
+	ground->LoadHeightMap("heightmap2.png",1);
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	sky = new Skybox(sb);
