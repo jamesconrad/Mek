@@ -1,8 +1,14 @@
+<<<<<<< HEAD
 ﻿Build started 1/27/2016 7:19:31 PM.
      1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
+=======
+﻿Build started 1/23/2016 11:50:27 PM.
+     1>Project "C:\Users\100559819\Desktop\Mek Game Folder\Mek\Mek.vcxproj" on node 2 (Build target(s)).
+>>>>>>> origin/dev
      1>PreBuildEvent:
-         echo C:\Users\100559437\Documents\Mek\Mek\
+         echo C:\Users\100559819\Desktop\Mek Game Folder\Mek\
          :VCEnd
+<<<<<<< HEAD
          C:\Users\100559437\Documents\Mek\Mek\
        Link:
          Mek.vcxproj -> C:\Users\100559437\Documents\Mek\Debug\Mek.exe
@@ -11,3 +17,13 @@
 Build succeeded.
 
 Time Elapsed 00:00:00.15
+=======
+         C:\Users\100559819\Desktop\Mek Game Folder\Mek\
+       Link:
+         Mek.vcxproj -> C:\Users\100559819\Desktop\Mek Game Folder\Debug\Mek.exe
+     1>Done Building Project "C:\Users\100559819\Desktop\Mek Game Folder\Mek\Mek.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.13
+>>>>>>> origin/dev

@@ -120,7 +120,7 @@ void Program::updateSkinning()
 	//setUniform("skinning", "meterialSpecularColor", glm::vec3(0.5,0.5,0.5));
 
 	setUniform("skinning", "gWVP", Camera::getInstance().matrix());
-	//setUniform("skinning", "cameraPosition", Camera::getInstance().position());
+//	setUniform("skinning", "cameraPosition", Camera::getInstance().position());
 	setUniform("skinning", "gWorld", glm::translate(glm::mat4(), glm::vec3(0, 0, 0)));
 
 }
