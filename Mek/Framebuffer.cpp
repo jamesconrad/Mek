@@ -70,7 +70,7 @@ bool Framebuffer::Check()
 	return true;
 }
 
-void Framebuffer::Render()
+void Framebuffer::Render(char* shader)
 {
 
 }

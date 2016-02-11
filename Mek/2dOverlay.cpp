@@ -42,7 +42,7 @@ void twodOverlay::render()
 	//glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(_vao);
 	
-	Program::getInstance().setUniform("hud", "transformationdata", pos);
+	Program::getInstance().setUniform("transformationdata", pos);
 	//Program::getInstance().setUniform("hud", "proj", glm::ortho(0.f, 1920.f, 1080.f, 0.f) * Camera::getInstance().view());
 
 	glActiveTexture(GL_TEXTURE0);

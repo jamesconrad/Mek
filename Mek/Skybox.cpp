@@ -68,6 +68,8 @@ Skybox::Skybox(char* fp[6])
 	_bmp[2].rotate90CounterClockwise();
 	_bmp[3].bitmapFromFile(fp[3]);
 	_bmp[3].rotate90CounterClockwise();
+	_bmp[3].rotate90CounterClockwise();
+	_bmp[3].rotate90CounterClockwise();
 	_bmp[4].bitmapFromFile(fp[4]);
 	_bmp[5].bitmapFromFile(fp[5]);
 
@@ -98,7 +100,7 @@ void Skybox::render()
 
 	glm::mat4 skyMap = glm::translate(Camera::getInstance().projection() * Camera::getInstance().view(), Camera::getInstance().position());
 
-	Program::getInstance().setUniform("skybox", "m", skyMap);
+	Program::getInstance().setUniform("m", skyMap);
 
 	glDepthMask(GL_FALSE);
 

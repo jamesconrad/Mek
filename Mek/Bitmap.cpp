@@ -181,8 +181,8 @@ bool Bitmap::bitmapFromFile(std::string filePath) {
 		width = ilGetInteger(IL_IMAGE_WIDTH);
 		height = ilGetInteger(IL_IMAGE_HEIGHT);
 		channels = ilGetInteger(IL_IMAGE_CHANNELS);
-
-		ILubyte * pixels = ilGetData();
+		
+		ILubyte* pixels = ilGetData();
 
 		_set(width, height, (Format)channels, pixels);
 

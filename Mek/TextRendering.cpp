@@ -76,15 +76,14 @@ void TextRendering::printText2D(const char * text, float x, float y, float size,
 		UVs.push_back(uv_down_left);
 	}
 
-	// Bind shader
-	glUseProgram(Text2DShaderID);
 	glBindVertexArray(vao);
 	// Bind texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Text2DTextureID);
 	// Set our "myTextureSampler" sampler to user Texture Unit 0
 	//glUniform1i(Text2DUniformID, Text2DTextureID);
-	Program::getInstance().setUniform("text", "textcol", colour);
+	Program::getInstance().bind("text");
+	Program::getInstance().setUniform("textcol", colour);
 
 	// 1rst attribute buffer : vertices
 	glBindBuffer(GL_ARRAY_BUFFER, Text2DVertexBufferID);

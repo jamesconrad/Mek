@@ -17,7 +17,7 @@ public:
 	void Bind();
 	static void Unbind();
 
-	void Render();
+	void Render(char * shader);
 
 private:
 	GLuint _fbo;

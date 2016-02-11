@@ -3,9 +3,27 @@
 
 #include "RayVsTriangle.h"
 
+struct tri
+{
+	tri(unsigned int i0, unsigned int i1, unsigned int i2, std::vector<glm::vec3>* h)
+	{
+		i[0] = i0;
+		i[1] = i1;
+		i[2] = i2;
+		v[0] = h->at(i0);
+		v[1] = h->at(i1);
+		v[2] = h->at(i2);
+		fn = glm::cross(v[1] - v[2], v[0] - v[1]);
+	}
+	unsigned int i[3];
+	glm::vec3 v[3];
+	glm::vec3 fn;
+};
+
 Terrain::Terrain()
 {
-
+	_textures.push_back(new Texture("ground.png", GL_LINEAR, GL_REPEAT));
+	_textures.push_back(new Texture("rock.jpg", GL_LINEAR, GL_REPEAT));
 }
 
 void Terrain::InitRender()
@@ -14,45 +32,84 @@ void Terrain::InitRender()
 	Program::getInstance().createShader("terrain", GL_VERTEX_SHADER, "shaders/terrain.vert");
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
-	_vbo = new GLuint[2];
-	glGenBuffers(2, &_vbo[0]);
-
-	printf("%i,%i\n", _vbo[0], _vbo[1]);
-	
-	//Prep the indicies
-	//Sloppy triangle strip method
-	for (int srow = 0; srow < _height - 1; srow++)
-	{
-		for (int i = 0; i < _width; i++)
-		{
-			GLuint rmod = srow * _width;
-			_indices.push_back(rmod + i);
-			_indices.push_back(rmod + i + _width);
-		}
-	}
+	_vbo = new GLuint[3];
+	glGenBuffers(3, &_vbo[0]);
 	//Triangle method
 	//Think quads
-	//for (int r = 0; r < _height - 1; r++)
-	//{
-	//	for (int c = 0; c < _width - 1; c++)
-	//	{
-	//		_indices.push_back(IndexAt(r,c));
-	//		_indices.push_back(IndexAt(r, c + 1));
-	//		_indices.push_back(IndexAt(r + 1, c));
-	//
-	//		_indices.push_back(IndexAt(r, c));
-	//		_indices.push_back(IndexAt(r + 1, c + 1));
-	//		_indices.push_back(IndexAt(r + 1, c));
-	//		
-	//	}
-	//}
+	std::vector<tri> triangle;
+
+	//indexing method : arr[x + width * (y + depth * z)]
+	//arr[x + _width * (y + {0,1})]
+	glm::vec3* norms = new glm::vec3[2 * _width * _height];
+	for (int i = 0; i < _height - 1; i++)//row
+	{
+		for (int j = 0; j < _width - 1; j++)//column
+		{
+			unsigned int rc = i * _width + j;
+			unsigned int a = rc;
+			unsigned int b = rc + _width;
+			unsigned int c = b + 1;
+			unsigned int d = a + 1;
+
+			_indices.push_back(a);
+			_indices.push_back(b);
+			_indices.push_back(c);
+			triangle.push_back(tri(a, b, c, &_heightMap));
+
+			norms[i + _width * (j + 0)] = triangle.back().fn;
+
+			_indices.push_back(c);
+			_indices.push_back(a);
+			_indices.push_back(d);
+			triangle.push_back(tri(c, a, d, &_heightMap));
+
+			norms[i + _width * (j + 1)] = triangle.back().fn;
+		}
+	}
+	//Per vertex normal calculation
+	for (int i = 0; i < _height - 1; i++)//row
+	{
+		for (int j = 0; j < _width - 1; j++)//column
+		{
+			glm::vec3 finalNormal;
+			// Look for upper-left triangles
+			if (j != 0 && i != 0)
+			{
+				for (int k = 0; k < 2; k++)
+					finalNormal += norms[(i - 1) + _width * ((j - 1) + k)];
+			}
+			// Look for upper-right triangles
+			if (i != 0 && j != _width - 1)
+			{
+				finalNormal += norms[(i - 1) + _width * (j + 0)];
+			}
+			// Look for bottom-right triangles
+			if (j != _width - 1 && i != _height - 1)
+			{
+				for (int k = 0; k < 2; k++)
+					finalNormal += norms[i + _width * (j + k)];
+			}
+			// Look for bottom-left triangles
+			if (j != 0 && i != _height - 1)
+			{
+				finalNormal += norms[i + _width * ((j - 1) + 1)];
+			}
+
+			_normals.push_back(glm::normalize(finalNormal));
+		}
+	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(_heightMap[0]) * _heightMap.size(), &_heightMap[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vbo[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(_normals[0]) * _normals.size(), &_normals[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vbo[2]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _indices.size(), &_indices[0], GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
@@ -61,11 +118,20 @@ void Terrain::InitRender()
 void Terrain::Render()
 {
 	Program::getInstance().use("terrain");
-	Program::getInstance().setUniform("terrain", "gWVP", Camera::getInstance().matrix());
-	Program::getInstance().setUniform("terrain", "_min", _min);
-	Program::getInstance().setUniform("terrain", "_max", _max);
+	Program::getInstance().setUniform("gWVP", Camera::getInstance().matrix());
+	Program::getInstance().setUniform("_min", _min);
+	Program::getInstance().setUniform("_max", _max);
 	glBindVertexArray(_vao);
-	glDrawElements(GL_TRIANGLE_STRIP, _indices.size(), GL_UNSIGNED_INT, 0);
+
+	//bind ground
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _textures[0]->object());
+	Program::getInstance().setUniform("t0", 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, _textures[1]->object());
+	Program::getInstance().setUniform("t1", 1);
+
+	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 
@@ -85,10 +151,20 @@ void Terrain::PosAtIndex(unsigned int* x, unsigned int* y, unsigned int index)
 
 void Terrain::LoadHeightMap(char* fp, float heightmod)
 {
-	Bitmap* hm = new Bitmap();
-	hm->bitmapFromFile(std::string(fp));
-	_height = hm->height();
-	_width = hm->width();
+	unsigned int il;
+	ilGenImages(1, &il);
+	ilBindImage(il);
+	ilLoadImage(fp);
+
+	_height = ilGetInteger(IL_IMAGE_HEIGHT);
+	_width = ilGetInteger(IL_IMAGE_WIDTH);
+	unsigned int c = ilGetInteger(IL_IMAGE_CHANNELS);
+	ILubyte* pixels = ilGetData();
+
+	//Bitmap* hm = new Bitmap();
+	//hm->bitmapFromFile(std::string(fp));
+	//_height = hm->height();
+	//_width = hm->width();
 	_size = _height * _width;
 	int hw = _width / 2;
 	int hh = _height / 2;
@@ -97,12 +173,14 @@ void Terrain::LoadHeightMap(char* fp, float heightmod)
 	{
 		for (int y = 0; y < _height; y++)
 		{
-			float h = (float)(hm->getPixel(x, y)[0]) * heightmod;
+			float h = (float)pixels[(y * _width + x) * c] * heightmod;
 			_heightMap.push_back(glm::vec3(x - hw, h, y - hh));
 			h > _max ? _max = h : (h < _min ? _min = h : h);
 			
 		}
 	}
+	ilBindImage(0);
+	ilDeleteImage(il);
 }
 
 void Terrain::GenerateHeightMap(int mode, float* heightmap, float heightmod)
@@ -130,15 +208,18 @@ float Terrain::HeightAtLocation(glm::vec3 p)
 	determine greater value, x or z, to determine which triangle it forms
 	*/
 
-	ui = IndexAt(up.x, up.z);
-	ud = IndexAt(dp.x, dp.z);
+	//ui = IndexAt(up.x, up.z);
+	//ud = IndexAt(dp.x, dp.z);
+
+	ui = up.x + up.y * _width + _size / 2;
+	ud = dp.x + dp.y * _width + _size / 2;
 
 	if (up.x > dp.z)
 	{
 		//lower right
 		verts[0] = _heightMap[ud - 1];
 		verts[1] = _heightMap[ud];
-		verts[2] = _heightMap[ud - _width];
+		verts[2] = _heightMap[ud + _width];
 	}
 	else
 	{

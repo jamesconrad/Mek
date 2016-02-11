@@ -25,8 +25,9 @@ private:
 	GLuint _vao;
 	GLuint* _vbo;
 
-	Texture* _textures;
+	std::vector<Texture*> _textures;
 	std::vector<GLuint> _indices;
+	std::vector<glm::vec3> _normals;
 	std::vector<glm::vec3> _heightMap;//Vec3 for simplyfying rendering process, may need to change this later
 	unsigned int _height, _width, _size;
 	float _min, _max;

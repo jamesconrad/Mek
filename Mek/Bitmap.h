@@ -45,12 +45,12 @@ public:
 
 	Bitmap& operator = (const Bitmap& other);
 
+	unsigned char* _pixels;
 private:
 	ILuint _image;
 	Format _format;
 	unsigned _width;
 	unsigned _height;
-	unsigned char* _pixels;
 
 	void _set(unsigned width, unsigned height, Format format, const unsigned char* pixels);
 	static void _getPixelOffset(unsigned col, unsigned row, unsigned width, unsigned height, Format format);
