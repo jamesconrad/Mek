@@ -30,6 +30,7 @@
 #include "2dOverlayAnim.h"
 #include "Target.h"
 #include "Projectile.h"
+#include "Model.h"
 
 enum game_state { GAME, MENU };
 
@@ -50,6 +51,8 @@ glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
 float playTime = 0;
+
+//Model* testmodel;
 
 Framebuffer* fb;
 
@@ -221,6 +224,7 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+
 	sky->render();
 	ground->Render();
 	animatedMechGC->render();
@@ -231,14 +235,14 @@ static void Render() {
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			//cc->renderHitbox();
+			cc->renderHitbox();
 		}
 	}
 
 	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
 		ObjectManager::instance().pMap[i]->cg->render();
-		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
+		ObjectManager::instance().pMap[i]->cc->renderHitbox();
 	}
 
 	for (unsigned int i = 0, s = targets.size(); i < s; i++)
@@ -246,7 +250,7 @@ static void Render() {
 		if (targets[i]->alive)
 		{
 			targets[i]->cg->render();
-			//targets[i]->cc->renderHitbox();
+			targets[i]->cc->renderHitbox();
 		}
 	}
 
@@ -284,8 +288,11 @@ static void Render() {
 		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
 	}
 
+	//testmodel->render();
+
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)
+
     glfwSwapBuffers(gWindow);
 }
 
@@ -382,8 +389,12 @@ static void Update(float secondsElapsed) {
 
 		skull->update(secondsElapsed);
 
-		model->pos.y = 0.5;
-		//model->pos.y = ground->HeightAtLocation(model->pos);
+		//model->pos.y = 0.5;
+		float h = ground->HeightAtLocation(model->pos);
+		printf("%f\n", h);
+		model->pos.y = h + 0.5;
+
+		cam->offsetPosition(model->pos - cam->position());
 
 		playTime += secondsElapsed;
 		if (score >= 0)
@@ -398,6 +409,7 @@ static void Update(float secondsElapsed) {
 			wonGame();
 
 
+		//printf("%f\n", ground->HeightAtLocation(model->pos));
 		//cam->lookAt(glm::vec3(7.5, 0, -11));
 	}
 	else if (gameState == MENU)
@@ -427,6 +439,7 @@ static void Update(float secondsElapsed) {
 	std::vector<glm::mat4> trans;
 	shotcd += secondsElapsed;
 	tElap += secondsElapsed;
+
 	//Will need to uncomment the following and have gModel relate to the mech's graphics
 	animatedMechGC->BoneTransform(tElap, trans);
 }
@@ -527,7 +540,7 @@ void AppMain() {
 	skull->cycle = true;
 
 	ground = new Terrain();
-	ground->LoadHeightMap("heightmap2.png",1);
+	ground->LoadHeightMap("testhm.png", 1, 5, 0.5);
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	sky = new Skybox(sb);
@@ -760,6 +773,8 @@ void AppMain() {
 
 	LoadTargets();
 	
+	//testmodel = new Model();
+	//testmodel->loadModel("models/Watertower.dae");
 
 	spotLightColour = glm::normalize(spotLightColour);
 	for (int i = 0; i < 6; i++)

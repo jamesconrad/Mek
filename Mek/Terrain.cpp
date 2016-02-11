@@ -13,7 +13,7 @@ struct tri
 		v[0] = h->at(i0);
 		v[1] = h->at(i1);
 		v[2] = h->at(i2);
-		fn = glm::cross(v[1] - v[2], v[0] - v[1]);
+		fn = glm::cross(v[0] - v[1], v[1] - v[2]);
 	}
 	unsigned int i[3];
 	glm::vec3 v[3];
@@ -137,10 +137,7 @@ void Terrain::Render()
 
 unsigned int Terrain::IndexAt(unsigned int x, unsigned int y)
 {
-	if (x > _width || y > _height)
-		return 0;
-	else
-		return (y * _width + x);
+	return (y * _width + x) + (_size / 2);
 }
 
 void Terrain::PosAtIndex(unsigned int* x, unsigned int* y, unsigned int index)
@@ -149,7 +146,7 @@ void Terrain::PosAtIndex(unsigned int* x, unsigned int* y, unsigned int index)
 	*y = index / _height;
 }
 
-void Terrain::LoadHeightMap(char* fp, float heightmod)
+void Terrain::LoadHeightMap(char* fp, float heightmod, unsigned int smoothiter, float factor)
 {
 	unsigned int il;
 	ilGenImages(1, &il);
@@ -169,9 +166,9 @@ void Terrain::LoadHeightMap(char* fp, float heightmod)
 	int hw = _width / 2;
 	int hh = _height / 2;
 	_min = _max = 0;
-	for (int x = 0; x < _width; x++)
+	for (int y = 0; y < _width; y++)
 	{
-		for (int y = 0; y < _height; y++)
+		for (int x = 0; x < _height; x++)
 		{
 			float h = (float)pixels[(y * _width + x) * c] * heightmod;
 			_heightMap.push_back(glm::vec3(x - hw, h, y - hh));
@@ -181,6 +178,9 @@ void Terrain::LoadHeightMap(char* fp, float heightmod)
 	}
 	ilBindImage(0);
 	ilDeleteImage(il);
+
+	for (int i = 0; i < smoothiter; i++)
+		PreSmooth(factor);
 }
 
 void Terrain::GenerateHeightMap(int mode, float* heightmap, float heightmod)
@@ -188,56 +188,68 @@ void Terrain::GenerateHeightMap(int mode, float* heightmap, float heightmod)
 	//TODO: Implement generation functions
 }
 
+float Terrain::LerpHeights(int a, int b, float t)
+{
+	a < 0 || a >= _size ? a = 0 : a;
+	b < 0 || b >= _size ? b = 0 : b;
+	return _heightMap[a].y * (1 - t) + _heightMap[b].y * t;
+}
+
+//This function must be run before the initRender function
+void Terrain::PreSmooth(float factor)
+{
+	for (int i = 0; i < _height; i++)//check left pixel
+		for (int j = 0; j < _width; j++)
+			_heightMap[i * _width + j].y = 
+				LerpHeights(i * _width + j, i * _width + (j-1), factor);
+	for (int i = 0; i < _height; i++)//check up pixel
+		for (int j = 0; j < _width; j++)
+			_heightMap[i * _width + j].y = 
+				LerpHeights(i * _width + j, (i-1) * _width + j, factor);
+	for (int i = 0; i < _height; i++)//check right pixel
+		for (int j = 0; j < _width; j++)
+			_heightMap[i * _width + j].y = 
+				LerpHeights(i * _width + j, i * _width + (j+1), factor);
+	for (int i = 0; i < _height; i++)//check down pixel
+		for (int j = 0; j < _width; j++)
+			_heightMap[i * _width + j].y = 
+				LerpHeights(i * _width + j, (i+1) * _width + j, factor);
+}
+
 float Terrain::HeightAtLocation(glm::vec3 p)
 {
-	glm::vec3 up, dp;
-	up.x = ceil(p.x);
-	up.y = ceil(p.y);
-	up.z = ceil(p.z);
-
-	dp.x = floor(p.x);
-	dp.y = floor(p.y);
-	dp.z = floor(p.z);
-
 	glm::vec3 verts[3];
+	glm::vec3 uP, dP;
 
-	unsigned int ui, ud;
+	uP.x = ceil(p.x);
+	uP.z = floor(p.z);
 
-	/*
-	find rounded down vec, find rounded up vec, those points make up the square
-	determine greater value, x or z, to determine which triangle it forms
-	*/
+	dP.x = floor(p.x);
+	dP.z = ceil(p.z);
 
-	//ui = IndexAt(up.x, up.z);
-	//ud = IndexAt(dp.x, dp.z);
+	if (uP.x == dP.x)
+		dP.x--;
+	if (uP.z == dP.z)
+		dP.z--;
 
-	ui = up.x + up.y * _width + _size / 2;
-	ud = dp.x + dp.y * _width + _size / 2;
+	//top right
+	verts[0] = _heightMap[IndexAt(uP.x, uP.z)];
+	verts[1] = _heightMap[IndexAt(uP.x - 1, uP.z)];
+	verts[2] = _heightMap[IndexAt(uP.x, uP.z + 1)];
 
-	if (up.x > dp.z)
-	{
-		//lower right
-		verts[0] = _heightMap[ud - 1];
-		verts[1] = _heightMap[ud];
-		verts[2] = _heightMap[ud + _width];
-	}
-	else
-	{
-		//default upper left if issue
-		verts[0] = _heightMap[ui + _width];
-		verts[1] = _heightMap[ui];
-		verts[2] = _heightMap[ui + 1];
-	}
 
 	rvtResponse rvt;
 
-	if (RayVsTriangle(glm::vec3(0, -1, 0), p, verts[0], verts[1], verts[2], &rvt))
-	{
-		rvt.intersection.y;
-	}
-	else
-	{
-		return p.y;
-	}
+	if (RayVsTriangle(glm::vec3(0, -1, 0), glm::vec3(p.x, 1024, p.z), verts[0], verts[1], verts[2], &rvt))
+		return rvt.intersection.y;
+	//not over top right, lets check bottom left
+	verts[0] = _heightMap[IndexAt(dP.x, dP.z)];
+	verts[1] = _heightMap[IndexAt(dP.x + 1, dP.z)];
+	verts[2] = _heightMap[IndexAt(dP.x, dP.z - 1)];
 
+	if (RayVsTriangle(glm::vec3(0, -1, 0), glm::vec3(p.x, 1024, p.z), verts[0], verts[1], verts[2], &rvt))
+		return rvt.intersection.y;
+
+	printf("FAIL! : %f,%f\n", p.x, p.z);
+	return p.y - 0.5;
 }

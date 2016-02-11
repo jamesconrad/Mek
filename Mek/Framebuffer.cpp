@@ -26,18 +26,22 @@ Framebuffer::Framebuffer()
 	}
 }
 
-void Framebuffer::CreateColorTexture(unsigned int width, unsigned int height)
+void Framebuffer::CreateColorTexture(unsigned int num, unsigned int width, unsigned int height)
 {
 	Bind();
-	GLuint cbo;
-	glGenTextures(1, &cbo);
-	glBindTexture(GL_TEXTURE_2D, cbo);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + _cbo.size(), GL_TEXTURE_2D, cbo, 0);
-	_cbo.push_back(cbo);
-	_buf.push_back(GL_COLOR_ATTACHMENT0 + _cbo.size());
+	for (int i = 0; i < num; i++)
+	{
+		GLuint cbo;
+		glGenTextures(1, &cbo);
+		glBindTexture(GL_TEXTURE_2D, cbo);
+		//GL_RGBA8, GL_RGB, and GL_UNSIGNED_BYTE might be changed
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, cbo, 0);
+		_cbo.push_back(cbo);
+		_buf.push_back(GL_COLOR_ATTACHMENT0 + _cbo.size());
+	}
 	Unbind();
 }
 
@@ -54,10 +58,20 @@ void Framebuffer::CreateDepthTexture(unsigned int width, unsigned int height)
 void Framebuffer::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+}
+
+void Framebuffer::BindForDraw()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 	glDrawBuffers(_buf.size(), _buf.data());
 }
 
 void Framebuffer::Unbind()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Framebuffer::UnbindForDraw()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDrawBuffer(0);
@@ -72,5 +86,13 @@ bool Framebuffer::Check()
 
 void Framebuffer::Render(char* shader)
 {
+	Program::getInstance().bind(shader);
+	glBindVertexArray(ScreenQuadVAO);
 
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	
+	
+	glBindVertexArray(0);
+	Program::getInstance().unbind();
 }

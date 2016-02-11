@@ -16,6 +16,22 @@ void main()
 	uv.y = abs(p.z) - floor(abs(p.z));
 	vec4 c0 = texture(t0, uv);
 	vec4 c1 = texture(t1, uv);
-	colour = mix(c0, c1, h);
+	//colour = mix(c0, c1, h) * 0.5;
 	//colour = vec4(n, 1);
+
+	// new slope based method
+	//i mean were adding 10 hours to the
+	//load time by calculating it.. lets use it
+
+	float s = dot(vec3(0,1,0), normalize(n));
+	colour = mix(c0, c1, h);
+	if (p.x < 0.1 && p.x > -0.1)
+		colour.g = 1;
+	if (p.z < 0.1 && p.z > -0.1)
+		colour.r = 1;
+	//if (uv.x < 0.05 && uv.x > -0.05)
+	//	colour.b = 0.1;
+	//if (uv.y < 0.05 && uv.x > -0.05)
+	//	colour.b = 0.1;
+	//colour = vec4(normalize(n) * 0.5 + 0.5, 1);
 }

@@ -70,12 +70,23 @@ void Render::createTexture(char* filepath, char* target, TextureFlag usage)
 	_numtex++;
 }
 
-void Render::draw()
+void Render::draw(bool basevertex)
 {
+	glBindVertexArray(_vao);
+	Program::getInstance().bind("standard");
+	//img binding
+	for (int i = 0; i < _numtex; i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, _textures[i].texture->object());
+		Program::getInstance().setUniform(_textures[i].target, i);
+	}
 
+	if (_indexed && basevertex)
+	{
 
-
-	if (_indexed)
+	}
+	else if (_indexed)
 	{
 
 	}

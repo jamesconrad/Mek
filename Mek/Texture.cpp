@@ -39,6 +39,15 @@ Texture::Texture(char* filepath, GLint minMagFiler, GLint wrapMode)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	err = glGetError();
+
+
+	//gluBuild2DMipmaps(GL_TEXTURE_2D,
+	//	imgType, //GL_RGBA
+	//	_originalWidth, //w
+	//	_originalHeight, //h
+	//	imgType, //GL_RGBA
+	//	GL_UNSIGNED_BYTE, //
+	//	bmp.pixelBuffer()); //data
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
 		imgType,

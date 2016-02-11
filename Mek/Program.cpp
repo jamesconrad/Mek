@@ -191,17 +191,6 @@ void Program::createShader(char* name, GLenum type, char* filepath)
 	debfp.append(filepath);
 	debfp = debfp.substr(17);
 	filepath = (char*)debfp.c_str();
-
-	//old method kept for now
-	//std::map<char*, std::pair<std::map<GLenum, Shader*>, GLuint>> _shaderMap;
-	//if (_shaderMap.find(name) == _shaderMap.end())
-	//{
-	//	std::pair<std::map<GLenum, Shader*>, GLuint> tmp;
-	//	_shaderMap.emplace(name, tmp);
-	//}
-	//std::map<GLenum, Shader*> &tmpMap = _shaderMap.at(name).first;
-	//tmpMap.emplace(type, Shader::shaderFromFile(filepath, type));
-
 	GLuint _object;
 
 	//New method
@@ -227,17 +216,9 @@ void Program::createShader(char* name, GLenum type, char* filepath)
 	for (auto i = _smap.at(name).shaders.begin(); i != _smap.at(name).shaders.end(); ++i)
 		glAttachShader(_object, i->second->object());
 
-	//How to scan through all shaders in a _shaderMap : for (std::map<GLenum, Shader>::iterator iter = _shaderMap.at(name).first.begin(); iter != _shaderMap.at(name).first.end(); ++iter)
-	//attach all the shaders
-	//for (std::map<GLenum, Shader*>::iterator iter = _shaderMap.at(name).first.begin(); iter != _shaderMap.at(name).first.end(); ++iter)
-	//	glAttachShader(_object, iter->second->object());
-
 	//link the shaders together
 	glLinkProgram(_object);
 
-	//detach all the shaders
-	//for (std::map<GLenum, Shader*>::iterator iter = _shaderMap.at(name).first.begin(); iter != _shaderMap.at(name).first.end(); ++iter)
-	//	glDetachShader(_object, iter->second->object());
 	for (auto i = _smap.at(name).shaders.begin(); i != _smap.at(name).shaders.end(); ++i)
 		glDetachShader(_object, i->second->object());
 

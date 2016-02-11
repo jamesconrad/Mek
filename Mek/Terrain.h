@@ -12,7 +12,7 @@ class Terrain
 public:
 	Terrain();
 
-	void LoadHeightMap(char* fp, float heightmod);
+	void LoadHeightMap(char* fp, float heightmod, unsigned int smoothiter = 0, float factor = 0.f);
 	void GenerateHeightMap(int mode, float* heightmap, float heightmod);
 
 	void InitRender();
@@ -22,6 +22,10 @@ public:
 private:
 	unsigned int IndexAt(unsigned int x, unsigned int y);
 	void PosAtIndex(unsigned int* x, unsigned int* y, unsigned int index);
+
+	void PreSmooth(float factor);
+	float LerpHeights(int a, int b, float t);
+
 	GLuint _vao;
 	GLuint* _vbo;
 
