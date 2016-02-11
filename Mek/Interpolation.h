@@ -40,6 +40,9 @@ struct Interpolation
 	bool paused = false;
 	bool loop = true;
 
+	bool isFinished = false;
+	glm::vec3 finalCheck;
+
 	void interpolate(float dTime);
 	void speedControlInterp(float dTime);
 };

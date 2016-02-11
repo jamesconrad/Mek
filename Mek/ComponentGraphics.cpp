@@ -564,7 +564,7 @@ void ComponentGraphics::updateShader()
 		Program::getInstance().setUniform("skinning", "gWVP", WVP);
 		Program::getInstance().setUniform("skinning", "gWorld", W);
 		Program::getInstance().setUniform("skinning", "gEyeWorldPos", Camera::getInstance().position());
-		Program::getInstance().setUniform("skinning", "EyeViewVec", Camera::getInstance().forward());
+		//Program::getInstance().setUniform("skinning", "EyeViewVec", Camera::getInstance().forward());
 		Program::getInstance().updateLighting("skinning");
 	}
 }

@@ -60,6 +60,7 @@ uniform sampler2D gColorMap;
 uniform vec3 gEyeWorldPos;
 uniform vec3 EyeViewVec;
 uniform float gMatSpecularIntensity;
+
 uniform float gSpecularPower;
 
 
@@ -114,30 +115,90 @@ vec3 SpotLambert(VSOutput In, SpotLight Light)
 vec3 PointSpecular(VSOutput In, PointLight Light)
 {
 	float Specular;
-	vec3 ReflectedLight = normalize(reflect(normalize( Light.Position - In.Normal), In.Normal));
-	Specular = dot(EyeViewVec, ReflectedLight);
-	return Light.Base.Color * Specular * gMatSpecularIntensity;
+	vec3 viewDirection = normalize(gEyeWorldPos - In.WorldPos);
+	vec3 lightToPoint = normalize(In.WorldPos - Light.Position);
+	vec3 reflectedLight = normalize(reflect(lightToPoint, In.Normal));
+
+	//vec3 ReflectedLight = normalize(reflect(normalize(Light.Position - In.WorldPos), In.Normal));
+	Specular = max(dot(reflectedLight, viewDirection),0.0); //normalize(gEyeWorldPos - Light.Position));
+	Specular = pow(Specular, 24);
+	return Light.Base.Color * Specular * gMatSpecularIntensity; // * specularMask;
 }
 
 float getSpecFresnelTerm(VSOutput In)
 {
 	vec3 EtoV = In.WorldPos - gEyeWorldPos;
-	float fres = max(0.0, min(1.0, 0.5 + 1.0 * (1.0 + dot(EtoV, In.Normal))));
-	//fres *= fres;
+	//float fresnelFactor = dot(In.Normal, EtoV);
+	float fres = max(0.0, min(1.0, 0.1 + 0.5 * (1.0 - dot(In.Normal, EtoV))));
+	//float fres = fresnelFactor*fresnelFactor;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
 	return fres;
 }
 
 float getRimFresnelTerm(VSOutput In)
 {
 	vec3 EtoV = In.WorldPos - gEyeWorldPos;
-	float fres = max(0.0, min(1.0, 0.0 + 0.1 * (1.0 + dot(EtoV, In.Normal))));
+	//float fresnelFactor = dot(In.Normal, EtoV);
+	float fres = max(0.0, min(1.0, 0.0 + 0.1 * (1.0 - dot(EtoV, In.Normal))));
 	fres *= fres;
 	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	fres *= fres;
+	//float fres = 1.0 - fresnelFactor*fresnelFactor*fresnelFactor*fresnelFactor; 
 	return fres;
 }
 
 
 out vec4 FragColor;
+
+vec3 warmColour = vec3(0.5, 0.0, 0.0);
+float alphaWarm = 0.1;
+vec3 coolColour = vec3(0.0, 0.0, 0.5);
+float alphaCool = 0.8;
+
+vec3 getGoochColour(VSOutput In, vec3 coolColour, vec3 warmColour, PointLight Light)
+{
+	vec3 lightVector = normalize(Light.Position - In.WorldPos);
+	float revisedDotProduct = (1.0 + dot(lightVector, In.Normal))/2;
+	vec3 kfinal = vec3(((revisedDotProduct * coolColour + (1 - revisedDotProduct) * warmColour)));
+	//vec3 kfinal = kCool;
+	return kfinal;
+}
 
 
 void main()
@@ -148,6 +209,8 @@ void main()
     In.Normal   = normalize(Normal0);
     In.WorldPos = WorldPos0;
 
+	//vec3 specularMask; = vec3(texture(gSpecularMap, In.TexCoord.xy));
+
 	//vec3 N = In.normal;
 	//vec3 V = normalize(gEyeWorldPos - In.WorldPos);
 	//vec3 L = normalize(lightPos - vIn.vertex);
@@ -155,9 +218,13 @@ void main()
 
 	vec3 Albedo = vec3(texture(gColorMap, In.TexCoord.xy));
 
+	vec3 kCool = coolColour + alphaWarm * Albedo;
+	vec3 kWarm = warmColour + alphaCool * Albedo;
+
 	vec3 Lambert = vec3(0.0);
 
-	vec3 ConstantAmbient = vec3(0.3);
+	vec3 goochColour = vec3(0.0);
+	vec3 ConstantAmbient = vec3(0.1);
 
 	float SpecFresnel = getSpecFresnelTerm(In);
 
@@ -177,93 +244,12 @@ void main()
 	for (int i = 0; i < gNumSpotLights; i++)
 	{
 		Lambert += SpotLambert(In, gSpotLights[i]);
-		SpecularHighlights += max(PointSpecular(In, gSpotLights[i].Base) * SpecFresnel, PointSpecular(In, gSpotLights[i].Base) * RimFresnel);
+		//SpecularHighlights += PointSpecular(In, gSpotLights[i].Base) * SpecFresnel;
+		SpecularHighlights += PointSpecular(In, gSpotLights[i].Base) * SpecFresnel;
+		goochColour += getGoochColour(In, kWarm, kCool, gSpotLights[i].Base);
 	}
-	RimHighlights += clamp(dot(In.Normal,WorldUp), 0.0, 1.0) * RimFresnel * (ConstantAmbient * normalize(gEyeWorldPos - In.WorldPos));
-
-
-	FragColor = vec4((Albedo * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights), 1.0);
+	RimHighlights += clamp(dot(In.Normal,WorldUp), 0.0, 1.0) * RimFresnel * ConstantAmbient; /** (ConstantAmbient * normalize(gEyeWorldPos - In.WorldPos));*/
+	
+	FragColor = vec4(((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights), 1.0);
+	//FragColor = vec4((Albedo + goochColour), 1.0);
 }
-
-//Old Code., By James Conrad
-//vec4 CalcLightInternal(BaseLight Light, vec3 LightDirection, VSOutput In)
-//{
-//    vec4 AmbientColor = vec4(Light.Color * Light.AmbientIntensity, 1.0);
-//    float DiffuseFactor = dot(In.Normal, -LightDirection);
-//
-//    vec4 DiffuseColor  = vec4(0, 0, 0, 0);
-//    vec4 SpecularColor = vec4(0, 0, 0, 0);
-//
-//    if (DiffuseFactor > 0.0)
-//	{
-//        DiffuseColor = vec4(Light.Color * Light.DiffuseIntensity * DiffuseFactor, 1.0);
-//
-//        vec3 VertexToEye = normalize(gEyeWorldPos - In.WorldPos);
-//        vec3 LightReflect = normalize(reflect(LightDirection, In.Normal));
-//	    //vec3 LightReflect = normalize(LightDirection + VertexToEye); //literally all I had to add to go from phong to blinn-phong lighting... feh.
-//        float SpecularFactor = dot(VertexToEye, LightReflect);
-//        if (SpecularFactor > 0.0)
-//		{
-//            SpecularFactor = pow(SpecularFactor, gSpecularPower);
-//            SpecularColor = vec4(Light.Color * gMatSpecularIntensity * SpecularFactor, 1.0);
-//        }
-//    }
-//
-//    return (AmbientColor + DiffuseColor + SpecularColor);
-//}
-//
-//vec4 CalcDirectionalLight(VSOutput In)
-//{
-//    return CalcLightInternal(gDirectionalLight.Base, gDirectionalLight.Direction, In);
-//}
-//
-//vec4 CalcPointLight(PointLight l, VSOutput In)
-//{
-//    vec3 LightDirection = In.WorldPos - l.Position;
-//    float Distance = length(LightDirection);
-//    LightDirection = normalize(LightDirection);
-//
-//    vec4 Color = CalcLightInternal(l.Base, LightDirection, In);
-//    float Attenuation =  l.Atten.Constant +
-//                         l.Atten.Linear * Distance +
-//                         l.Atten.Exp * Distance * Distance;
-//
-//    return Color / Attenuation;
-//}
-//
-//
-//vec4 CalcSpotLight(SpotLight l, VSOutput In)
-//{
-//    vec3 LightToPixel = normalize(l.Base.Position - In.WorldPos);
-//    float SpotFactor = dot(LightToPixel, l.Direction);
-//
-//    if (SpotFactor > l.Cutoff)
-//	{
-//        vec4 Color = CalcPointLight(l.Base, In);
-//        return Color * (1.0 - (1.0 - SpotFactor) * 1.0/(1.0 - l.Cutoff));
-//    }
-//    else 
-//	{
-//        return vec4(0,0,0,0);
-//    }
-//}
-
-
-//FragColor = vec4(SpecularHighlights + RimHighlights, 1.0);
-
-    //vec4 TotalLight;// = CalcDirectionalLight(In);
-	//
-    //for (int i = 0 ; i < gNumPointLights ; i++)
-	//{
-    //    TotalLight += CalcPointLight(gPointLights[i], In);
-    //}
-	//
-    //for (int i = 0 ; i < gNumSpotLights ; i++)
-	//{
-    //    TotalLight += CalcSpotLight(gSpotLights[0], In);
-    //}
-    //
-	//FragColor = texture(gColorMap, In.TexCoord.xy);// * TotalLight;
-	//FragColor = CalcSpotLight(gSpotLights[0], In);
-	//FragColor = vec4(gSpotLights[0].Base.Position, 1);
-	//FragColor = vec4(CalcPointLight(gSpotLights[0].Base, In).xyz, 1);

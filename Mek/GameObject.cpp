@@ -94,7 +94,6 @@ void ObjectManager::updateProjectile(float dTime)
 			todel.push_back(i);
 		}
 	}
-	//check if todel.end() > pmap.size(); If yes, check what the fuck pmap[todel.end()] is. somehow.
 	//remove targets
 	for (unsigned int i = 0, s = todel.size(); i < s; i++)
 	{
