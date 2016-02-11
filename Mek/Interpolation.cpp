@@ -144,6 +144,7 @@ void Interpolation::interpolate(float dTime)
 
 void Interpolation::speedControlInterp(float dTime)
 {
+	isFinished = false;
 	if (curve.size() > 1)
 	{
 		//stage 1 lerp for distance
@@ -161,11 +162,26 @@ void Interpolation::speedControlInterp(float dTime)
 			}
 		}
 
+	
 		float il = invlerp(curve[p1].arcl, curve[p2].arcl, dst);
 		pos = lerp(curve[p1].v, curve[p2].v, il);
 
 		time += dTime;
+
 		if (time > 1)
+		{
+			//glm::vec3 tempPos = curve[p2].v;
+			finalCheck = curve[p2].v;
+			if (finalCheck == curve.back().v)
+			{
+				isFinished = true;
+			}
+			else
+			{
+				isFinished = false;
+			}
 			time = 0;
+			
+		}
 	}
 }
