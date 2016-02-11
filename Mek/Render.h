@@ -68,8 +68,20 @@ public:
 
 	void createTexture(char* filepath, char* target, TextureFlag usage);
 
-	void draw(bool basevertex = false);
+	void draw(char* shader, bool basevertex = false, unsigned int baseIndex = 0, unsigned int baseVertex = 0);
 
+	//This function should be avoided, however was put in for the model class usage.
+	void forceOverride(
+		unsigned int vao,
+		unsigned int* vbo,
+		unsigned int numvbo,
+		unsigned int  dflag,	//currently unused
+		bool indexed,
+		unsigned int numindices,
+		unsigned int numvertices);
+
+
+private:
 	struct Tex
 	{
 		TextureFlag usage;
@@ -82,6 +94,8 @@ public:
 	unsigned int _numvbo;
 	unsigned int  _dflag;
 	bool _indexed;
+	unsigned int _numindices;
+	unsigned int _numvertices;
 	Tex* _textures;
 	unsigned int _numtex;
 };

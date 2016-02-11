@@ -70,10 +70,10 @@ void Render::createTexture(char* filepath, char* target, TextureFlag usage)
 	_numtex++;
 }
 
-void Render::draw(bool basevertex)
+void Render::draw(char* shader, bool basevertex, unsigned int baseIndex, unsigned int baseVertex)
 {
 	glBindVertexArray(_vao);
-	Program::getInstance().bind("standard");
+	Program::getInstance().bind(shader);
 	//img binding
 	for (int i = 0; i < _numtex; i++)
 	{
@@ -83,18 +83,32 @@ void Render::draw(bool basevertex)
 	}
 
 	if (_indexed && basevertex)
-	{
-
-	}
+		glDrawElementsBaseVertex(GL_TRIANGLES, _numindices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int)*baseIndex), baseVertex);
 	else if (_indexed)
-	{
-
-	}
+		glDrawElements(GL_TRIANGLES, _numindices, GL_UNSIGNED_INT, 0);
 	else
-	{
+		glDrawArrays(GL_TRIANGLES, 0, _numvertices);
 
-	}
+	Program::getInstance().unbind();
+	glBindVertexArray(0);
+}
 
-
-
+void Render::forceOverride(
+	unsigned int vao,
+	unsigned int* vbo,
+	unsigned int numvbo,
+	unsigned int  dflag,
+	bool indexed,
+	unsigned int numindices,
+	unsigned int numvertices)
+{
+	_vao = vao;
+	_vbo = new unsigned int[numvbo];
+	for (int i = 0; i < numvbo; i++)
+		_vbo[i] = vbo[i];
+	_numvbo = numvbo;
+	_dflag = dflag;
+	_indexed = indexed;
+	_numindices = numindices;
+	_numvertices = numvertices;
 }

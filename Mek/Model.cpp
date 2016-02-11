@@ -147,13 +147,15 @@ void Model::loadScene(aiScene* scene)
 	}
 	//All done with textures
 
+	unsigned int vao;
+	unsigned int *vbo =  new unsigned int[2];
+
 	//Manually setting the opengl stuff since the render class dosnt support struct data
-	glGenVertexArrays(1, &_render->_vao);
-	glBindVertexArray(_render->_vao);
-	glGenBuffers(2, _render->_vbo);
-	_render->_numvbo = 2;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glGenBuffers(2, vbo);
 	//Indices first as they are the most straight forward
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _render->_vbo[1]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 	
 	//Now to interleave the other data into one vbo
@@ -183,7 +185,7 @@ void Model::loadScene(aiScene* scene)
 		memcpy(vert[i].boneid, boneweight[i].bone, sizeof(unsigned int)* 4);
 		memcpy(vert[i].weight, boneweight[i].weight, sizeof(float)* 4);
 	}
-	glBindBuffer(GL_ARRAY_BUFFER, _render->_vbo[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData)* vert.size(), vert.data(), GL_STATIC_DRAW);
 
 	//vertices
@@ -201,6 +203,9 @@ void Model::loadScene(aiScene* scene)
 	//boneids
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 4, GL_UNSIGNED_INT, GL_FALSE, sizeof(VertexData), BUFFER_OFFSET(48));
+
+	//Pass the preset data to render
+	_render->forceOverride(vao, vbo, 2, NULL, true, numIndices, numVertices);
 }
 
 unsigned int Model::findScalingKey(float animTime, aiNodeAnim* animNode)
@@ -392,5 +397,8 @@ aiNodeAnim* Model::findAnimNode(aiAnimation* anim, std::string nodename)
 
 void Model::render()
 {
-	//todo shaderwork
+	for (int i = 0, s = _entries.size(); i < s; i++)
+	{
+		_render->draw("skinning", true, _entries[i].baseIndex, _entries[i].baseVertex);
+	}
 }

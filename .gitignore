@@ -4,3 +4,13 @@
 *.obj
 *.exe
 *.sdf
+*.pdb
+*.suo
+*.ilk
+*.log
+*.tlog
+*.user
+*.res
+*.pch
+*.lastbuildstate
+*.aps
