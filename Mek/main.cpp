@@ -15,6 +15,7 @@
 #include <list>
 #include <sstream>
 #include <algorithm>
+#include <time.h>
 
 // classes
 #include "Program.h"
@@ -31,6 +32,7 @@
 #include "Target.h"
 #include "Projectile.h"
 #include "Model.h"
+#include "NavMesh.h"
 
 enum game_state { GAME, MENU };
 
@@ -51,6 +53,7 @@ glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
 float playTime = 0;
+NavMesh testNaveMesh;
 
 //Model* testmodel;
 
@@ -151,6 +154,7 @@ void startGame()
 
 void LoadTargets()
 {
+	float randomX, randomY;
 	//load in targets
 	for (int i = 0; i < 6; i++)
 	{
@@ -160,54 +164,78 @@ void LoadTargets()
 
 		if (i == 0)
 		{
-			tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
-			tar->interp.points.push_back(glm::vec3(6, 0.4, 1));
-			tar->interp.points.push_back(glm::vec3(7, 0.4, 0));
-			tar->interp.points.push_back(glm::vec3(6, 0.4, -1));
-			tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
+			//tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
+			//tar->interp.points.push_back(glm::vec3(6, 0.4, 1));
+			//tar->interp.points.push_back(glm::vec3(7, 0.4, 0));
+			//tar->interp.points.push_back(glm::vec3(6, 0.4, -1));
+			//tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
 			tar->interp.state = LINEAR;
+			randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+			tar->generatePath(testNaveMesh);
 		}
 		if (i == 1)
 		{
-			tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
-			tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
-			tar->interp.points.push_back(glm::vec3(-1, 0.4, 9));
-			tar->interp.points.push_back(glm::vec3(1, 0.4, 9));
-			tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
-			tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
-			tar->interp.state = CATMULLROM;
+			//tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
+			//tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
+			//tar->interp.points.push_back(glm::vec3(-1, 0.4, 9));
+			//tar->interp.points.push_back(glm::vec3(1, 0.4, 9));
+			//tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
+			//tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
+			tar->interp.state = LINEAR;
+			randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+			tar->generatePath(testNaveMesh);
 		}
 		if (i == 2)
 		{
-			tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
-			tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
-			tar->interp.points.push_back(glm::vec3(-2, 0.4, 8));
-			tar->interp.points.push_back(glm::vec3(-4, 0.4, 8));
-			tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
-			tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
-			tar->interp.state = CATMULLROM;
+			//tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
+			//tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
+			//tar->interp.points.push_back(glm::vec3(-2, 0.4, 8));
+			//tar->interp.points.push_back(glm::vec3(-4, 0.4, 8));
+			//tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
+			//tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
+			tar->interp.state = LINEAR;
+			randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+			tar->generatePath(testNaveMesh);
 		}
 		if (i == 3)
 		{
-			tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
-			tar->interp.points.push_back(glm::vec3(-6, 0.4, 8));
-			tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
+			//tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
+			//tar->interp.points.push_back(glm::vec3(-6, 0.4, 8));
+			//tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
 			tar->interp.state = LINEAR;
+			randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+			tar->generatePath(testNaveMesh);
 		}
 		if (i == 4)
 		{
-			tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
-			tar->interp.points.push_back(glm::vec3(3, 0.4, 8));
-			tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
+			//tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
+			//tar->interp.points.push_back(glm::vec3(3, 0.4, 8));
+			//tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
 			tar->interp.state = LINEAR;
+			randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+			tar->generatePath(testNaveMesh);
 		}
 		if (i == 5)
 		{
-			tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
-			tar->interp.points.push_back(glm::vec3(-4, 0.4, 1));
-			tar->interp.points.push_back(glm::vec3(-4, 0.4, -1));
-			tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
+			//tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
+			//tar->interp.points.push_back(glm::vec3(-4, 0.4, 1));
+			//tar->interp.points.push_back(glm::vec3(-4, 0.4, -1));
+			//tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
 			tar->interp.state = LINEAR;
+			randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+			tar->generatePath(testNaveMesh);
 		}
 
 
@@ -378,7 +406,7 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
-			targets[i]->update(secondsElapsed/10);
+			targets[i]->update(secondsElapsed/10, testNaveMesh);
 			if (targets[i]->hit && targets[i]->alive)
 			{
 				targets[i]->alive = false;
@@ -455,6 +483,8 @@ void OnError(int errorCode, const char* msg) {
 
 // the program starts here
 void AppMain() {
+	testNaveMesh.loadNavMesh("../Release/models/NavMeshes/TestLevelNavMesh-scaled.obj");
+	srand(time(NULL));
     // initialise GLFW
     glfwSetErrorCallback(OnError);
     if(!glfwInit())
