@@ -10,6 +10,23 @@ T lerp(T d0, T d1, float t)
 {
 	return d0 * (1 - t) + d1 * t;
 }
+template <typename T>
+T slerp(T p0, T p1, float deltaT)
+{
+	float theta = acosf(glm::dot(p0, p1));
+	if (theta == 0)
+		return p0;
+	else if (theta == 180)
+		return lerp(p0, p1, deltaT);
+	else
+		return p0 * ((sin((1 - deltaT) * theta)) / sin(theta)) + p1 * ((sin(deltaT * theta)) / sin(theta));
+}
+
+template <typename T>
+float invlerp(T d0, T d1, T res)
+{
+	return (res + (d0*-1)) / (d1 + (d0*-1));
+}
 
 struct ce
 {

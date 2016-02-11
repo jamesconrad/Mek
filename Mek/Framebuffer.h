@@ -10,12 +10,17 @@ class Framebuffer
 public:
 	Framebuffer();
 
-	void CreateDepthTexture(unsigned int width, unsigned int height);
-	void CreateColorTexture(unsigned int width, unsigned int height);
+	void CreateDepthTexture(unsigned int width = 1920, unsigned int height = 1080);
+	void CreateColorTexture(unsigned int num, unsigned int width = 1920, unsigned int = 1080);
 	bool Check();
 
+	void BindTextureForSampling(int texIndex, GLenum texUnit);
+	void UnbindTexture(GLenum texUnit);
+
 	void Bind();
+	void BindForDraw();
 	static void Unbind();
+	static void UnbindForDraw();
 
 	void Render(char * shader);
 

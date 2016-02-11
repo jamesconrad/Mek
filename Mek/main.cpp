@@ -15,7 +15,6 @@
 #include <list>
 #include <sstream>
 #include <algorithm>
-#include <time.h>
 
 // classes
 #include "Program.h"
@@ -31,8 +30,7 @@
 #include "2dOverlayAnim.h"
 #include "Target.h"
 #include "Projectile.h"
-
-#include "NavMesh.h"
+#include "Model.h"
 
 enum game_state { GAME, MENU };
 
@@ -49,10 +47,12 @@ twodOverlayAnim* skull;
 game_state gameState = MENU;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
-glm::vec3 spotLightColour = glm::vec3(50, 50, 50); //glm::vec3(158, 64, 60);
+glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
 float playTime = 0;
+
+//Model* testmodel;
 
 Framebuffer* fb;
 
@@ -60,8 +60,6 @@ GameObject* animatedMech;
 ComponentGraphics* animatedMechGC;
 Terrain* ground;
 Skybox* sky;
-NavMesh testNavMesh;
-
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
@@ -153,105 +151,63 @@ void startGame()
 
 void LoadTargets()
 {
-	float randomX, randomY;
 	//load in targets
 	for (int i = 0; i < 6; i++)
 	{
 		Target* tar = new Target("models/Dummy.dae", 0.5);
 
 		//last point needs to == first point
-		
+
 		if (i == 0)
 		{
-			//tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
-			//tar->interp.points.push_back(glm::vec3(6, 0.4, 1));
-			//tar->interp.points.push_back(glm::vec3(7, 0.4, 0));
-			//tar->interp.points.push_back(glm::vec3(6, 0.4, -1));
-			//tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
+			tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
+			tar->interp.points.push_back(glm::vec3(6, 0.4, 1));
+			tar->interp.points.push_back(glm::vec3(7, 0.4, 0));
+			tar->interp.points.push_back(glm::vec3(6, 0.4, -1));
+			tar->interp.points.push_back(glm::vec3(5, 0.4, 0));
 			tar->interp.state = LINEAR;
-			//tar->go->pos = tar->AiHandle.path[0]->center + glm::vec3(0, 0.4, 0);
-			randomX = randomClampedInt(0, testNavMesh.TriangleSet.size() - 1);
-			randomY = randomClampedInt(0, testNavMesh.TriangleSet[randomX].size() - 1);
-			tar->tempPosition = testNavMesh.TriangleSet[randomX][randomY];
-			tar->generatePath(testNavMesh);
-			
 		}
 		if (i == 1)
 		{
-			//tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
-			//tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
-			//tar->interp.points.push_back(glm::vec3(-1, 0.4, 9));
-			//tar->interp.points.push_back(glm::vec3(1, 0.4, 9));
-			//tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
-			//tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
-			tar->interp.state = LINEAR;
-
-			//tar->go->pos = glm::vec3(0, 0.4, 12);
-
-			randomX = randomClampedInt(0, testNavMesh.TriangleSet.size() - 1);
-			randomY = randomClampedInt(0, testNavMesh.TriangleSet[randomX].size() - 1);
-			tar->tempPosition = testNavMesh.TriangleSet[randomX][randomY];
-			tar->generatePath(testNavMesh);
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
+			tar->interp.points.push_back(glm::vec3(-1, 0.4, 9));
+			tar->interp.points.push_back(glm::vec3(1, 0.4, 9));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 9));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 12));
+			tar->interp.state = CATMULLROM;
 		}
 		if (i == 2)
 		{
-			//tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
-			//tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
-			//tar->interp.points.push_back(glm::vec3(-2, 0.4, 8));
-			//tar->interp.points.push_back(glm::vec3(-4, 0.4, 8));
-			//tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
-			//tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
-			tar->interp.state = LINEAR;
-
-			//tar->go->pos = glm::vec3(-3, 0.4, 12);
-
-			randomX = randomClampedInt(0, testNavMesh.TriangleSet.size() - 1);
-			randomY = randomClampedInt(0, testNavMesh.TriangleSet[randomX].size() - 1);
-			tar->tempPosition = testNavMesh.TriangleSet[randomX][randomY];
-			tar->generatePath(testNavMesh);
+			tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-2, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-4, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-3, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-3, 0.4, 12));
+			tar->interp.state = CATMULLROM;
 		}
 		if (i == 3)
 		{
-			//tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
-			//tar->interp.points.push_back(glm::vec3(-6, 0.4, 8));
-			//tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(-6, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(-6, 0.4, 12));
 			tar->interp.state = LINEAR;
-
-			//tar->go->pos = glm::vec3(-6, 0.4, 12);
-
-			randomX = randomClampedInt(0, testNavMesh.TriangleSet.size() - 1);
-			randomY = randomClampedInt(0, testNavMesh.TriangleSet[randomX].size() - 1);
-			tar->tempPosition = testNavMesh.TriangleSet[randomX][randomY];
-			tar->generatePath(testNavMesh);
 		}
 		if (i == 4)
 		{
-			//tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
-			//tar->interp.points.push_back(glm::vec3(3, 0.4, 8));
-			//tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
+			tar->interp.points.push_back(glm::vec3(3, 0.4, 8));
+			tar->interp.points.push_back(glm::vec3(3, 0.4, 12));
 			tar->interp.state = LINEAR;
-
-			//tar->go->pos = glm::vec3(3, 0.4, 12);
-
-			randomX = randomClampedInt(0, testNavMesh.TriangleSet.size() - 1);
-			randomY = randomClampedInt(0, testNavMesh.TriangleSet[randomX].size() - 1);
-			tar->tempPosition = testNavMesh.TriangleSet[randomX][randomY];
-			tar->generatePath(testNavMesh);
 		}
 		if (i == 5)
 		{
-			//tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
-			//tar->interp.points.push_back(glm::vec3(-4, 0.4, 1));
-			//tar->interp.points.push_back(glm::vec3(-4, 0.4, -1));
-			//tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
+			tar->interp.points.push_back(glm::vec3(-4, 0.4, 1));
+			tar->interp.points.push_back(glm::vec3(-4, 0.4, -1));
+			tar->interp.points.push_back(glm::vec3(0, 0.4, 0));
 			tar->interp.state = LINEAR;
-
-			//tar->go->pos = glm::vec3(0, 0.4, 0);
-
-			randomX = randomClampedInt(0, testNavMesh.TriangleSet.size() - 1);
-			randomY = randomClampedInt(0, testNavMesh.TriangleSet[randomX].size() - 1);
-			tar->tempPosition = testNavMesh.TriangleSet[randomX][randomY];
-			tar->generatePath(testNavMesh);
 		}
 
 
@@ -268,6 +224,7 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+
 	sky->render();
 	ground->Render();
 	animatedMechGC->render();
@@ -278,14 +235,14 @@ static void Render() {
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			//cc->renderHitbox();
+			cc->renderHitbox();
 		}
 	}
 
 	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
 		ObjectManager::instance().pMap[i]->cg->render();
-		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
+		ObjectManager::instance().pMap[i]->cc->renderHitbox();
 	}
 
 	for (unsigned int i = 0, s = targets.size(); i < s; i++)
@@ -293,7 +250,7 @@ static void Render() {
 		if (targets[i]->alive)
 		{
 			targets[i]->cg->render();
-			//targets[i]->cc->renderHitbox();
+			targets[i]->cc->renderHitbox();
 		}
 	}
 
@@ -330,19 +287,12 @@ static void Render() {
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
 		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
 	}
-	glDisable(GL_CULL_FACE);
-	glBegin(GL_TRIANGLES);
-	glVertex3f(-87.193561, 20.730296, 66.114849);
-	glVertex3f(87.193561, 20.730296, 66.114849);
-	glVertex3f(-87.193561, 20.730296, -108.272273);
 
-	glVertex3f(-87.193561, 20.730296, -108.272273);
-	glVertex3f(87.193561, 20.730296, 66.114849);
-	glVertex3f(87.193561, 20.730296, -108.272273);
-	glEnd();
+	//testmodel->render();
 
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)
+
     glfwSwapBuffers(gWindow);
 }
 
@@ -428,8 +378,7 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
-			targets[i]->update(secondsElapsed / 10, testNavMesh); //I don't particularly like passing the navMesh here.
-			//targets[i]->update(secondsElapsed/10);
+			targets[i]->update(secondsElapsed/10);
 			if (targets[i]->hit && targets[i]->alive)
 			{
 				targets[i]->alive = false;
@@ -440,8 +389,12 @@ static void Update(float secondsElapsed) {
 
 		skull->update(secondsElapsed);
 
-		model->pos.y = 0.5;
-		//model->pos.y = ground->HeightAtLocation(model->pos);
+		//model->pos.y = 0.5;
+		float h = ground->HeightAtLocation(model->pos);
+		printf("%f\n", h);
+		model->pos.y = h + 0.5;
+
+		cam->offsetPosition(model->pos - cam->position());
 
 		playTime += secondsElapsed;
 		if (score >= 0)
@@ -456,6 +409,7 @@ static void Update(float secondsElapsed) {
 			wonGame();
 
 
+		//printf("%f\n", ground->HeightAtLocation(model->pos));
 		//cam->lookAt(glm::vec3(7.5, 0, -11));
 	}
 	else if (gameState == MENU)
@@ -486,8 +440,6 @@ static void Update(float secondsElapsed) {
 	shotcd += secondsElapsed;
 	tElap += secondsElapsed;
 
-	glm::vec3 playerPosition = model->pos;
-	//std::cout << testNavMesh.isPointInsideTriangle(playerPosition) << std::endl;
 	//Will need to uncomment the following and have gModel relate to the mech's graphics
 	animatedMechGC->BoneTransform(tElap, trans);
 }
@@ -503,9 +455,6 @@ void OnError(int errorCode, const char* msg) {
 
 // the program starts here
 void AppMain() {
-	//testNavMesh.loadNavMesh("../Release/models/NavMeshes/TestLevelNavMesh.obj");
-	testNavMesh.loadNavMesh("../Release/models/NavMeshes/TestLevelNavMesh-scaled.obj");
-	srand((unsigned)time(NULL));
     // initialise GLFW
     glfwSetErrorCallback(OnError);
     if(!glfwInit())
@@ -591,7 +540,7 @@ void AppMain() {
 	skull->cycle = true;
 
 	ground = new Terrain();
-	ground->LoadHeightMap("heightmap2.png",1);
+	ground->LoadHeightMap("testhm.png", 1, 5, 0.5);
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	sky = new Skybox(sb);
@@ -729,13 +678,8 @@ void AppMain() {
 			else if (i == 12)
 			{
 				gObject->SetName("West Wall");
-				//cModel->loadModel("models/NavMeshes/TestNavMesh.dae");
-				//
-				//gObject->scale = glm::vec3(1, 1, 1);
-				//gObject->pos = glm::vec3(0, 50.0, 0);
-				
 				cModel->loadModel("models/Container_Wal_LP90.dae");
-				
+
 				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
 				gObject->pos = glm::vec3(50, 0, -125);
 			}
@@ -749,13 +693,9 @@ void AppMain() {
 			}
 			else if (i == 14)
 			{
-				//gObject->SetName("Container 90");
-				//cModel->loadModel("models/NavMeshes/TestNavMesh.dae");
-				//
-				//gObject->scale = glm::vec3(0, 0, 0);
-				//gObject->pos = glm::vec3(0, 5, 0);
-				
-				cModel->loadModel("models/Container90.dae"); 
+				gObject->SetName("Container 90");
+				cModel->loadModel("models/Container90.dae");
+
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(70, 0, 70);
 			}
@@ -833,6 +773,8 @@ void AppMain() {
 
 	LoadTargets();
 	
+	//testmodel = new Model();
+	//testmodel->loadModel("models/Watertower.dae");
 
 	spotLightColour = glm::normalize(spotLightColour);
 	for (int i = 0; i < 6; i++)

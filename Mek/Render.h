@@ -3,7 +3,7 @@
 //  Swift Strike Studios                                                                   //
 //  Standard class for drawing objects from given data                                     //
 //=========================================================================================//
-
+#pragma once
 #include "Program.h"
 #include "Texture.h"
 
@@ -19,9 +19,18 @@ enum DrawFlag
 //Texture flags
 enum TextureFlag
 {
-	IMAGE = 0x01,
-	NORMAL = 0x02,
-	BUMP = 0x04
+	NONE		= 0,
+	DIFFUSE		,
+	SPECULAR	,
+	AMBIENT		,
+	EMISSIVE	,
+	HEIGHT		,
+	NORMALS		,
+	SHININESS	,
+	OPACITY		,//DO NOT USE
+	DISPLACEMENT,
+	LIGHTMAP	,
+	REFLECTION	
 };
 
 struct VBOData
@@ -59,8 +68,8 @@ public:
 
 	void createTexture(char* filepath, char* target, TextureFlag usage);
 
-	void draw();
-private:
+	void draw(bool basevertex = false);
+
 	struct Tex
 	{
 		TextureFlag usage;

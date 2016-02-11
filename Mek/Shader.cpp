@@ -42,28 +42,12 @@ Shader::Shader(const std::string& shaderCode, GLenum shaderType) :
     *_refCount = 1;
 }
 
-Shader::Shader(const Shader& other) :
-    _object(other._object),
-    _refCount(other._refCount)
-{
-    _retain();
-}
-
 Shader::~Shader() {
-    //_refCount will be NULL if constructor failed and threw an exception
-    if(_refCount) _release();
+
 }
 
 GLuint Shader::object() const {
     return _object;
-}
-
-Shader& Shader::operator = (const Shader& other) {
-    _release();
-    _object = other._object;
-    _refCount = other._refCount;
-    _retain();
-    return *this;
 }
 
 std::string ReadShader(char* filepath)
@@ -98,36 +82,7 @@ std::string ReadShader(char* filepath)
 }
 
 Shader* Shader::shaderFromFile(const std::string& filePath, GLenum shaderType) {
-    //open file
-    //std::ifstream f;
-    //f.open(filePath.c_str(), std::ios::in | std::ios::binary);
-    //if(!f.is_open()){
-    //    throw std::runtime_error(std::string("Failed to open file: ") + filePath);
-    //}
-	//
-    ////read whole file into stringstream buffer
-    //std::stringstream buffer;
-    //buffer << f.rdbuf();
-	//
-	//
-    ////return new shader
-	
-	//get shader code
     Shader* shader = new Shader(ReadShader((char*)filePath.c_str()), shaderType);
     return shader;
-}
-
-void Shader::_retain() {
-    assert(_refCount);
-    *_refCount += 1;
-}
-
-void Shader::_release() {
-    assert(_refCount && *_refCount > 0);
-    *_refCount -= 1;
-    if(*_refCount == 0){
-        glDeleteShader(_object); _object = 0;
-        delete _refCount; _refCount = NULL;
-    }
 }
 
