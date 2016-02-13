@@ -9,17 +9,23 @@ float Interpolation::arclength(int i)
 
 void Interpolation::buildCurve()
 {
+	ce c;
 	curveFin = false;
 	while (!curveFin && points.size() > 1)
 	{
 		interpolate(0.04);
-		ce c;
+		
 		c.v = pos;
 		c.seg = stage;
 		c.tval = time;
 		c.arcl = 0;
 		curve.push_back(c);
 	}
+	c.v = points.back();
+	c.seg = stage;
+	c.tval = 1.0f;
+	c.arcl = 0;
+	curve.push_back(c);
 	//distance function
 	//mag(p2 - p1) + alp1
 	for (int i = 1; i < curve.size(); i++)
@@ -37,6 +43,8 @@ void Interpolation::interpolate(float dTime)
 {
 	std::vector<glm::vec3> lerpItems;
 
+	if (time >= 1.0f)
+		time = 1.0f;
 	if (stage + 1 < points.size() && state == LINEAR)
 	{
 		pos = lerp(points[stage], points[stage + 1], time);
@@ -149,6 +157,8 @@ void Interpolation::speedControlInterp(float dTime)
 	{
 		//stage 1 lerp for distance
 		//d is incremented by vel and reset to 0
+		if (time > 1.0f)
+			time = 1.0f;
 		float dst = lerp(0.0f, 1.0f, time);
 		//stage 2 find closest points
 		int p1 = 0, p2 = 0;
@@ -164,14 +174,22 @@ void Interpolation::speedControlInterp(float dTime)
 
 	
 		float il = invlerp(curve[p1].arcl, curve[p2].arcl, dst);
-		pos = lerp(curve[p1].v, curve[p2].v, il);
+	
+		if (time >= 1.0f)
+		{
+			pos = curve.back().v;
+		}
+		else
+			pos = lerp(curve[p1].v, curve[p2].v, il);
 
 		time += dTime;
-
+		
 		if (time > 1)
 		{
 			//glm::vec3 tempPos = curve[p2].v;
 			finalCheck = curve[p2].v;
+			time = 0;
+			pos = finalCheck;
 			if (finalCheck == curve.back().v)
 			{
 				isFinished = true;
@@ -180,8 +198,7 @@ void Interpolation::speedControlInterp(float dTime)
 			{
 				isFinished = false;
 			}
-			time = 0;
-			
 		}
+
 	}
 }
