@@ -6,6 +6,7 @@
 #include "lib\glm\gtc\matrix_transform.hpp"
 #include "lib\glm\gtx\rotate_vector.hpp"
 #include "include\IL\ilut.h"
+#include "FMODmanager.h"
 
 // standard C++ libraries
 #include <cassert>
@@ -56,6 +57,11 @@ unsigned int score;
 float playTime = 0;
 NavMesh testNaveMesh;
 
+FSystem* fsystem;
+FSound* background;
+FSound* laserSound;
+FSound* test;
+std::vector<FSound*> soundArchive;
 //Model* testmodel;
 
 Framebuffer* fb;
@@ -66,6 +72,15 @@ Terrain* ground;
 Skybox* sky;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
+void initFSystem(){
+	fsystem = new FSystem;
+	background = new FSound(fsystem, "../debug/media/drumloop.wav", SOUND_TYPE_2D_LOOP);
+	laserSound = new FSound(fsystem, "../debug/media/swish.wav", SOUND_TYPE_3D);
+	test = new FSound(fsystem, "../debug/media/wave.mp3",SOUND_TYPE_3D_LOOP,0.5,5);
+	test->soundPos = { 0.0, 28.0, 0.0 };
+	test->play();
+	//soundArchive.push_back(&laserSound);
+}
 void LoadShaders(char* vertFilename, char* fragFilename) 
 {
 	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
@@ -79,7 +94,6 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	Program::getInstance().createShader("hud", GL_VERTEX_SHADER, "shaders/hud.vert");
 	Program::getInstance().createShader("hud", GL_FRAGMENT_SHADER, "shaders/hud.frag");
 }
-
 // constants
 const glm::vec2 SCREEN_SIZE(1920, 1080);
 
@@ -101,30 +115,22 @@ static Texture* LoadTexture(char* filename) {
     bmp.flipVertically();
     return new Texture(filename);
 }
-
-
 // initialises the gWoodenCrate global
 static void LoadWoodenCrateAsset() {
     LoadShaders("shaders/vertex-shader.vert", "shaders/fragment-shader.frag");
 }
-
 // convenience function that returns a translation matrix
 glm::mat4 translate(GLfloat x, GLfloat y, GLfloat z) {
     return glm::translate(glm::mat4(), glm::vec3(x,y,z));
 }
-
-
 // convenience function that returns a scaling matrix
 glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
     return glm::scale(glm::mat4(), glm::vec3(x,y,z));
 }
-
-
 //create all the `instance` structs for the 3D scene, and add them to `gInstances`
 static void CreateInstances() {
 
 }
-
 void wonGame()
 {
 	gameState = MENU;
@@ -134,7 +140,6 @@ void wonGame()
 	Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
 	Camera::getInstance().setNearAndFarPlanes(1.f, 500.f);
 }
-
 void startGame()
 {
 	gameState = GAME;
@@ -151,8 +156,8 @@ void startGame()
 	}
 	Camera::getInstance().setNearAndFarPlanes(0.01f, 50.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
+	background->play();
 }
-
 void LoadTargets()
 {
 	float randomX, randomY;
@@ -244,7 +249,6 @@ void LoadTargets()
 		targets.push_back(tar);
 	}
 }
-
 // draws a single frame
 static void Render() {
 	//fb->Bind();
@@ -324,11 +328,11 @@ static void Render() {
 
     glfwSwapBuffers(gWindow);
 }
-
 #define SHOT_CD 0.1
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
+	fsystem->Update();
 	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
@@ -339,6 +343,17 @@ static void Update(float secondsElapsed) {
 	glm::vec3 fmy = cam->forward();
 	fmy.y = 0;
 	bool shoot = false;
+
+	FMOD_VECTOR _pos, _for, _up;
+	_pos = { cam->position().x, cam->position().y, cam->position().z };
+	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
+	_up = { cam->up().x, cam->up().y, cam->up().z };
+
+	fsystem->set(_pos, _for, _up);
+
+	system("CLS");
+	cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
+	cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
 
 	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
 	if (c->Refresh())
@@ -363,6 +378,7 @@ static void Update(float secondsElapsed) {
 		if (glfwGetKey(gWindow, ' '))
 		{
 			shoot = true;
+
 		}
 
 		//rotate camera based on mouse movement
@@ -395,7 +411,7 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD)
 		{
-			Projectile* pr = new Projectile(p, f, 0.5, 100, 10);
+			Projectile* pr = new Projectile(p, f, 0.5, 100, 10,laserSound->play());
 			ObjectManager::instance().pMap.push_back(pr);
 			shotcd = 0;
 		}
@@ -485,19 +501,21 @@ static void Update(float secondsElapsed) {
 	//Will need to uncomment the following and have gModel relate to the mech's graphics
 	animatedMechGC->BoneTransform(tElap, trans);
 }
-
 // records how far the y axis has been scrolled
 void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
     gScrollY += deltaY;
 }
-
 void OnError(int errorCode, const char* msg) {
     throw std::runtime_error(msg);
 }
-
 // the program starts here
 void AppMain() {
+<<<<<<< HEAD
 	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/TestLevelNavMesh-scaled.obj");
+=======
+	initFSystem();
+	testNaveMesh.loadNavMesh("../Release/models/NavMeshes/TestLevelNavMesh-scaled.obj");
+>>>>>>> c090aec440d9f63e334600214d750019cd006b92
 	srand(time(NULL));
     // initialise GLFW
     glfwSetErrorCallback(OnError);
