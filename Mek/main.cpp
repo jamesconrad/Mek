@@ -510,12 +510,8 @@ void OnError(int errorCode, const char* msg) {
 }
 // the program starts here
 void AppMain() {
-<<<<<<< HEAD
-	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/TestLevelNavMesh-scaled.obj");
-=======
 	initFSystem();
-	testNaveMesh.loadNavMesh("../Release/models/NavMeshes/TestLevelNavMesh-scaled.obj");
->>>>>>> c090aec440d9f63e334600214d750019cd006b92
+	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/TestLevelNavMesh-scaled.obj");
 	srand(time(NULL));
     // initialise GLFW
     glfwSetErrorCallback(OnError);

@@ -94,9 +94,9 @@ void Target::determineCombatRoute(NavMesh &navMesh)
 {
 	glm::vec2 pointCoordinates;
 	std::vector<combatPosition> positions;
-	for (float i = 0; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 	{
-		pointCoordinates = navMesh.isPointInsideTriangle(glm::vec3(glm::rotateY(glm::vec4(go->dir, 1.0f), 160.f / i) * 10.f * i % 2.f));
+		pointCoordinates = navMesh.isPointInsideTriangle(glm::vec3(glm::rotateY(glm::vec4(go->dir, 1.0f), 160.f / i) * 10.f * ((float) (i % 2) + 0.5f)));
 		if (pointCoordinates.x != -1 && pointCoordinates.y != -1)
 		{
 			combatPosition tempPosition;
