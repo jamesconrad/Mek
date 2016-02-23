@@ -63,7 +63,7 @@ void Target::generatePath(NavMesh &mesh)
 	float clampedNumberY1 = randomClampedInt(0, mesh.TriangleSet[clampedNumberX1].size() - 1);  float clampedNumberY2 = randomClampedInt(0, mesh.TriangleSet[clampedNumberX2].size() - 1);
 	//glm::vec2 temp = mesh.isPointInsideTriangle(go->pos); //assuming that the object is staring inside the nav mesh
 	AiHandle.determineRoute(mesh, tempPosition, mesh.TriangleSet[clampedNumberX2][clampedNumberY2]);
-	for (int i = AiHandle.path.size() - 1; i > 0; i--)
+	for (int i = AiHandle.path.size() - 1; i >= 0; i--)
 	{
 		interp.points.push_back(AiHandle.path[i]->center + glm::vec3(0, 0.4, 0));
 	}

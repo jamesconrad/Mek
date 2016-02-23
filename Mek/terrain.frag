@@ -25,10 +25,10 @@ void main()
 
 	float s = dot(vec3(0,1,0), normalize(n));
 	colour = mix(c0, c1, h);
-	if (p.x < 0.1 && p.x > -0.1)
-		colour.g = 1;
-	if (p.z < 0.1 && p.z > -0.1)
-		colour.r = 1;
+	//if (p.x < 0.1 && p.x > -0.1)
+	//	colour.g = 1;
+	//if (p.z < 0.1 && p.z > -0.1)
+	//	colour.r = 1;
 	//if (uv.x < 0.05 && uv.x > -0.05)
 	//	colour.b = 0.1;
 	//if (uv.y < 0.05 && uv.x > -0.05)

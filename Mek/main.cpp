@@ -267,14 +267,14 @@ static void Render() {
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			cc->renderHitbox();
+			//cc->renderHitbox();
 		}
 	}
 
 	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
 		ObjectManager::instance().pMap[i]->cg->render();
-		ObjectManager::instance().pMap[i]->cc->renderHitbox();
+		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
 	}
 
 	for (unsigned int i = 0, s = targets.size(); i < s; i++)
@@ -282,7 +282,7 @@ static void Render() {
 		if (targets[i]->alive)
 		{
 			targets[i]->cg->render();
-			targets[i]->cc->renderHitbox();
+			//targets[i]->cc->renderHitbox();
 		}
 	}
 
@@ -422,7 +422,9 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
-			targets[i]->update(secondsElapsed/10, testNaveMesh);
+			targets[i]->update(secondsElapsed/5, testNaveMesh);
+			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) + 0.4; //this moves the targets to the correct position above the ground.
+
 			if (targets[i]->hit && targets[i]->alive)
 			{
 				targets[i]->alive = false;
@@ -801,6 +803,7 @@ void AppMain() {
 			}
 
 			gObject->pos /= 10.f;
+			gObject->pos.y = ground->HeightAtLocation(gObject->pos);
 
 			cModel->setOwner(gObject);
 			c = cModel;

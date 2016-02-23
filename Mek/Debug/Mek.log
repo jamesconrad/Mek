@@ -1,8 +1,14 @@
+<<<<<<< HEAD
 ﻿Build started 2/22/2016 4:47:01 PM.
      1>Project "C:\Users\100488896\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
+=======
+﻿Build started 2/11/2016 6:16:59 PM.
+     1>Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" on node 2 (Build target(s)).
+>>>>>>> 1c8565156dc34991b5e3c0c75b42590e7a066b82
      1>PreBuildEvent:
          echo C:\Users\100488896\Documents\Mek\Mek\
          :VCEnd
+<<<<<<< HEAD
          C:\Users\100488896\Documents\Mek\Mek\
        ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _CRT_SECURE_NO_WARNINGS /D _MBCS /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ComponentCollision.cpp GameObject.cpp Projectile.cpp main.cpp
@@ -46,3 +52,13 @@
 Build succeeded.
 
 Time Elapsed 00:00:01.52
+=======
+         C:\Users\100559437\Documents\Mek\Mek\
+       Link:
+         Mek.vcxproj -> C:\Users\100559437\Documents\Mek\Debug\Mek.exe
+     1>Done Building Project "C:\Users\100559437\Documents\Mek\Mek\Mek.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.07
+>>>>>>> 1c8565156dc34991b5e3c0c75b42590e7a066b82
