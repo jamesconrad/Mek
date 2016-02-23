@@ -41,8 +41,8 @@ void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 			glm::mat4 h = glm::translate(glm::mat4(), _owner->pos);
 			h = glm::scale(glm::mat4(), glm::vec3(0.1, 0.1, 0.1));
 			h = glm::scale(glm::mat4(), _owner->scale);
-			//_cMesh[i]->fmin = (_cMesh[i]->min * 0.1f) + _owner->pos;// *_owner->scale;
-			//_cMesh[i]->fmax = (_cMesh[i]->max * 0.1f) + _owner->pos;// *_owner->scale;
+			_cMesh[i]->fmin = (_cMesh[i]->min * 0.1f) + _owner->pos;// *_owner->scale;
+			_cMesh[i]->fmax = (_cMesh[i]->max * 0.1f) + _owner->pos;// *_owner->scale;
 			_cMesh[i]->fuN = _cMesh[i]->uN;
 			_cMesh[i]->frN = _cMesh[i]->rN;
 			_cMesh[i]->ffN = _cMesh[i]->fN;

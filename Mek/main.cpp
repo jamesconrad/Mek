@@ -33,6 +33,7 @@
 #include "Projectile.h"
 #include "Model.h"
 #include "NavMesh.h"
+#include "RayVsOBB.h"
 
 enum game_state { GAME, MENU };
 
@@ -408,13 +409,24 @@ static void Update(float secondsElapsed) {
 		{
 			targets[i]->update(secondsElapsed/5, testNaveMesh);
 			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) + 0.4; //this moves the targets to the correct position above the ground.
+			targets[i]->canSeePlayer(model->pos);
 
-			if (targets[i]->hit && targets[i]->alive)
+			if (shoot)
 			{
-				targets[i]->alive = false;
-				skull->play();
-				targetsKilled++;
+				if (RayVsOBB((model->pos), cam->forward(), targets[i]->cc->_cMesh[0]->fmin, targets[i]->cc->_cMesh[0]->fmax))
+				{
+					targets[i]->alive = false;
+					skull->play();
+					targetsKilled++;
+				}
 			}
+
+			//if (targets[i]->hit && targets[i]->alive)
+			//{
+			//	targets[i]->alive = false;
+			//	skull->play();
+			//	targetsKilled++;
+			//}
 		}
 
 		skull->update(secondsElapsed);
@@ -438,7 +450,7 @@ static void Update(float secondsElapsed) {
 		if (targetsKilled == targets.size() || c->IsPressed(XINPUT_GAMEPAD_BACK))
 			wonGame();
 
-
+		
 		//printf("%f\n", ground->HeightAtLocation(model->pos));
 		//cam->lookAt(glm::vec3(7.5, 0, -11));
 	}
@@ -485,7 +497,7 @@ void OnError(int errorCode, const char* msg) {
 
 // the program starts here
 void AppMain() {
-	testNaveMesh.loadNavMesh("../Release/models/NavMeshes/TestLevelNavMesh-scaled.obj");
+	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/TestLevelNavMesh-scaled.obj");
 	srand(time(NULL));
     // initialise GLFW
     glfwSetErrorCallback(OnError);

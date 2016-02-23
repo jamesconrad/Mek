@@ -5,6 +5,8 @@
 #include "AIBehaviour.h"
 #include "NavMesh.h"
 
+#include "lib\glm\gtx\vector_angle.hpp"
+
 class Target
 {
 public:
@@ -25,4 +27,12 @@ public:
 
 	//Resets the path for the object
 	void generatePath(NavMesh &navMesh);
+	
+
+	bool hasSpottedPlayer = false;
+	float angleToPlayer, angleTolerance = 60.0f;
+	glm::vec3 vectorToPlayer;
+	void canSeePlayer(glm::vec3 &playerPosition);
+
+	void determineCombatRoute(NavMesh &navMesh);
 };

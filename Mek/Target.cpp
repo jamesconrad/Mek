@@ -70,3 +70,39 @@ void Target::generatePath(NavMesh &mesh)
 	interp.curve.clear();
 	interp.buildCurve();
 }
+
+void Target::canSeePlayer(glm::vec3 &position)
+{
+	vectorToPlayer = glm::normalize(glm::vec3(go->pos - position));
+	angleToPlayer = glm::angle(vectorToPlayer, go->dir);
+	if (angleToPlayer <= angleTolerance)
+		hasSpottedPlayer = true;
+}
+
+	enum combatPositionType
+	{
+		ATTACKING,
+		DEFENDING
+	};
+struct combatPosition
+{
+	glm::vec3 position;
+	combatPositionType positionType;
+};
+
+void Target::determineCombatRoute(NavMesh &navMesh)
+{
+	glm::vec2 pointCoordinates;
+	std::vector<combatPosition> positions;
+	for (float i = 0; i < 10; i++)
+	{
+		pointCoordinates = navMesh.isPointInsideTriangle(glm::vec3(glm::rotateY(glm::vec4(go->dir, 1.0f), 160.f / i) * 10.f * i % 2.f));
+		if (pointCoordinates.x != -1 && pointCoordinates.y != -1)
+		{
+			combatPosition tempPosition;
+			tempPosition.position = navMesh.TriangleSet[pointCoordinates.x][pointCoordinates.y].center;
+			//check from position to player->position. Check all world elements and if any first contact points have a distance from the position that is less than the player's, the position is defensive, you can break and that's that.
+		}
+	}
+
+}
