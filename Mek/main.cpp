@@ -95,7 +95,8 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	Program::getInstance().createShader("hud", GL_FRAGMENT_SHADER, "shaders/hud.frag");
 }
 // constants
-const glm::vec2 SCREEN_SIZE(1920, 1080);
+//const glm::vec2 SCREEN_SIZE(1920, 1080);
+const glm::vec2 SCREEN_SIZE(1280, 800);
 
 // globals
 GLFWwindow* gWindow = NULL;
@@ -332,7 +333,7 @@ static void Render() {
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-	fsystem->Update();
+	//fsystem->Update();
 	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
@@ -351,9 +352,9 @@ static void Update(float secondsElapsed) {
 
 	fsystem->set(_pos, _for, _up);
 
-	system("CLS");
-	cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
-	cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
+	//system("CLS");
+	//cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
+	//cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
 
 	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
 	if (c->Refresh())
@@ -425,31 +426,37 @@ static void Update(float secondsElapsed) {
 		{
 			targets[i]->update(secondsElapsed/5, testNaveMesh);
 			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) + 0.4; //this moves the targets to the correct position above the ground.
-			targets[i]->canSeePlayer(model->pos);
-
-			if (shoot)
+			if (targets[i]->hasSpottedPlayer == false)
 			{
-				if (RayVsOBB((model->pos), cam->forward(), targets[i]->cc->_cMesh[0]->fmin, targets[i]->cc->_cMesh[0]->fmax))
+				if (targets[i]->canSeePlayer(model->pos))
 				{
-					targets[i]->alive = false;
-					skull->play();
-					targetsKilled++;
+					targets[i]->determineCombatRoute(testNaveMesh);
 				}
 			}
 
-			//if (targets[i]->hit && targets[i]->alive)
+			//if (shoot)
 			//{
-			//	targets[i]->alive = false;
-			//	skull->play();
-			//	targetsKilled++;
+			//	if (RayVsOBB((model->pos), cam->forward(), targets[i]->cc->_cMesh[0]->fmin, targets[i]->cc->_cMesh[0]->fmax))
+			//	{
+			//		targets[i]->alive = false;
+			//		skull->play();
+			//		targetsKilled++;
+			//	}
 			//}
+
+			if (targets[i]->hit && targets[i]->alive)
+			{
+				targets[i]->alive = false;
+				skull->play();
+				targetsKilled++;
+			}
 		}
 
 		skull->update(secondsElapsed);
 
 		//model->pos.y = 0.5;
 		float h = ground->HeightAtLocation(model->pos);
-		printf("%f\n", h);
+		//printf("%f\n", h);
 		model->pos.y = h + 0.5;
 
 		cam->offsetPosition(model->pos - cam->position());

@@ -4,6 +4,7 @@
 #include "ComponentGraphics.h"
 #include "AIBehaviour.h"
 #include "NavMesh.h"
+#include "RayVsOBB.h"
 
 #include "lib\glm\gtx\vector_angle.hpp"
 
@@ -27,12 +28,14 @@ public:
 
 	//Resets the path for the object
 	void generatePath(NavMesh &navMesh);
+
+	void generatePath(NavMesh &navMesh, glm::vec3 &endPosition);
 	
 
 	bool hasSpottedPlayer = false;
-	float angleToPlayer, angleTolerance = 60.0f;
+	float distanceToPlayer, angleToPlayer, angleTolerance = 120.0f, distanceTolerance = 15.f;
 	glm::vec3 vectorToPlayer;
-	void canSeePlayer(glm::vec3 &playerPosition);
+	bool canSeePlayer(glm::vec3 &playerPosition);
 
 	void determineCombatRoute(NavMesh &navMesh);
 };
