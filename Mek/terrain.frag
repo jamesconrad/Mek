@@ -2,6 +2,8 @@
 
 uniform sampler2D t0;
 uniform sampler2D t1;
+//uniform vec3 u;
+//uniform vec3 d;
 
 out vec4 colour;
 in vec3 p;
@@ -33,5 +35,9 @@ void main()
 	//	colour.b = 0.1;
 	//if (uv.y < 0.05 && uv.x > -0.05)
 	//	colour.b = 0.1;
+	//
+	//if (p.x > d.x && p.x < u.x)
+	//	if (p.z > u.z && p.z < d.z)
+	//		colour.r = 1;
 	//colour = vec4(normalize(n) * 0.5 + 0.5, 1);
 }

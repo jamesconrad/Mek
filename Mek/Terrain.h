@@ -20,7 +20,7 @@ public:
 
 	float HeightAtLocation(glm::vec3 pos);
 private:
-	unsigned int IndexAt(unsigned int x, unsigned int y);
+	unsigned int IndexAt(int x, int y);
 	void PosAtIndex(unsigned int* x, unsigned int* y, unsigned int index);
 
 	void PreSmooth(float factor);
@@ -35,4 +35,5 @@ private:
 	std::vector<glm::vec3> _heightMap;//Vec3 for simplyfying rendering process, may need to change this later
 	unsigned int _height, _width, _size;
 	float _min, _max;
+	glm::vec3 u, d;
 };

@@ -74,6 +74,8 @@
     <None Include="hud.frag" />
     <None Include="hud.vert" />
     <None Include="NavMesh.inl" />
+    <None Include="pass.frag" />
+    <None Include="pass.vert" />
     <None Include="skinning.frag" />
     <None Include="skinning.vert" />
     <None Include="skinningA.frag" />

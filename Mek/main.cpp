@@ -93,6 +93,8 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	Program::getInstance().createShader("anim", GL_FRAGMENT_SHADER, "shaders/skinningA.frag");
 	Program::getInstance().createShader("hud", GL_VERTEX_SHADER, "shaders/hud.vert");
 	Program::getInstance().createShader("hud", GL_FRAGMENT_SHADER, "shaders/hud.frag");
+	Program::getInstance().createShader("pass", GL_VERTEX_SHADER, "shaders/pass.vert");
+	Program::getInstance().createShader("pass", GL_FRAGMENT_SHADER, "shaders/pass.frag");
 }
 // constants
 //const glm::vec2 SCREEN_SIZE(1920, 1080);
@@ -252,12 +254,11 @@ void LoadTargets()
 }
 // draws a single frame
 static void Render() {
-	//fb->Bind();
+	fb->Bind();
 
     // clear everything
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
 
 	sky->render();
 	ground->Render();
@@ -326,7 +327,8 @@ static void Render() {
 
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)
-
+	fb->Unbind();
+	fb->Render("pass");
     glfwSwapBuffers(gWindow);
 }
 #define SHOT_CD 0.1
@@ -588,9 +590,9 @@ void AppMain() {
     // create all the instances in the 3D scene based on the gWoodenCrate asset
     CreateInstances();
 
-	//fb = new Framebuffer();
-	//fb->CreateDepthTexture(1920, 1080);
-	//fb->CreateColorTexture(1920, 1080);
+	fb = new Framebuffer();
+	fb->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
+	fb->CreateColorTexture(1, SCREEN_SIZE.x, SCREEN_SIZE.y);
 
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
@@ -605,7 +607,7 @@ void AppMain() {
 	skull->cycle = true;
 
 	ground = new Terrain();
-	ground->LoadHeightMap("testhm.png", 1, 5, 0.5);
+	ground->LoadHeightMap("testhm.png", 1, 5, 0.8);
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	sky = new Skybox(sb);
