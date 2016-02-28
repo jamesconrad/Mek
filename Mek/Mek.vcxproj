@@ -19,6 +19,7 @@
     <ClCompile Include="ComponentGraphics.cpp" />
     <ClCompile Include="FMODmanager.cpp" />
     <ClCompile Include="Framebuffer.cpp" />
+    <ClCompile Include="FramebufferEffects.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="ComponentInput.cpp" />
     <ClCompile Include="Interpolation.cpp" />
@@ -46,6 +47,7 @@
     <ClInclude Include="ComponentPhysics.h" />
     <ClInclude Include="FMODmanager.h" />
     <ClInclude Include="Framebuffer.h" />
+    <ClInclude Include="FramebufferEffects.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="ComponentInput.h" />
     <ClInclude Include="ComponentLight.h" />
@@ -71,6 +73,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AIBehaviour.inl" />
+    <None Include="combine.frag" />
+    <None Include="fxaa.frag" />
+    <None Include="gblurH.frag" />
+    <None Include="gblurV.frag" />
     <None Include="hud.frag" />
     <None Include="hud.vert" />
     <None Include="NavMesh.inl" />
@@ -86,6 +92,7 @@
     <None Include="terrain.vert" />
     <None Include="text.frag" />
     <None Include="text.vert" />
+    <None Include="tonemap.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{222737CC-70B8-41BB-A92B-095192302DFF}</ProjectGuid>

@@ -27,6 +27,7 @@
 #include "Terrain.h"
 #include "Skybox.h"
 #include "Framebuffer.h"
+#include "FramebufferEffects.h"
 
 #include "TextRendering.h"
 #include "2dOverlayAnim.h"
@@ -64,7 +65,11 @@ FSound* test;
 std::vector<FSound*> soundArchive;
 //Model* testmodel;
 
-Framebuffer* fb;
+Framebuffer* framebuff[3];
+FramebufferEffects* framebuffeffects;
+
+bool numpadPress[9];
+
 
 GameObject* animatedMech;
 ComponentGraphics* animatedMechGC;
@@ -252,9 +257,10 @@ void LoadTargets()
 		targets.push_back(tar);
 	}
 }
+
 // draws a single frame
 static void Render() {
-	fb->Bind();
+	framebuff[0]->Bind();
 
     // clear everything
     glClearColor(0, 0, 0, 1); // black
@@ -327,8 +333,14 @@ static void Render() {
 
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)
-	fb->Unbind();
-	fb->Render("pass");
+
+	if (numpadPress[1])
+		framebuffeffects->Bloom(4);
+	if (numpadPress[2])
+		framebuffeffects->FXAA();
+
+	framebuff[0]->Unbind();
+	framebuff[0]->Render("pass");
     glfwSwapBuffers(gWindow);
 }
 #define SHOT_CD 0.1
@@ -354,6 +366,13 @@ static void Update(float secondsElapsed) {
 
 	fsystem->set(_pos, _for, _up);
 
+	for (int i = 0; i < 9; i++)
+	{
+		if (glfwGetKey(gWindow, GLFW_KEY_KP_0 + i))
+			numpadPress[i] = true;
+		else
+			numpadPress[i] = false;
+	}
 	//system("CLS");
 	//cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
 	//cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
@@ -530,13 +549,13 @@ void AppMain() {
     // open a window with GLFW
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
 	if (!gWindow)
-		throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.3?");
+		throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 4.3?");
 
     // GLFW settings
     glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -575,8 +594,8 @@ void AppMain() {
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 
     // make sure OpenGL version 3.2 API is available
-    if(!GLEW_VERSION_3_3)
-        throw std::runtime_error("OpenGL 3.3 API is not available.");
+    if(!GLEW_VERSION_4_3)
+        throw std::runtime_error("OpenGL 4.3 API is not available.");
 
     // OpenGL settings
     glEnable(GL_DEPTH_TEST);
@@ -590,9 +609,18 @@ void AppMain() {
     // create all the instances in the 3D scene based on the gWoodenCrate asset
     CreateInstances();
 
-	fb = new Framebuffer();
-	fb->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
-	fb->CreateColorTexture(1, SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[0] = new Framebuffer();
+	framebuff[0]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[0]->CreateColorTexture(1, SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[1] = new Framebuffer();
+	framebuff[1]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[1]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[2] = new Framebuffer();
+	framebuff[2]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[2]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuffeffects = new FramebufferEffects(framebuff);
+	framebuffeffects->LoadBloomShaders();
+	framebuffeffects->LoadFXAAShaders();
 
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));

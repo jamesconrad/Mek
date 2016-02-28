@@ -2,6 +2,7 @@
 
 GLuint Framebuffer::ScreenQuadVAO = 0;
 GLuint Framebuffer::ScreenQuadVBO = 0;
+unsigned int Framebuffer::Texture = 0;
 
 static const GLfloat quadVBData[] = {
 	-1.0f, -1.0f, 0.0f,
@@ -26,6 +27,16 @@ Framebuffer::Framebuffer()
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	}
+}
+
+unsigned int Framebuffer::Width()
+{
+	return _w;
+}
+
+unsigned int Framebuffer::Height()
+{
+	return _h;
 }
 
 void Framebuffer::CreateColorTexture(unsigned int num, unsigned int width, unsigned int height)
@@ -57,6 +68,9 @@ void Framebuffer::CreateDepthTexture(unsigned int width, unsigned int height)
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _dbo);
 	Unbind();
+
+	_w = width;
+	_h = height;
 }
 
 void Framebuffer::Bind()
@@ -64,21 +78,9 @@ void Framebuffer::Bind()
 	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 }
 
-void Framebuffer::BindForDraw()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-	glDrawBuffers(_buf.size(), _buf.data());
-}
-
 void Framebuffer::Unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void Framebuffer::UnbindForDraw()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glDrawBuffer(0);
 }
 
 bool Framebuffer::Check()
@@ -86,6 +88,12 @@ bool Framebuffer::Check()
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		return false;
 	return true;
+}
+
+void Framebuffer::Clear()
+{
+	//glClearColor(0, 0, 0, 1); // black
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Framebuffer::Render(char* shader)
@@ -116,16 +124,18 @@ void Framebuffer::RenderQuad()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glEnable(GL_DEPTH_TEST);
 	glBindVertexArray(0);
+	Texture = 0;
 }
 
 void Framebuffer::PassTextureToPreBoundShader(char* uniform, int cbo)
 {
-	if (cbo > _cbo.size())
+	if (cbo >= _cbo.size())
 	{
 		printf("ERROR: Attempting to pass a cbo that dosen't exist!");
 		return;
 	}
-	glActiveTexture(GL_TEXTURE0 + cbo);
+	glActiveTexture(GL_TEXTURE0 + Texture);
 	glBindTexture(GL_TEXTURE_2D, _cbo[cbo]);
 	Program::getInstance().setUniform(uniform, cbo);
+	Texture++;
 }

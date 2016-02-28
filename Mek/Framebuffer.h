@@ -1,3 +1,5 @@
+#pragma once
+
 #include "include\GL\glew.h"
 #include <vector>
 #include "Program.h"
@@ -17,10 +19,13 @@ public:
 	void BindTextureForSampling(int texIndex, GLenum texUnit);
 	void UnbindTexture(GLenum texUnit);
 
+	unsigned int Width();
+	unsigned int Height();
+
 	void Bind();
-	void BindForDraw();
 	static void Unbind();
-	static void UnbindForDraw();
+
+	void Clear();
 
 	void Render(char * shader);
 	void RenderQuad();
@@ -33,6 +38,9 @@ private:
 	std::vector<GLuint> _buf;
 	//unsigned int _numColor;
 
+	unsigned int _w, _h;
+
 	static GLuint ScreenQuadVAO;
 	static GLuint ScreenQuadVBO;
+	static unsigned int Texture;
 };

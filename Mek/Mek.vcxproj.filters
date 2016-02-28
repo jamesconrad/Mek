@@ -16,6 +16,15 @@
     <Filter Include="Inline Files">
       <UniqueIdentifier>{4ace166a-08bb-45fd-85ab-8ef045814f1c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Bloom">
+      <UniqueIdentifier>{70e291eb-8fe7-47a7-a70e-bfe70d4fce38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\AA">
+      <UniqueIdentifier>{a4abeb81-8d0a-42d2-86af-0a2fe3ba8e63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\AA\FXAA">
+      <UniqueIdentifier>{501df8f7-4115-47df-84ec-dab8869b8451}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -82,6 +91,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FMODmanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FramebufferEffects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,6 +185,9 @@
     <ClInclude Include="FMODmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FramebufferEffects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragment-shader.frag">
@@ -230,6 +245,21 @@
     </None>
     <None Include="pass.vert">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="tonemap.frag">
+      <Filter>Resource Files\Bloom</Filter>
+    </None>
+    <None Include="combine.frag">
+      <Filter>Resource Files\Bloom</Filter>
+    </None>
+    <None Include="gblurH.frag">
+      <Filter>Resource Files\Bloom</Filter>
+    </None>
+    <None Include="gblurV.frag">
+      <Filter>Resource Files\Bloom</Filter>
+    </None>
+    <None Include="fxaa.frag">
+      <Filter>Resource Files\AA\FXAA</Filter>
     </None>
   </ItemGroup>
 </Project>
