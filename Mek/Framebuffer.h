@@ -23,6 +23,8 @@ public:
 	static void UnbindForDraw();
 
 	void Render(char * shader);
+	void RenderQuad();
+	void PassTextureToPreBoundShader(char* uniform, int cbo);
 
 private:
 	GLuint _fbo;

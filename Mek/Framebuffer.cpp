@@ -108,3 +108,24 @@ void Framebuffer::Render(char* shader)
 	glBindVertexArray(0);
 	Program::getInstance().unbind();
 }
+
+void Framebuffer::RenderQuad()
+{
+	glBindVertexArray(ScreenQuadVAO);
+	glDisable(GL_DEPTH_TEST);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glEnable(GL_DEPTH_TEST);
+	glBindVertexArray(0);
+}
+
+void Framebuffer::PassTextureToPreBoundShader(char* uniform, int cbo)
+{
+	if (cbo > _cbo.size())
+	{
+		printf("ERROR: Attempting to pass a cbo that dosen't exist!");
+		return;
+	}
+	glActiveTexture(GL_TEXTURE0 + cbo);
+	glBindTexture(GL_TEXTURE_2D, _cbo[cbo]);
+	Program::getInstance().setUniform(uniform, cbo);
+}
