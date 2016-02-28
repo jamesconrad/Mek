@@ -262,7 +262,7 @@ static void Render() {
 
 	sky->render();
 	ground->Render();
-	animatedMechGC->render();
+	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
 		ComponentGraphics* cg = static_cast<ComponentGraphics*>(goVec[i]->GetComponent(GRAPHICS));
