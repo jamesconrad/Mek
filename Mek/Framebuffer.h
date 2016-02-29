@@ -42,5 +42,5 @@ private:
 
 	static GLuint ScreenQuadVAO;
 	static GLuint ScreenQuadVBO;
-	static unsigned int Texture;
+	static GLint Texture;
 };

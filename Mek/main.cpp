@@ -145,8 +145,8 @@ void wonGame()
 	scoreTable.push_back(score);
 	sort(scoreTable.begin(), scoreTable.end());
 	std::reverse(scoreTable.begin(), scoreTable.end());
-	Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
-	Camera::getInstance().setNearAndFarPlanes(1.f, 500.f);
+	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
+	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
 }
 void startGame()
 {
@@ -162,7 +162,7 @@ void startGame()
 		targets[i]->hit = false;
 		targets[i]->alive = true;
 	}
-	Camera::getInstance().setNearAndFarPlanes(0.01f, 50.0f);
+	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
 	background->play();
 }
@@ -285,7 +285,7 @@ static void Render() {
 		ObjectManager::instance().pMap[i]->cg->render();
 		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
 	}
-
+	
 	for (unsigned int i = 0, s = targets.size(); i < s; i++)
 	{
 		if (targets[i]->alive)
@@ -294,40 +294,7 @@ static void Render() {
 			//targets[i]->cc->renderHitbox();
 		}
 	}
-
 	//gCol->renderHitbox();
-	if (gameState == MENU)
-	{
-		startscreen->render();
-
-		TextRendering::getInstance().printText2D("HIGHSCORES", -0.6f, -0.675f, 0.125f, fontColour);
-		for (int i = 0, s = scoreTable.size(); i < s && i < 5; i++)
-		{
-			char buffer[64];
-			_snprintf_s(buffer, 64, "SCORE:%i", scoreTable[i]);
-			TextRendering::getInstance().printText2D(buffer, -0.38f, -0.75f - i / 16.f, 0.075f, fontColour);
-		}
-		if (score != 0)
-		{
-			char buffer[64];
-			_snprintf_s(buffer, 64, "SCORE:%i", score);
-			TextRendering::getInstance().printText2D(buffer, -0.38f, 0.85f, 0.075f, fontColour);
-		}
-
-
-	}
-	else if (gameState == GAME)
-	{
-		crosshair->render();
-		skull->render();
-
-		char buffer[5];
-		_snprintf_s(buffer, 5, "%i/%i", targetsKilled, targets.size());
-		TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
-		char scbuff[64];
-		_snprintf_s(scbuff, 64, "SCORE:%i", score);
-		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
-	}
 
 	//testmodel->render();
 
@@ -341,6 +308,40 @@ static void Render() {
 
 	framebuff[0]->Unbind();
 	framebuff[0]->Render("pass");
+
+	//Render HUD
+	glDisable(GL_DEPTH_TEST);
+	if (gameState == MENU)
+	{
+		startscreen->render();
+		TextRendering::getInstance().printText2D("HIGHSCORES", -0.6f, -0.675f, 0.125f, fontColour);
+		for (int i = 0, s = scoreTable.size(); i < s && i < 5; i++)
+		{
+			char buffer[64];
+			_snprintf_s(buffer, 64, "SCORE:%i", scoreTable[i]);
+			TextRendering::getInstance().printText2D(buffer, -0.38f, -0.75f - i / 16.f, 0.075f, fontColour);
+		}
+		if (score != 0)
+		{
+			char buffer[64];
+			_snprintf_s(buffer, 64, "SCORE:%i", score);
+			TextRendering::getInstance().printText2D(buffer, -0.38f, 0.85f, 0.075f, fontColour);
+		}
+	}
+	else if (gameState == GAME)
+	{
+		crosshair->render();
+		skull->render();
+		char buffer[5];
+		_snprintf_s(buffer, 5, "%i/%i", targetsKilled, targets.size());
+		TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
+		char scbuff[64];
+		_snprintf_s(scbuff, 64, "SCORE:%i", score);
+		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
+	}
+	glEnable(GL_DEPTH_TEST);
+
+
     glfwSwapBuffers(gWindow);
 }
 #define SHOT_CD 0.1
@@ -623,9 +624,9 @@ void AppMain() {
 	framebuffeffects->LoadFXAAShaders();
 
     // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
+    Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-	Camera::getInstance().setNearAndFarPlanes(1.f, 1024.0f);
+	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().setFieldOfView(50);
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);

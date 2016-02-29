@@ -2,7 +2,7 @@
 
 GLuint Framebuffer::ScreenQuadVAO = 0;
 GLuint Framebuffer::ScreenQuadVBO = 0;
-unsigned int Framebuffer::Texture = 0;
+GLint Framebuffer::Texture = 0;
 
 static const GLfloat quadVBData[] = {
 	-1.0f, -1.0f, 0.0f,
@@ -136,6 +136,6 @@ void Framebuffer::PassTextureToPreBoundShader(char* uniform, int cbo)
 	}
 	glActiveTexture(GL_TEXTURE0 + Texture);
 	glBindTexture(GL_TEXTURE_2D, _cbo[cbo]);
-	Program::getInstance().setUniform(uniform, cbo);
+	Program::getInstance().setUniform(uniform, Texture);
 	Texture++;
 }

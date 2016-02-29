@@ -47,7 +47,7 @@ void FramebufferEffects::Bloom(unsigned int numGaussPasses)
 	//Program::getInstance().bind("tonemap");
 	//_fb->PassTextureToPreBoundShader("tex", 0);
 	//_fb->RenderQuad();
-	Framebuffer::Unbind();
+	//Framebuffer::Unbind();
 	_wb[0]->Bind();
 	//_wb[0]->Clear();
 	glViewport(0, 0, _size.x, _size.y);
