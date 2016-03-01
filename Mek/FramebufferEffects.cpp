@@ -83,7 +83,6 @@ void FramebufferEffects::FXAA()
 {
 	_fb->Bind();
 	Program::getInstance().bind("fxaa");
-	Program::getInstance().setUniform("pixsize", glm::vec2(pixsizeX, pixsizeY));
 	Program::getInstance().setUniform("screensize", glm::vec2(_fb->Width(), _fb->Height()));
 	_fb->PassTextureToPreBoundShader("tex", 0);
 	_fb->RenderQuad();
