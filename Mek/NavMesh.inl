@@ -127,7 +127,7 @@ inline glm::vec2 NavMesh::isPointInsideTriangle(glm::vec3 &_position)
 	{
 		for (unsigned int j = 0; j < TriangleSet[i].size(); j++)
 		{
-			if (RayVsTriangle(glm::vec3(0, -1, 0), _position, triangles[i].vertexA.vertexCoords, triangles[i].vertexB.vertexCoords, triangles[i].vertexC.vertexCoords, &rayVsTri))
+			if (RayVsTriangle(glm::vec3(0, -1, 0), _position, TriangleSet[i][j].vertexA.vertexCoords, TriangleSet[i][j].vertexB.vertexCoords, TriangleSet[i][j].vertexC.vertexCoords, &rayVsTri))
 			{
 				return glm::vec2(i, j);
 			}

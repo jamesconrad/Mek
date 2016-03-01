@@ -71,6 +71,8 @@ public:
 	std::vector<GameObject*> gMap;
 	std::vector<unsigned int> colMap;
 	std::vector<Projectile*> pMap;
+
+	//int currentEnemyToUpdate = 0;
 private:
 	ObjectManager() {}
 };

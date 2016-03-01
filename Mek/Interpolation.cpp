@@ -184,7 +184,7 @@ void Interpolation::speedControlInterp(float dTime)
 
 		time += dTime;
 		
-		if (time > 1)
+		if (time >= 1)
 		{
 			//glm::vec3 tempPos = curve[p2].v;
 			finalCheck = curve[p2].v;
