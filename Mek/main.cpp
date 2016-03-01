@@ -263,14 +263,8 @@ void LoadTargets()
 	}
 }
 
-// draws a single frame
-static void Render() {
-	framebuff[0]->Bind();
-
-    // clear everything
-    glClearColor(0, 0, 0, 1); // black
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+static void DrawScene()
+{
 	sky->render();
 	ground->Render();
 	//animatedMechGC->render(); //Source of the glError 1282
@@ -290,7 +284,7 @@ static void Render() {
 		ObjectManager::instance().pMap[i]->cg->render();
 		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
 	}
-	
+
 	for (unsigned int i = 0, s = targets.size(); i < s; i++)
 	{
 		if (targets[i]->alive)
@@ -302,6 +296,20 @@ static void Render() {
 	//gCol->renderHitbox();
 
 	//testmodel->render();
+}
+// draws a single frame
+static void Render() {
+	framebuff[0]->Bind();
+
+    // clear everything
+    glClearColor(0, 0, 0, 1); // black
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	framebuffeffects->PrepShadowMap();
+	DrawScene();
+	framebuffeffects->FinShadowMap();
+
+	DrawScene();
 
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)

@@ -13,9 +13,13 @@ public:
 
 	void LoadBloomShaders();
 	void LoadFXAAShaders();
+	void LoadShadowMapShaders();
 
 	void Bloom(unsigned int numGaussPasses);
 	void FXAA();
+
+	void PrepShadowMap();
+	void FinShadowMap();
 
 private:
 	Framebuffer* _fb;
