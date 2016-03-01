@@ -5,8 +5,12 @@
 #include "AIBehaviour.h"
 #include "NavMesh.h"
 #include "RayVsOBB.h"
+#include "Projectile.h"
+
+#include "SoundManager.h"
 
 #include "lib\glm\gtx\vector_angle.hpp"
+
 
 
 enum combatPositionType
@@ -85,5 +89,13 @@ public:
 	glm::vec3 steering;
 
 	bool selectedToDoCombatUpdate = false;
+
+
+
+	Projectile 
+		*weaponProjectile;
+	float fireTimer = 0.f;
+	float fireTimeTolerance = 2.0f;
+	FSound *laserSound;
 };
 

@@ -10,7 +10,7 @@ public:
 	
 	Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,FSound*);
 	
-	void update(float dtime)
+	void update(float &dtime)
 	{
 		pos += dir * (vel);
 		go->pos = pos;

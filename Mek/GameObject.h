@@ -61,6 +61,9 @@ public:
 	void addProjectile(Projectile*);
 	void updateProjectile(float dTime);
 
+	void addEnemyProjectile(Projectile*);
+	void updateEnemyProjectile(float &dTime);
+
 	//singleton
 	static ObjectManager& instance()
 	{
@@ -70,6 +73,7 @@ public:
 
 	std::vector<GameObject*> gMap;
 	std::vector<unsigned int> colMap;
+	std::vector<Projectile*> enemyPMap;
 	std::vector<Projectile*> pMap;
 
 	//int currentEnemyToUpdate = 0;

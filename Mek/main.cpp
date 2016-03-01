@@ -194,6 +194,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			tar->laserSound = laserSound; //Seriously need get sounds to the other classes in a better way than this.
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 1)
 		{
@@ -208,6 +210,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 2)
 		{
@@ -222,6 +226,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 3)
 		{
@@ -233,6 +239,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 4)
 		{
@@ -244,6 +252,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 5)
 		{
@@ -256,6 +266,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 
 
@@ -283,6 +295,12 @@ static void DrawScene()
 	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
 		ObjectManager::instance().pMap[i]->cg->render();
+		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
+	}
+
+	for (unsigned int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+	{
+		ObjectManager::instance().enemyPMap[i]->cg->render();
 		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
 	}
 
@@ -444,6 +462,8 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 			ObjectManager::instance().pMap[i]->update(secondsElapsed);
+		for (unsigned int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+			ObjectManager::instance().enemyPMap[i]->update(secondsElapsed);
 
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD)
@@ -455,8 +475,9 @@ static void Update(float secondsElapsed) {
 
 
 		CollisionManager::instance().checkAll();
-
+		
 		ObjectManager::instance().updateProjectile(secondsElapsed);
+		ObjectManager::instance().updateEnemyProjectile(secondsElapsed);
 		
 		if (targets[currentEnemyToUpdate]->hasSpottedPlayer == true && targets[currentEnemyToUpdate]->alive)
 		{
@@ -479,8 +500,6 @@ static void Update(float secondsElapsed) {
 				targets[i]->canSeePlayer(model->pos);
 			}
 
-
-
 			//if (shoot)
 			//{
 			//	if (RayVsOBB((model->pos), cam->forward(), targets[i]->cc->_cMesh[0]->fmin, targets[i]->cc->_cMesh[0]->fmax))
@@ -498,6 +517,15 @@ static void Update(float secondsElapsed) {
 				targetsKilled++;
 			}
 			
+			targets[i]->fireTimer += secondsElapsed;
+			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance)
+			{
+				targets[i]->fireTimer = 0.f;
+				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f))) /* targets[i]->vecToPlayer*/, 0.1, 100, 10, laserSound);
+				targets[i]->weaponProjectile->go->scale = glm::vec3(1.5f);
+				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
+				targets[i]->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+			}
 		}
 
 		skull->update(secondsElapsed);
