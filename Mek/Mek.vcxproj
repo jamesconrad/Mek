@@ -17,8 +17,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ComponentCollision.cpp" />
     <ClCompile Include="ComponentGraphics.cpp" />
-    <ClCompile Include="FMODmanager.cpp" />
     <ClCompile Include="Framebuffer.cpp" />
+    <ClCompile Include="FramebufferEffects.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="ComponentInput.cpp" />
     <ClCompile Include="Interpolation.cpp" />
@@ -29,6 +29,7 @@
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="Target.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TextRendering.cpp" />
@@ -44,8 +45,8 @@
     <ClInclude Include="ComponentCollision.h" />
     <ClInclude Include="ComponentGraphics.h" />
     <ClInclude Include="ComponentPhysics.h" />
-    <ClInclude Include="FMODmanager.h" />
     <ClInclude Include="Framebuffer.h" />
+    <ClInclude Include="FramebufferEffects.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="ComponentInput.h" />
     <ClInclude Include="ComponentLight.h" />
@@ -60,6 +61,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Interpolation.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Target.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="TextRendering.h" />
@@ -71,9 +73,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AIBehaviour.inl" />
+    <None Include="combine.frag" />
+    <None Include="fxaa.frag" />
+    <None Include="gblurH.frag" />
+    <None Include="gblurV.frag" />
     <None Include="hud.frag" />
     <None Include="hud.vert" />
     <None Include="NavMesh.inl" />
+    <None Include="pass.frag" />
+    <None Include="pass.vert" />
     <None Include="skinning.frag" />
     <None Include="skinning.vert" />
     <None Include="skinningA.frag" />
@@ -84,6 +92,7 @@
     <None Include="terrain.vert" />
     <None Include="text.frag" />
     <None Include="text.vert" />
+    <None Include="tonemap.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{222737CC-70B8-41BB-A92B-095192302DFF}</ProjectGuid>

@@ -103,11 +103,13 @@ void Skybox::render()
 	Program::getInstance().setUniform("m", skyMap);
 
 	glDepthMask(GL_FALSE);
+	//glDisable(GL_DEPTH_TEST);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _cubeMapID);
 	//glBindBuffer(GL_ARRAY_BUFFER, _vbo[i]);
 	glDrawArrays(GL_TRIANGLES, 0, 108);
 	glBindVertexArray(0);
 
+	//glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 }

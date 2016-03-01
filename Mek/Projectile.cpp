@@ -10,7 +10,7 @@ void prepProjectiles()
 	scene = (aiScene*)cg->getScene();
 }
 
-Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,FMOD::Channel* _channel)
+Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,FSound* _sound)
 {
 	pos = p;
 	dir = d;
@@ -32,10 +32,11 @@ Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifesp
 	go->pos = p;
 	go->scale = glm::vec3(0.1, 0.1, 0.1);
 
-	sound = _channel;
+	sound = _sound;
+	sound->Play();
 	FMOD_VECTOR pos = { p.x, p.y, p.z };
 	FMOD_VECTOR vel = { d.x, d.y, d.z };
-	sound->set3DAttributes(&pos, &vel);
+	sound->ChannelPtr->set3DAttributes(&pos, &vel);
 	isSound = true;
 
 	cc->createHitboxRender();

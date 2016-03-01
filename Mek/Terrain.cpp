@@ -121,6 +121,8 @@ void Terrain::Render()
 	Program::getInstance().setUniform("gWVP", Camera::getInstance().matrix());
 	Program::getInstance().setUniform("_min", _min);
 	Program::getInstance().setUniform("_max", _max);
+	//Program::getInstance().setUniform("u", u);
+	//Program::getInstance().setUniform("d", d);
 	glBindVertexArray(_vao);
 
 	//bind ground
@@ -135,9 +137,10 @@ void Terrain::Render()
 	glBindVertexArray(0);
 }
 
-unsigned int Terrain::IndexAt(unsigned int x, unsigned int y)
+unsigned int Terrain::IndexAt(int x, int y)
 {
-	return (y * _width + x) + (_size / 2);
+	int i = ((y + _height/2) * _width + x + _width/2);
+	return (i >= 0 && i < _size ? i : 0);
 }
 
 void Terrain::PosAtIndex(unsigned int* x, unsigned int* y, unsigned int index)
@@ -158,10 +161,6 @@ void Terrain::LoadHeightMap(char* fp, float heightmod, unsigned int smoothiter, 
 	unsigned int c = ilGetInteger(IL_IMAGE_CHANNELS);
 	ILubyte* pixels = ilGetData();
 
-	//Bitmap* hm = new Bitmap();
-	//hm->bitmapFromFile(std::string(fp));
-	//_height = hm->height();
-	//_width = hm->width();
 	_size = _height * _width;
 	int hw = _width / 2;
 	int hh = _height / 2;
@@ -173,7 +172,6 @@ void Terrain::LoadHeightMap(char* fp, float heightmod, unsigned int smoothiter, 
 			float h = (float)pixels[(y * _width + x) * c] * heightmod;
 			_heightMap.push_back(glm::vec3(x - hw, h, y - hh));
 			h > _max ? _max = h : (h < _min ? _min = h : h);
-			
 		}
 	}
 	ilBindImage(0);
@@ -230,14 +228,16 @@ float Terrain::HeightAtLocation(glm::vec3 p)
 	if (uP.x == dP.x)
 		dP.x--;
 	if (uP.z == dP.z)
-		dP.z--;
+		dP.z++;
+
+	u = uP;
+	d = dP;
 
 	//top right
 	verts[0] = _heightMap[IndexAt(uP.x, uP.z)];
 	verts[1] = _heightMap[IndexAt(uP.x - 1, uP.z)];
 	verts[2] = _heightMap[IndexAt(uP.x, uP.z + 1)];
-
-
+	
 	rvtResponse rvt;
 
 	if (RayVsTriangle(glm::vec3(0, -1, 0), glm::vec3(p.x, 1024, p.z), verts[0], verts[1], verts[2], &rvt))
@@ -250,6 +250,6 @@ float Terrain::HeightAtLocation(glm::vec3 p)
 	if (RayVsTriangle(glm::vec3(0, -1, 0), glm::vec3(p.x, 1024, p.z), verts[0], verts[1], verts[2], &rvt))
 		return rvt.intersection.y;
 
-	printf("FAIL! : %f,%f\n", p.x, p.z);
+	printf("Height failed! : %f, %f\n", p.x, p.z);
 	return p.y - 0.5;
 }

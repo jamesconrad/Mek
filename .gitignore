@@ -14,3 +14,5 @@
 *.pch
 *.lastbuildstate
 *.aps
+*.idb
+*.opensdf

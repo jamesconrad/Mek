@@ -13,12 +13,7 @@ uniform float _max;
 
 void main()
 {
-	vec4 glp = vec4(Position, 1);
-	glp.y = glp.y;//(Position.y - _min) / (_max - _min) - 0.5;
-	glp.x = glp.x;
-	glp.z = glp.z;
-	//gl_Position = gWVP * vec4(Position , 1);
-	gl_Position = gWVP * glp;
+	gl_Position = gWVP * vec4(Position , 1);
 
 	p = Position;
 	h = (Position.y - _min) / (_max - _min);

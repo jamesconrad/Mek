@@ -6,7 +6,7 @@
 #include "lib\glm\gtc\matrix_transform.hpp"
 #include "lib\glm\gtx\rotate_vector.hpp"
 #include "include\IL\ilut.h"
-#include "FMODmanager.h"
+#include "SoundManager.h"
 
 // standard C++ libraries
 #include <cassert>
@@ -27,6 +27,7 @@
 #include "Terrain.h"
 #include "Skybox.h"
 #include "Framebuffer.h"
+#include "FramebufferEffects.h"
 
 #include "TextRendering.h"
 #include "2dOverlayAnim.h"
@@ -58,14 +59,20 @@ unsigned int score;
 float playTime = 0;
 NavMesh testNaveMesh;
 
-FSystem* fsystem;
-FSound* background;
+
+FSystem* SoundSystem;
+FSound * background;
 FSound* laserSound;
-FSound* test;
-std::vector<FSound*> soundArchive;
+FSound* hitSound;
+FSound* music;
+FSound* rWalk;
 //Model* testmodel;
 
-Framebuffer* fb;
+Framebuffer* framebuff[3];
+FramebufferEffects* framebuffeffects;
+
+bool numpadPress[9];
+
 
 GameObject* animatedMech;
 ComponentGraphics* animatedMechGC;
@@ -74,14 +81,17 @@ Skybox* sky;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
 void initFSystem(){
-	fsystem = new FSystem;
-	background = new FSound(fsystem, "../debug/media/drumloop.wav", SOUND_TYPE_2D_LOOP);
-	laserSound = new FSound(fsystem, "../debug/media/swish.wav", SOUND_TYPE_3D);
-	test = new FSound(fsystem, "../debug/media/wave.mp3",SOUND_TYPE_3D_LOOP,0.5,5);
-	test->soundPos = { 0.0, 28.0, 0.0 };
-	test->play();
-	//soundArchive.push_back(&laserSound);
-}
+	SoundSystem = new FSystem;
+
+	hitSound = new FSound(SoundSystem, "../Debug/media/swish.wav", SOUND_TYPE_3D);
+	background = new FSound(SoundSystem, "../Debug/media/MechTheme2.wav", SOUND_TYPE_2D_LOOP);
+	laserSound = new FSound(SoundSystem, "../Debug/media/laser6.wav", SOUND_TYPE_3D, ROLLOFF_LINEARSQUARE, 0.5, 100.0);
+	music = new FSound(SoundSystem, "../Debug/media/baller.mp3", SOUND_TYPE_3D, ROLLOFF_LINEAR, 0.5, 20);
+	rWalk = new FSound(SoundSystem, "../Debug/media/rwalk.wav", SOUND_TYPE_3D, ROLLOFF_LINEAR, 0.5, 10);
+
+	music->soundPos = { 0.0, 28.0, 0.0 };
+	music->Play();
+};
 void LoadShaders(char* vertFilename, char* fragFilename) 
 {
 	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
@@ -94,6 +104,8 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 	Program::getInstance().createShader("anim", GL_FRAGMENT_SHADER, "shaders/skinningA.frag");
 	Program::getInstance().createShader("hud", GL_VERTEX_SHADER, "shaders/hud.vert");
 	Program::getInstance().createShader("hud", GL_FRAGMENT_SHADER, "shaders/hud.frag");
+	Program::getInstance().createShader("pass", GL_VERTEX_SHADER, "shaders/pass.vert");
+	Program::getInstance().createShader("pass", GL_FRAGMENT_SHADER, "shaders/pass.frag");
 }
 // constants
 //const glm::vec2 SCREEN_SIZE(1920, 1080);
@@ -139,8 +151,8 @@ void wonGame()
 	scoreTable.push_back(score);
 	sort(scoreTable.begin(), scoreTable.end());
 	std::reverse(scoreTable.begin(), scoreTable.end());
-	Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
-	Camera::getInstance().setNearAndFarPlanes(1.f, 500.f);
+	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
+	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
 }
 void startGame()
 {
@@ -156,9 +168,9 @@ void startGame()
 		targets[i]->hit = false;
 		targets[i]->alive = true;
 	}
-	Camera::getInstance().setNearAndFarPlanes(0.01f, 50.0f);
+	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
-	background->play();
+	background->Play();
 }
 void LoadTargets()
 {
@@ -251,18 +263,12 @@ void LoadTargets()
 		targets.push_back(tar);
 	}
 }
-// draws a single frame
-static void Render() {
-	//fb->Bind();
 
-    // clear everything
-    glClearColor(0, 0, 0, 1); // black
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-
+static void DrawScene()
+{
 	sky->render();
 	ground->Render();
-	animatedMechGC->render();
+	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
 		ComponentGraphics* cg = static_cast<ComponentGraphics*>(goVec[i]->GetComponent(GRAPHICS));
@@ -288,12 +294,40 @@ static void Render() {
 			//targets[i]->cc->renderHitbox();
 		}
 	}
-
 	//gCol->renderHitbox();
+
+	//testmodel->render();
+}
+// draws a single frame
+static void Render() {
+	framebuff[0]->Bind();
+
+    // clear everything
+    glClearColor(0, 0, 0, 1); // black
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	framebuffeffects->PrepShadowMap();
+	DrawScene();
+	framebuffeffects->FinShadowMap();
+
+	DrawScene();
+
+	//_snprintf_s(buffer, 5, "%i", score);
+    // swap the display buffers (displays what was just drawn)
+
+	if (numpadPress[1])
+		framebuffeffects->Bloom(4);
+	if (numpadPress[2])
+		framebuffeffects->FXAA();
+
+	framebuff[0]->Unbind();
+	framebuff[0]->Render("pass");
+
+	//Render HUD
+	glDisable(GL_DEPTH_TEST);
 	if (gameState == MENU)
 	{
 		startscreen->render();
-
 		TextRendering::getInstance().printText2D("HIGHSCORES", -0.6f, -0.675f, 0.125f, fontColour);
 		for (int i = 0, s = scoreTable.size(); i < s && i < 5; i++)
 		{
@@ -307,14 +341,11 @@ static void Render() {
 			_snprintf_s(buffer, 64, "SCORE:%i", score);
 			TextRendering::getInstance().printText2D(buffer, -0.38f, 0.85f, 0.075f, fontColour);
 		}
-
-
 	}
 	else if (gameState == GAME)
 	{
 		crosshair->render();
 		skull->render();
-
 		char buffer[5];
 		_snprintf_s(buffer, 5, "%i/%i", targetsKilled, targets.size());
 		TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
@@ -322,11 +353,8 @@ static void Render() {
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
 		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
 	}
+	glEnable(GL_DEPTH_TEST);
 
-	//testmodel->render();
-
-	//_snprintf_s(buffer, 5, "%i", score);
-    // swap the display buffers (displays what was just drawn)
 
     glfwSwapBuffers(gWindow);
 }
@@ -351,8 +379,15 @@ static void Update(float secondsElapsed) {
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
 
-	fsystem->set(_pos, _for, _up);
+	SoundSystem->Set(_pos, _for, _up);
 
+	for (int i = 0; i < 9; i++)
+	{
+		if (glfwGetKey(gWindow, GLFW_KEY_KP_0 + i))
+			numpadPress[i] = true;
+		else
+			numpadPress[i] = false;
+	}
 	//system("CLS");
 	//cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
 	//cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
@@ -413,7 +448,7 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD)
 		{
-			Projectile* pr = new Projectile(p, f, 0.5, 100, 10,laserSound->play());
+			Projectile* pr = new Projectile(p, f, 0.5, 100, 10,laserSound);
 			ObjectManager::instance().pMap.push_back(pr);
 			shotcd = 0;
 		}
@@ -541,13 +576,13 @@ void AppMain() {
     // open a window with GLFW
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
 	if (!gWindow)
-		throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 3.3?");
+		throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 4.3?");
 
     // GLFW settings
     glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -586,8 +621,8 @@ void AppMain() {
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 
     // make sure OpenGL version 3.2 API is available
-    if(!GLEW_VERSION_3_3)
-        throw std::runtime_error("OpenGL 3.3 API is not available.");
+    if(!GLEW_VERSION_4_3)
+        throw std::runtime_error("OpenGL 4.3 API is not available.");
 
     // OpenGL settings
     glEnable(GL_DEPTH_TEST);
@@ -601,14 +636,23 @@ void AppMain() {
     // create all the instances in the 3D scene based on the gWoodenCrate asset
     CreateInstances();
 
-	//fb = new Framebuffer();
-	//fb->CreateDepthTexture(1920, 1080);
-	//fb->CreateColorTexture(1920, 1080);
+	framebuff[0] = new Framebuffer();
+	framebuff[0]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[0]->CreateColorTexture(1, SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[1] = new Framebuffer();
+	framebuff[1]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[1]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[2] = new Framebuffer();
+	framebuff[2]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[2]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuffeffects = new FramebufferEffects(framebuff);
+	framebuffeffects->LoadBloomShaders();
+	framebuffeffects->LoadFXAAShaders();
 
     // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(1100, 75, 0));
+    Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
-	Camera::getInstance().setNearAndFarPlanes(1.f, 1024.0f);
+	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().setFieldOfView(50);
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
@@ -618,7 +662,7 @@ void AppMain() {
 	skull->cycle = true;
 
 	ground = new Terrain();
-	ground->LoadHeightMap("testhm.png", 1, 5, 0.5);
+	ground->LoadHeightMap("testhm.png", 1, 5, 0.8);
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	sky = new Skybox(sb);
