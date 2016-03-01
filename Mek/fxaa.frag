@@ -27,10 +27,12 @@ void main()
 	blurDir.y = ((lTL + lBL) - (lTR + lBR));
 	//scale blurDir so smallest val = 1 texel
 	float dirReduce = max((lTL + lTR + lBL + lBR) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDCUE_MIN);
-	float blurScale = 1.0/(min(abs(blurDir.x), abs(blurDir.y) + dirReduce));
+	float blurScale = 1.0 / (min(abs(blurDir.x), abs(blurDir.y)) + dirReduce);
 
-	//cap off the blurDir so it is between 8,8 and -8,-8, also transform into texel space
-	blurDir = min(vec2(FXAA_SPAN_MAX), max(vec2(-FXAA_SPAN_MAX), blurDir * blurScale)); //Produces an awkward grainy effect, very wrong
+    //cap off the blurDir so it is between 8,8 and -8,-8, also transform into texel space
+	blurDir = min(vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX),
+              max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
+              blurDir * blurScale)) * invVP; //is this the problem?
 	//blurDir = clamp(blurDir * blurScale, vec2(FXAA_SPAN_MAX), vec2(-FXAA_SPAN_MAX)) * invVP;
 
 	//now we actually blur
@@ -43,13 +45,7 @@ void main()
 	float lMin = min(lM, min(min(lTL, lTR), min(lBL, lBR)));
 	float lMax = max(lM, max(max(lTL, lTR), max(lBL, lBR)));
 	if (luma < lMin || luma > lMax)
-	{
 		colour = vec4(res1, 1.0); //outside of range, use the acutal value
-		colour = vec4(0,0,0,1);
-	}
 	else
-	{
 		colour = vec4(result, 1.0);//result
-		colour = vec4(1,1,1,1);
-	}
 }
