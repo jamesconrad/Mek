@@ -44,6 +44,7 @@ enum game_state { GAME, MENU };
 float runTime = 0;
 std::vector<GameObject*> goVec;
 std::vector<Target*> targets;
+int currentEnemyToUpdate = 0;
 int targetsKilled = 0;
 twodOverlay* crosshair;
 twodOverlay* startscreen;
@@ -456,18 +457,29 @@ static void Update(float secondsElapsed) {
 		CollisionManager::instance().checkAll();
 
 		ObjectManager::instance().updateProjectile(secondsElapsed);
+		
+		if (targets[currentEnemyToUpdate]->hasSpottedPlayer == true && targets[currentEnemyToUpdate]->alive)
+		{
+			targets[currentEnemyToUpdate]->selectedToDoCombatUpdate = true;
+		}
+		currentEnemyToUpdate++;
+		if (currentEnemyToUpdate >= targets.size())
+		{
+			currentEnemyToUpdate = 0;
+		}
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
-			targets[i]->update(secondsElapsed/5, testNaveMesh);
+			
+			targets[i]->update(secondsElapsed / 5, testNaveMesh);
 			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) + 0.4; //this moves the targets to the correct position above the ground.
-			if (targets[i]->hasSpottedPlayer == false)
+
+			if (targets[i]->hasSpottedPlayer == false && targets[i]->alive)
 			{
-				if (targets[i]->canSeePlayer(model->pos))
-				{
-					targets[i]->determineCombatRoute(testNaveMesh);
-				}
+				targets[i]->canSeePlayer(model->pos);
 			}
+
+
 
 			//if (shoot)
 			//{
@@ -485,6 +497,7 @@ static void Update(float secondsElapsed) {
 				skull->play();
 				targetsKilled++;
 			}
+			
 		}
 
 		skull->update(secondsElapsed);

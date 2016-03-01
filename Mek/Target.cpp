@@ -25,6 +25,8 @@ Target::Target(char* fp, float t)
 
 	go->dir = glm::vec3(1.0f, 0.0f, 0.0f);
 	go->vel = 2.f;
+
+	surroundingPositions.reserve(11);
 }
 
 void Target::update(float dTime, NavMesh &mesh)
@@ -35,37 +37,15 @@ void Target::update(float dTime, NavMesh &mesh)
 	}
 	else
 	{
-		if (AiHandle.currentBehaviour == INTERPOLATING)
+		glm::vec2 tempCoords = mesh.isPointInsideTriangle(go->pos);
+		if (tempCoords.x > -1 && tempCoords.y > -1)
 		{
-			interp.speedControlInterp(dTime * tmod);
-			go->dir = glm::normalize(interp.pos - go->dir);
-			go->pos = interp.pos;
-			if (interp.isFinished)
-			{
-				tempPosition = *AiHandle.path.front();
-				interp.points.clear();
-				generatePath(mesh);
-				//go->pos = AiHandle.path.back()->center;
-			}
+			currentFace = mesh.TriangleSet[tempCoords.x][tempCoords.y];
 		}
-		else if (AiHandle.currentBehaviour == WANDERING)
-		{
-			go->dir = AiHandle.update(go->pos, go->dir, dTime);
-			go->pos = go->pos + go->dir * go->vel * dTime;
-		}
-		else if (AiHandle.currentBehaviour == FIGHTING)
-		{
-			if (interp.isFinished)
-			{
-				//do nothing
-			}
-			else
-			{
-				interp.speedControlInterp(dTime * tmod);
-				go->dir = glm::normalize(interp.pos - go->dir);
-				go->pos = interp.pos;
-			}
-		}
+
+		go->dir = go->pos;// glm::normalize(interp.pos - go->dir);
+		followPath(dTime, mesh, hasSpottedPlayer);
+		go->dir = glm::normalize(go->pos - go->dir);
 	}
 	
 }
@@ -73,6 +53,8 @@ void Target::update(float dTime, NavMesh &mesh)
 //Resets and creates a path for the target
 void Target::generatePath(NavMesh &mesh)
 {
+	currentNodeIterator = 0;
+	interp.points.clear();
 	float clampedNumberX1 = randomClampedInt(0, mesh.TriangleSet.size() - 1);					float clampedNumberX2 = randomClampedInt(0, mesh.TriangleSet.size() - 1);
 	float clampedNumberY1 = randomClampedInt(0, mesh.TriangleSet[clampedNumberX1].size() - 1);  float clampedNumberY2 = randomClampedInt(0, mesh.TriangleSet[clampedNumberX2].size() - 1);
 	//glm::vec2 temp = mesh.isPointInsideTriangle(go->pos); //assuming that the object is staring inside the nav mesh
@@ -81,91 +63,154 @@ void Target::generatePath(NavMesh &mesh)
 	{
 		interp.points.push_back(AiHandle.path[i]->center + glm::vec3(0, 0.4, 0));
 	}
-	interp.curve.clear();
-	interp.buildCurve();
+	//interp.curve.clear();
+	//interp.buildCurve();
 }
 
 void Target::generatePath(NavMesh &mesh, glm::vec3 &endPosition)
 {
+	currentNodeIterator = 0;
 	glm::vec2 coords = mesh.isPointInsideTriangle(endPosition);
 	AiHandle.determineRoute(mesh, tempPosition, mesh.TriangleSet[coords.x][coords.y]);
 	for (int i = AiHandle.path.size() - 1; i >= 0; i--)
 	{
 		interp.points.push_back(AiHandle.path[i]->center + glm::vec3(0, 0.4, 0));
 	}
-	interp.curve.clear();
-	interp.buildCurve();
+	//interp.curve.clear();
+	//interp.buildCurve();
 }
 
 bool Target::canSeePlayer(glm::vec3 &position)
 {
 	distanceToPlayer = glm::distance(go->pos, position);
-	vectorToPlayer = glm::normalize(glm::vec3(go->pos - position));
+	vectorToPlayer = glm::normalize(glm::vec3(position - go->pos));
 	angleToPlayer = glm::angle(vectorToPlayer, go->dir);
 	if (angleToPlayer <= angleTolerance && distanceToPlayer < distanceTolerance)
+	{
 		hasSpottedPlayer = true;
-	AiHandle.currentBehaviour = FIGHTING;
+		AiHandle.currentBehaviour = FIGHTING;
+	}
 	return hasSpottedPlayer;
 }
 
-	enum combatPositionType
-	{
-		OFFENSIVE,
-		DEFENSIVE
-	};
-struct combatPosition
-{
-	glm::vec3 position;
-	float distanceToPlayer;
-	combatPositionType positionType;
-};
-
 void Target::determineCombatRoute(NavMesh &navMesh)
 {
-	glm::vec2 pointCoordinates;
-	std::vector<combatPosition> positions;
-	combatPosition* bestOffensivePosition;
-	combatPosition* bestDefensivePosition;
+	//Sample surroundings:
+	
+	//getting the player's position:
+	glm::vec3 playerPosition = ObjectManager::instance().gMap[0]->pos; //This is actually the player.
+	vecToPlayer = glm::normalize(playerPosition - tcpPosition);
 
-	combatPosition tempPosition;
-	tempPosition.position = navMesh.TriangleSet[pointCoordinates.x][pointCoordinates.y].center;
-	tempPosition.distanceToPlayer = LONG_MAX;
-	bestDefensivePosition = &tempPosition;
-	bestOffensivePosition = &tempPosition;
-	for (int i = 0; i < 10; i++)
+	//set current position variables:
+	tcpCoordinatesInTriangleSet = navMesh.isTriangleInsideTriangle(currentFace);
+	tcpPosition = navMesh.TriangleSet[tcpCoordinatesInTriangleSet.x][tcpCoordinatesInTriangleSet.y].center;
+	tcpDistanceToPlayer = glm::distance(tcpPosition, playerPosition);
+	tcpPositionType = OFFENSIVE; //The position is only defensive if proven to be so.
+	
+	//check if there is an object between the position and the player.
+	for (int i = 1, s = ObjectManager::instance().colMap.size(); i < s; i++)
 	{
-		pointCoordinates = navMesh.isPointInsideTriangle(glm::vec3(glm::rotateY(glm::vec4(go->dir, 1.0f), 160.f / i) * 30.f * ((float) (i % 2) + 0.5f)));
-		if (pointCoordinates.x != -1 && pointCoordinates.y != -1)
+		comparisonObjectGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[i]]);
+		comparisonObjectCC = static_cast<ComponentCollision*>(comparisonObjectGO->GetComponent(PHYSICS));
+		if (RayVsOBB(tcpPosition, vectorToPlayer, comparisonObjectCC->_cMesh[0]->fmin, comparisonObjectCC->_cMesh[0]->fmax))
 		{
-			for (int i = 1, s = ObjectManager::instance().colMap.size(); i < s; i++)
-			{
-				GameObject* thisGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[i]]);
-				ComponentCollision* thisCC = static_cast<ComponentCollision*>(thisGO->GetComponent(PHYSICS));
-				tempPosition.distanceToPlayer = glm::distance(tempPosition.position, ObjectManager::instance().gMap[0]->pos); //gmap[0] is the player.
-				if (RayVsOBB(thisCC->getPos(), vectorToPlayer, thisCC->_cMesh[0]->fmin, thisCC->_cMesh[0]->fmax))
-				{
-					tempPosition.distanceToPlayer = glm::distance(tempPosition.position, thisCC->_cMesh[0]->fc);
-					if (tempPosition.distanceToPlayer < distanceToPlayer)
-					{
-						tempPosition.positionType = DEFENSIVE;
-						positions.push_back(tempPosition);
-						if (tempPosition.distanceToPlayer > bestDefensivePosition->distanceToPlayer)
-						{
-							bestDefensivePosition = &positions.back();
-						}
-						break;
-					}
-				}
-				tempPosition.positionType = OFFENSIVE;
-				positions.push_back(tempPosition);
-				if (tempPosition.distanceToPlayer < bestOffensivePosition->distanceToPlayer)
-				{
-					bestOffensivePosition = &positions.back();
-				}
-			}
+			//If there is an object between the player and the length of the origin to the first colliding point is less than the distance to the player, the position is defensive.
+			//currently not actually used. I'll need to figure out a way to do the above. I think I do, but I'm not quite sure yet.
+			tcpPositionType = DEFENSIVE;
+			break;
 		}
 	}
-	//Add in some stuff to change whether the ai chooses a defensive or offensive position based on health or something. Stuff like that.
+	//push_back the position into surroundingPositions.
+	tcp.position = tcpPosition;
+	tcp.positionCoordinatesInTriangleSet = tcpCoordinatesInTriangleSet;
+	tcp.distanceToPlayer = tcpDistanceToPlayer;
+	tcp.positionType = tcpPositionType;
+	surroundingPositions.push_back(tcp);
+	bestOffensivePosition = surroundingPositions.back();
+
+
+
+	//Check the points that actually surround the first point.
+	for (int i = 1; i < 5; i++)
+	{
+		//Generate new position
+		glm::vec3 addedVector = glm::normalize(glm::rotateY(glm::vec3(0, 0, 1), 89.9f * i)) * 5.0f;
+		tcpPosition = (surroundingPositions[0].position) + addedVector;
+
+		//Check if the point is inside the mesh
+		tcpCoordinatesInTriangleSet = navMesh.isPointInsideTriangle(tcpPosition);
+		if (tcpCoordinatesInTriangleSet.x == -1 || tcpCoordinatesInTriangleSet.y == -1)
+		{
+			continue;
+		}
+		
+		//set the variables for the position being examined.
+		vecToPlayer = glm::normalize(playerPosition - tcpPosition);
+		tcpDistanceToPlayer = glm::distance(playerPosition, tcpPosition);
+		tcpPositionType = OFFENSIVE;
+
+		//Check the position against the collision map.
+		for (int i = 1, s = ObjectManager::instance().colMap.size(); i < s; i++)
+		{
+			comparisonObjectGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[i]]);
+			comparisonObjectCC = static_cast<ComponentCollision*>(comparisonObjectGO->GetComponent(PHYSICS));
+			if (RayVsOBB(tcpPosition, vectorToPlayer, comparisonObjectCC->_cMesh[0]->fmin, comparisonObjectCC->_cMesh[0]->fmax))
+			{
+				//If there is an object between the player and the length of the origin to the first colliding point is less than the distance to the player, the position is defensive.
+				tcpPositionType = DEFENSIVE;
+				break;
+			}
+		}
+		//push_back the new position
+		tcp.position = tcpPosition;
+		tcp.positionCoordinatesInTriangleSet = tcpCoordinatesInTriangleSet;
+		tcp.distanceToPlayer = tcpDistanceToPlayer;
+		tcp.positionType = tcpPositionType;
+		surroundingPositions.push_back(tcp);
+		if (tcp.distanceToPlayer < bestOffensivePosition.distanceToPlayer)
+		{
+			bestOffensivePosition = tcp;
+		}
+	}
+
+	//reset tempPosition to the current position
+	tempPosition = navMesh.TriangleSet[surroundingPositions[0].positionCoordinatesInTriangleSet.x][surroundingPositions[0].positionCoordinatesInTriangleSet.y];
+
+	//generate the new curve.
 	interp.points.clear();
-	generatePath(navMesh, bestOffensivePosition->position);
+	generatePath(navMesh, bestOffensivePosition.position);
+	//generatePath(navMesh, playerPosition);
+	surroundingPositions.clear();
+}
+
+void Target::followPath(float &dT, NavMesh &mesh, bool &doCombat)
+{
+	if (glm::distance(glm::vec3(go->pos.x, 0.496205002, go->pos.z), currentTargetNode) < pointRadius)
+	{
+		currentNodeIterator++;
+		unsigned int lolsize = interp.points.size() - 1;
+		if (currentNodeIterator >= interp.points.size() - 1)
+		{
+			currentNodeIterator = 0;
+			//create new path.
+			if (doCombat)
+			{
+				determineCombatRoute(mesh);
+				selectedToDoCombatUpdate = false;
+			}
+			else
+			{
+				generatePath(mesh);
+			}
+			currentTargetNode = interp.points[0];
+		}
+	}
+	currentTargetNode = interp.points[currentNodeIterator];
+	
+
+	desiredVelocity = glm::normalize(currentTargetNode - glm::vec3(go->pos.x, 0.496205002, go->pos.z)) * maxVelocity;
+	steering = desiredVelocity - currentVelocity;
+	currentVelocity = glm::normalize(currentVelocity + steering / steeringCorrectionFactor) * maxVelocity;
+
+	go->pos = go->pos + currentVelocity * dT;
 }
