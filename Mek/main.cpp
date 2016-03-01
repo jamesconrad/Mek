@@ -6,7 +6,7 @@
 #include "lib\glm\gtc\matrix_transform.hpp"
 #include "lib\glm\gtx\rotate_vector.hpp"
 #include "include\IL\ilut.h"
-#include "FMODmanager.h"
+#include "SoundManager.h"
 
 // standard C++ libraries
 #include <cassert>
@@ -58,11 +58,13 @@ unsigned int score;
 float playTime = 0;
 NavMesh testNaveMesh;
 
-FSystem* fsystem;
-FSound* background;
+
+FSystem* SoundSystem;
+FSound * background;
 FSound* laserSound;
-FSound* test;
-std::vector<FSound*> soundArchive;
+FSound* hitSound;
+FSound* music;
+FSound* rWalk;
 //Model* testmodel;
 
 Framebuffer* framebuff[3];
@@ -78,14 +80,17 @@ Skybox* sky;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
 void initFSystem(){
-	fsystem = new FSystem;
-	background = new FSound(fsystem, "../debug/media/drumloop.wav", SOUND_TYPE_2D_LOOP);
-	laserSound = new FSound(fsystem, "../debug/media/swish.wav", SOUND_TYPE_3D);
-	test = new FSound(fsystem, "../debug/media/wave.mp3",SOUND_TYPE_3D_LOOP,0.5,5);
-	test->soundPos = { 0.0, 28.0, 0.0 };
-	test->play();
-	//soundArchive.push_back(&laserSound);
-}
+	SoundSystem = new FSystem;
+
+	hitSound = new FSound(SoundSystem, "../Debug/media/swish.wav", SOUND_TYPE_3D);
+	background = new FSound(SoundSystem, "../Debug/media/MechTheme2.wav", SOUND_TYPE_2D_LOOP);
+	laserSound = new FSound(SoundSystem, "../Debug/media/laser6.wav", SOUND_TYPE_3D, ROLLOFF_LINEARSQUARE, 0.5, 100.0);
+	music = new FSound(SoundSystem, "../Debug/media/baller.mp3", SOUND_TYPE_3D, ROLLOFF_LINEAR, 0.5, 20);
+	rWalk = new FSound(SoundSystem, "../Debug/media/rwalk.wav", SOUND_TYPE_3D, ROLLOFF_LINEAR, 0.5, 10);
+
+	music->soundPos = { 0.0, 28.0, 0.0 };
+	music->Play();
+};
 void LoadShaders(char* vertFilename, char* fragFilename) 
 {
 	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
@@ -164,7 +169,7 @@ void startGame()
 	}
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
-	background->play();
+	background->Play();
 }
 void LoadTargets()
 {
@@ -365,7 +370,7 @@ static void Update(float secondsElapsed) {
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
 
-	fsystem->set(_pos, _for, _up);
+	SoundSystem->Set(_pos, _for, _up);
 
 	for (int i = 0; i < 9; i++)
 	{
@@ -434,7 +439,7 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD)
 		{
-			Projectile* pr = new Projectile(p, f, 0.5, 100, 10,laserSound->play());
+			Projectile* pr = new Projectile(p, f, 0.5, 100, 10,laserSound);
 			ObjectManager::instance().pMap.push_back(pr);
 			shotcd = 0;
 		}

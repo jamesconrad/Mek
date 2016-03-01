@@ -2,13 +2,13 @@
 
 #include "ComponentGraphics.h"
 #include "ComponentCollision.h"
-#include "FMODmanager.h"
+#include "SoundManager.h"
 
 class Projectile
 {
 public:
 	
-	Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,FMOD::Channel*);
+	Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,FSound*);
 	
 	void update(float dtime)
 	{
@@ -16,15 +16,15 @@ public:
 		go->pos = pos;
 		FMOD_VECTOR sp = { pos.x, pos.y, pos.z };
 		FMOD_VECTOR sv = { 0.0, 0.0, 0.0 };
-		sound->set3DAttributes(&sp, &sv);
+		sound->ChannelPtr->set3DAttributes(&sp, &sv);
 		life -= dtime;
-		sound->isPlaying(&isSound);
+		sound->ChannelPtr->isPlaying(&isSound);
 		if (!isSound)
-			sound->stop();
+			sound->ChannelPtr->stop();
 
 		if (life < 0){
 			alive = false;
-			sound->stop();
+			sound->ChannelPtr->stop();
 		}
 	}
 
@@ -36,7 +36,7 @@ public:
 	//unsigned double soundLength;
 	bool isSound;
 	bool alive;
-	FMOD::Channel* sound;
+	FSound* sound;
 
 	GameObject* go;
 	ComponentCollision* cc;

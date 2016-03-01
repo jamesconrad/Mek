@@ -90,10 +90,10 @@
     <ClCompile Include="Render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FMODmanager.cpp">
+    <ClCompile Include="FramebufferEffects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FramebufferEffects.cpp">
+    <ClCompile Include="SoundManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -182,10 +182,10 @@
     <ClInclude Include="Render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FMODmanager.h">
+    <ClInclude Include="FramebufferEffects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FramebufferEffects.h">
+    <ClInclude Include="SoundManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
