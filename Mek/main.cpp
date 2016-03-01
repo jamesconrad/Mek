@@ -306,9 +306,9 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	framebuffeffects->PrepShadowMap();
-	DrawScene();
-	framebuffeffects->FinShadowMap();
+	//framebuffeffects->PrepShadowMap();
+	//DrawScene();
+	//framebuffeffects->FinShadowMap();
 
 	DrawScene();
 
