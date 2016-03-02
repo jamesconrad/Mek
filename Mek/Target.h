@@ -53,7 +53,7 @@ public:
 	
 
 	bool hasSpottedPlayer = false;
-	float distanceToPlayer, angleToPlayer, angleTolerance = 60.0f, distanceTolerance = 30.0f;
+	float distanceToPlayer, angleToPlayer, angleTolerance = 60.0f, distanceTolerance = 15.0f;
 	glm::vec3 vectorToPlayer;
 	bool canSeePlayer(glm::vec3 &playerPosition);
 

@@ -420,8 +420,17 @@ bool ComponentCollision::checkVs(ComponentCollision* c)
 				{
 					//this is where the hit would be done
 					if (strcmp(_owner->GetName(), "Target") == 0)
-						_owner->scale = glm::vec3(0, 0, 0);
-					ObjectManager::instance().pMap[c->_owner->handle]->alive = false;
+					{
+						_owner->health -= c->_owner->dmg;
+						_owner->force = c->_owner->dir * 30.f;
+						//_owner->scale = glm::vec3(0, 0, 0);
+					}
+					if (strcmp(c->_owner->GetName(), "PlayerProjectile") == 0)
+						ObjectManager::instance().pMap[c->_owner->handle]->alive = false;
+					else if (strcmp(c->_owner->GetName(), "EnemyProjectile") == 0)
+					{
+						c->_owner->health = 0.0f;
+					}
 				}
 				printf("NOTICE: %s.%s and %s.%s\n", _owner->GetName(), _cMesh[i]->name.c_str(), c->_owner->GetName(), c->_cMesh[j]->name.c_str());
 				return true;
@@ -477,9 +486,32 @@ void CollisionManager::checkAll()
 	
 				if (thatCC->type == STATIC)
 					thatCC->checkVs(ObjectManager::instance().pMap[i]->cc);
+				
 			}
 		}
-	
+	}
+
+	// STAGE 3 PlAYER VS ENEMY PROJECTILES
+	{
+		for (int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+		{
+			ObjectManager::instance().enemyPMap[i]->cc->updateFrame(NULL, FALSE);
+			
+			GameObject* playerGO = static_cast<GameObject*>(ObjectManager::instance().gMap[0]);
+			ComponentCollision* playerCC = static_cast<ComponentCollision*>(playerGO->GetComponent(PHYSICS));
+
+			playerCC->updateFrame(playerGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (playerCC->_cMesh[0]->boneNum == -1 ? false : true));
+
+			if (ObjectManager::instance().enemyPMap[i]->go->health > 0)
+			{
+				if (playerCC->checkVs(ObjectManager::instance().enemyPMap[i]->cc))
+				{
+					playerGO->health -= ObjectManager::instance().enemyPMap[i]->dmg;
+					playerGO->force = ObjectManager::instance().enemyPMap[i]->go->dir * 0.105f;
+
+				}
+			}
+		}
 	}
 }
 void ComponentCollision::createHitboxRender()

@@ -44,7 +44,10 @@ public:
 
 	glm::vec3 pos, scale, rot, dir;
 	float vel;
+	glm::vec3 force = { 0.f, 0.f, 0.f };
 	int handle;
+	float health = 100;
+	float dmg = 0;
 private:
 	char* _n;
 	std::string _objStr;

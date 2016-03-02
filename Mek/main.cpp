@@ -157,16 +157,21 @@ void wonGame()
 void startGame()
 {
 	gameState = GAME;
-	Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
-	Camera::getInstance().lookAt(glm::vec3(0, 1, 0));
+	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
+	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
+	model->pos = glm::vec3(15.5, 0.5, 1);
+	model->health = 100.f;
 	score = 0;
 	playTime = 0;
 	targetsKilled = 0;
 	for (int i = 0, s = targets.size(); i < s; i++)
 	{
 		targets[i]->go->scale = glm::vec3(1, 1, 1);
+		targets[i]->hasSpottedPlayer = false;
+		targets[i]->update(0.166f, testNaveMesh);
 		targets[i]->hit = false;
 		targets[i]->alive = true;
+		targets[i]->go->health = 100.f;
 	}
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
@@ -450,7 +455,10 @@ static void Update(float secondsElapsed) {
 	if (gameState == GAME)
 	{
 		//Begin Camera code
-		model->pos += fmy * (c->getOwner()->vel * lInput.z);
+		model->pos += fmy * (c->getOwner()->vel * lInput.z) + model->force;
+		model->force = model->force / 1.2f;
+		if (glm::length(model->force) < 0.1f)
+			model->force = glm::vec3(0);
 		model->pos += cam->right() * (c->getOwner()->vel * lInput.x);
 
 		cam->offsetPosition(model->pos - cam->position());
@@ -468,7 +476,7 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD)
 		{
-			Projectile* pr = new Projectile(p, f, 0.5, 100, 10,laserSound);
+			Projectile* pr = new Projectile(p, f, 0.5, 25, 10,laserSound);
 			ObjectManager::instance().pMap.push_back(pr);
 			shotcd = 0;
 		}
@@ -518,11 +526,13 @@ static void Update(float secondsElapsed) {
 			}
 			
 			targets[i]->fireTimer += secondsElapsed;
-			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance)
+			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
 			{
 				targets[i]->fireTimer = 0.f;
-				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f))) /* targets[i]->vecToPlayer*/, 0.1, 100, 10, laserSound);
+				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, laserSound);
 				targets[i]->weaponProjectile->go->scale = glm::vec3(1.5f);
+				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
+				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
 				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
 				targets[i]->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 			}
@@ -548,6 +558,12 @@ static void Update(float secondsElapsed) {
 
 		if (targetsKilled == targets.size() || c->IsPressed(XINPUT_GAMEPAD_BACK))
 			wonGame();
+		
+		//Only a different if statement because we need a loseGame function to replace the wonGame function.
+		if (model->health <= 0)
+		{
+			wonGame();
+		}
 
 		
 		//printf("%f\n", ground->HeightAtLocation(model->pos));
@@ -699,7 +715,7 @@ void AppMain() {
 	prepProjectiles();
 
 	model = new GameObject(0);
-	model->SetName("Moving");
+	model->SetName("Player");
 	gModel = new ComponentGraphics();
 	gModel->setOwner(model);
 	gModel->loadModel("models/TallCube.dae");
