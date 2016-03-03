@@ -740,13 +740,8 @@ void AppMain() {
 	prepProjectiles();
 
 	model = new GameObject(0);
-<<<<<<< HEAD
-	model->SetName("Moving");
-	gModel = new Model();
-=======
 	model->SetName("Player");
-	gModel = new ComponentGraphics();
->>>>>>> 473854e9fb7c6295edd6e475431a35084ad3fb49
+	gModel = new Model();
 	gModel->setOwner(model);
 	gModel->loadModel("models/TallCube.dae");
 	Component* gp = gModel;
