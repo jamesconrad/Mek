@@ -5,8 +5,12 @@
 #include "AIBehaviour.h"
 #include "NavMesh.h"
 #include "RayVsOBB.h"
+#include "Projectile.h"
+
+#include "SoundManager.h"
 
 #include "lib\glm\gtx\vector_angle.hpp"
+
 
 
 enum combatPositionType
@@ -49,7 +53,7 @@ public:
 	
 
 	bool hasSpottedPlayer = false;
-	float distanceToPlayer, angleToPlayer, angleTolerance = 60.0f, distanceTolerance = 30.0f;
+	float distanceToPlayer, angleToPlayer, angleTolerance = 60.0f, distanceTolerance = 15.0f;
 	glm::vec3 vectorToPlayer;
 	bool canSeePlayer(glm::vec3 &playerPosition);
 
@@ -85,5 +89,13 @@ public:
 	glm::vec3 steering;
 
 	bool selectedToDoCombatUpdate = false;
+
+
+
+	Projectile 
+		*weaponProjectile;
+	float fireTimer = 0.f;
+	float fireTimeTolerance = 2.0f;
+	FSound *laserSound;
 };
 

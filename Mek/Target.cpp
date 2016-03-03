@@ -31,7 +31,7 @@ Target::Target(char* fp, float t)
 
 void Target::update(float dTime, NavMesh &mesh)
 {
-	if (!hit && go->scale == glm::vec3(0, 0, 0))
+	if (!hit && go->health <= 0) //go->scale == glm::vec3(0, 0, 0))
 	{
 		hit = true;
 	}
@@ -210,7 +210,8 @@ void Target::followPath(float &dT, NavMesh &mesh, bool &doCombat)
 
 	desiredVelocity = glm::normalize(currentTargetNode - glm::vec3(go->pos.x, 0.496205002, go->pos.z)) * maxVelocity;
 	steering = desiredVelocity - currentVelocity;
-	currentVelocity = glm::normalize(currentVelocity + steering / steeringCorrectionFactor) * maxVelocity;
+	currentVelocity = glm::normalize(currentVelocity + steering / steeringCorrectionFactor) * maxVelocity + go->force;
+	go->force = go->force / 1.2f;
 
 	go->pos = go->pos + currentVelocity * dT;
 }
