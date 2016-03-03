@@ -20,6 +20,11 @@ void CopyaiMat(const aiMatrix4x4& from, glm::mat4 &to)
 	to[2][3] = from.d3; to[3][3] = from.d4;
 }
 
+const aiScene* Model::getScene()
+{
+	return _scene;
+}
+
 void Model::BoneWeight::add(unsigned int b, float w)
 {
 	for (unsigned int i = 0; i < MAX_BONES_PER_VERTEX; i++)
@@ -35,6 +40,10 @@ void Model::BoneWeight::add(unsigned int b, float w)
 
 void Model::loadModel(char* fp)
 {
+	std::string debfp = "../Debug/";
+	debfp.append(fp);
+	fp = (char*)debfp.c_str();
+
 	_importer.GetIOHandler();
 	_scene = (aiScene*)_importer.ReadFile(fp, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 
@@ -47,7 +56,6 @@ void Model::loadModel(char* fp)
 void Model::loadScene(aiScene* scene)
 {
 	_render = new Render();
-	_scene = scene;
 	CopyaiMat(scene->mRootNode->mTransformation, _rootTransform);
 
 	_entries.resize(scene->mNumMeshes);
@@ -82,13 +90,19 @@ void Model::loadScene(aiScene* scene)
 	for (unsigned int i = 0, s = _entries.size(); i < s; i++)
 	{ //For each mesh
 		const aiMesh* mesh = scene->mMeshes[i];
-
+		//Lets do the indices first
+		for (int j = 0; j < mesh->mNumFaces; j++)
+		{
+			indices.push_back(mesh->mFaces[j].mIndices[0]);
+			indices.push_back(mesh->mFaces[j].mIndices[1]);
+			indices.push_back(mesh->mFaces[j].mIndices[2]);
+		}
 		for (unsigned int j = 0; j < mesh->mNumVertices; j++)
 		{ //For each vertex
 			position.push_back(glm::vec3(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z));
 			normal.push_back(glm::vec3(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z));
 			texcoord.push_back(mesh->HasTextureCoords(0) ? 
-			/*true*/	glm::vec2(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].x) : 
+			/*true*/	glm::vec2(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y) : 
 			/*false*/	glm::vec2(0,0));
 
 			for (unsigned int k = 0; k < mesh->mNumBones; k++)
@@ -115,19 +129,10 @@ void Model::loadScene(aiScene* scene)
 					boneweight[vertex].add(index, weight);
 				}
 			}
-			for (unsigned int k = 0; k < MAX_BONES; k++)
-			{
-				//store the uniform locations now
-				char loc[16];
-				memset(loc, 0, sizeof(loc));
-				_snprintf_s(loc, sizeof(loc), "Bones[%i]", i);
-				Program::getInstance().bind("standard");
-				Program::getInstance().uniform(loc);
-			}
 		}
 	}
 	//All done with the vertex data!
-
+	bool textured = false;
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 	{
 		const aiMaterial* mat = scene->mMaterials[i];
@@ -139,12 +144,18 @@ void Model::loadScene(aiScene* scene)
 				aiString fp;
 				if (mat->GetTexture((aiTextureType)type, 0, &fp, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
 				{
-					_render->createTexture((char*)fp.C_Str(), "todo", (TextureFlag)type);
-					break;
+					if (_render->createTexture((char*)fp.C_Str(), "gColorMap", (TextureFlag)type));//todo: fix
+					{
+						textured = true;
+						break;
+					}
 				}
 			}
 		}
 	}
+	//make sure we have a texture
+	if (!textured)
+		_render->createTexture("missingtexture.png", "gColorMap", (TextureFlag)1);
 	//All done with textures
 
 	unsigned int vao;
@@ -155,7 +166,7 @@ void Model::loadScene(aiScene* scene)
 	glBindVertexArray(vao);
 	glGenBuffers(2, vbo);
 	//Indices first as they are the most straight forward
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 	
 	//Now to interleave the other data into one vbo
@@ -167,6 +178,7 @@ void Model::loadScene(aiScene* scene)
 	boneid		= 4		GL_UNSIGNED_INT
 	boneweight	= 4		GL_FLOAT
 	*/
+
 	struct VertexData
 	{							//previousfloats * sizeof(float) = offset
 		glm::vec3 pos;			//0 * 4 = 0
@@ -182,27 +194,38 @@ void Model::loadScene(aiScene* scene)
 		vert[i].pos = position[i];
 		vert[i].normal = normal[i];
 		vert[i].uv = texcoord[i];
-		memcpy(vert[i].boneid, boneweight[i].bone, sizeof(unsigned int)* 4);
-		memcpy(vert[i].weight, boneweight[i].weight, sizeof(float)* 4);
+		if (i < boneweight.size())
+		{//if this fails we do not have any bones, ouch
+			memcpy(vert[i].boneid, boneweight[i].bone, sizeof(unsigned int) * 4);
+			memcpy(vert[i].weight, boneweight[i].weight, sizeof(float) * 4);
+		}
+		else
+		{//just pad with 0s to solve the issue of no bones
+			memset(vert[i].boneid, 0, sizeof(unsigned int)* 4);
+			memset(vert[i].weight, 0, sizeof(float)* 4);
+		}
 	}
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData)* vert.size(), vert.data(), GL_STATIC_DRAW);
 
+	int vsize = sizeof(VertexData);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, vsize * vert.size(), vert.data(), GL_STATIC_DRAW);
+	
 	//vertices
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), BUFFER_OFFSET(0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vsize, 0);
 	//normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), BUFFER_OFFSET(12));
-	//uvs
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), BUFFER_OFFSET(24));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, vsize, (void*)12);
+	//uvs
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vsize, (void*)24);
 	//weights
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), BUFFER_OFFSET(32));
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, vsize, (void*)32);
 	//boneids
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 4, GL_UNSIGNED_INT, GL_FALSE, sizeof(VertexData), BUFFER_OFFSET(48));
+	glVertexAttribPointer(4, 4, GL_UNSIGNED_INT, GL_FALSE, vsize, (void*)48);
 
 	//Pass the preset data to render
 	_render->forceOverride(vao, vbo, 2, NULL, true, numIndices, numVertices);
@@ -397,8 +420,71 @@ aiNodeAnim* Model::findAnimNode(aiAnimation* anim, std::string nodename)
 
 void Model::render()
 {
+	glm::mat4 W;// = _transform;
+	W = glm::translate(W, _owner->pos);
+	//W = glm::rotate(W, _owner->rot);
+	W = glm::scale(W, 0.1f * _owner->scale);
+	glm::mat4 VP;
+	VP = Camera::getInstance().matrix();
+	glm::mat4 WVP = VP * W;
+	if (_numBones > 0)
+	{
+		Program::getInstance().bind("anim");
+		Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
+		Program::getInstance().setUniform("gWVP", WVP);
+		Program::getInstance().setUniform("gWorld", W);
+		Program::getInstance().updateLighting("anim");
+	}
+	else
+	{
+		Program::getInstance().bind("skinning");
+		Program::getInstance().setUniform("gWVP", WVP);
+		Program::getInstance().setUniform("gWorld", W);
+		Program::getInstance().setUniform("gEyeWorldPos", Camera::getInstance().position());
+		Program::getInstance().setUniform("EyeViewVec", Camera::getInstance().forward());
+		Program::getInstance().updateLighting("skinning");
+	}
+
 	for (int i = 0, s = _entries.size(); i < s; i++)
 	{
-		_render->draw("skinning", true, _entries[i].baseIndex, _entries[i].baseVertex);
+		_render->draw(true, _entries[i].baseIndex, _entries[i].baseVertex);
+	}
+}
+
+void Model::renderShadowPass()
+{
+	Program::getInstance().bind("skinnedShadow");//todo: convert to animated
+	if (_numBones > 0)
+	{
+		Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
+	}
+
+	glm::vec3 lightInvDir = glm::vec3(0, 1, 1);
+
+	// Compute the MVP matrix from the light's point of view
+	glm::mat4 depthProj = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+	glm::mat4 depthView = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+	glm::mat4 depthModel;
+	depthModel = glm::translate(depthModel, _owner->pos);
+	//depthModel = glm::rotate(depthModel, _owner->rot);
+	depthModel = glm::scale(depthModel, 0.1f * _owner->scale);
+
+	glm::mat4 depthMVP = depthProj * depthView * depthModel;
+
+	glm::mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+		);
+	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
+
+
+	Program::getInstance().setUniform("LVP", depthBiasMVP);
+
+	for (int i = 0, s = _entries.size(); i < s; i++)
+	{
+		_render->drawShadowPass(true, _entries[i].baseIndex, _entries[i].baseVertex);
 	}
 }

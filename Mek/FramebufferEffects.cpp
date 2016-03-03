@@ -42,7 +42,8 @@ void FramebufferEffects::LoadFXAAShaders()
 
 void FramebufferEffects::LoadShadowMapShaders()
 {
-
+	Program::getInstance().createShader("skinnedShadow", GL_VERTEX_SHADER, "shaders/shadow.vert");
+	Program::getInstance().createShader("skinnedShadow", GL_FRAGMENT_SHADER, "shaders/shadow.frag");
 }
 
 void FramebufferEffects::Bloom(unsigned int numGaussPasses)
@@ -95,10 +96,11 @@ void FramebufferEffects::FXAA()
 
 void FramebufferEffects::PrepShadowMap()
 {
-
+	_wb[0]->Bind();
+	Program::getInstance().bind("skinnedShadow");
 }
 
 void FramebufferEffects::FinShadowMap()
 {
-
+	_fb->Bind();
 }

@@ -7,7 +7,7 @@ Target::Target(char* fp, float t)
 	alive = true;
 	go = new GameObject(0);
 	go->SetName("Target");
-	cg = new ComponentGraphics();
+	cg = new Model();
 	cg->setOwner(go);
 	cg->loadModel(fp);
 	cc = new ComponentCollision();

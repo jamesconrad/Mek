@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ComponentGraphics.h"
+#include "Model.h"
 #include "ComponentCollision.h"
 #include "SoundManager.h"
 
@@ -40,7 +40,7 @@ public:
 
 	GameObject* go;
 	ComponentCollision* cc;
-	ComponentGraphics* cg;
+	Model* cg;
 };
 
 void prepProjectiles();

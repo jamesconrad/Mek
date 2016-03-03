@@ -74,8 +74,8 @@ FramebufferEffects* framebuffeffects;
 bool numpadPress[9];
 
 
-GameObject* animatedMech;
-ComponentGraphics* animatedMechGC;
+//GameObject* animatedMech;
+//Model* animatedMechGC;
 Terrain* ground;
 Skybox* sky;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
@@ -117,7 +117,7 @@ double gScrollY = 0.0;
 GLfloat gDegreesRotated = 0.0f;
 
 GameObject* model;
-ComponentGraphics* gModel;
+Model* gModel;
 ComponentCollision* gCol;
 
 float tElap = 0;
@@ -264,6 +264,30 @@ void LoadTargets()
 	}
 }
 
+static void DrawSceneShadowPass()
+{
+	//animatedMechGC->render(); //Source of the glError 1282
+	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
+	{
+		Model* cg = static_cast<Model*>(goVec[i]->GetComponent(GRAPHICS));
+		cg->renderShadowPass();
+	}
+
+	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
+	{
+		ObjectManager::instance().pMap[i]->cg->renderShadowPass();
+	}
+
+	for (unsigned int i = 0, s = targets.size(); i < s; i++)
+	{
+		if (targets[i]->alive)
+		{
+			targets[i]->cg->renderShadowPass();
+			//targets[i]->cc->renderHitbox();
+		}
+	}
+}
+
 static void DrawScene()
 {
 	sky->render();
@@ -271,7 +295,7 @@ static void DrawScene()
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
-		ComponentGraphics* cg = static_cast<ComponentGraphics*>(goVec[i]->GetComponent(GRAPHICS));
+		Model* cg = static_cast<Model*>(goVec[i]->GetComponent(GRAPHICS));
 		cg->render();
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
@@ -307,7 +331,7 @@ static void Render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//framebuffeffects->PrepShadowMap();
-	//DrawScene();
+	//DrawSceneShadowPass();
 	//framebuffeffects->FinShadowMap();
 
 	DrawScene();
@@ -554,7 +578,7 @@ static void Update(float secondsElapsed) {
 	tElap += secondsElapsed;
 
 	//Will need to uncomment the following and have gModel relate to the mech's graphics
-	animatedMechGC->BoneTransform(tElap, trans);
+	//animatedMechGC->BoneTransform(tElap, trans);
 }
 // records how far the y axis has been scrolled
 void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
@@ -648,6 +672,7 @@ void AppMain() {
 	framebuffeffects = new FramebufferEffects(framebuff);
 	framebuffeffects->LoadBloomShaders();
 	framebuffeffects->LoadFXAAShaders();
+	framebuffeffects->LoadShadowMapShaders();
 
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
@@ -672,7 +697,7 @@ void AppMain() {
 
 	model = new GameObject(0);
 	model->SetName("Moving");
-	gModel = new ComponentGraphics();
+	gModel = new Model();
 	gModel->setOwner(model);
 	gModel->loadModel("models/TallCube.dae");
 	Component* gp = gModel;
@@ -698,7 +723,7 @@ void AppMain() {
 		if (i != 3 && i != 0 && i != 4 && i != 8 && i != 18 && i != 19 && i != 20 && i !=21)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
-			ComponentGraphics *cModel = new ComponentGraphics();
+			Model *cModel = new Model();
 			ComponentCollision *cCollision = new ComponentCollision();
 			Component *c;
 
@@ -1013,13 +1038,13 @@ void AppMain() {
 		}
 	}
 
-	animatedMech = new GameObject(100);
-	animatedMechGC = new ComponentGraphics();
-	animatedMechGC->loadModel("models/Test_Animation_DAE.dae");
-	Component* c = animatedMechGC;
-	animatedMech->AddComponent(GRAPHICS, c);
-	animatedMech->pos = glm::vec3(0, 0, 0);
-	animatedMech->scale = glm::vec3(1, 1, 1);
+	//animatedMech = new GameObject(100);
+	//animatedMechGC = new Model();
+	//animatedMechGC->loadModel("models/Test_Animation_DAE.dae");
+	//Component* c = animatedMechGC;
+	//animatedMech->AddComponent(GRAPHICS, c);
+	//animatedMech->pos = glm::vec3(0, 0, 0);
+	//animatedMech->scale = glm::vec3(1, 1, 1);
 
 	//END MODEL INITS
 	camInterp.points.push_back(glm::vec3(1025, 1, 0));

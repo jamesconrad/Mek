@@ -1,7 +1,7 @@
 #pragma once
 #include "Interpolation.h"
 #include "ComponentCollision.h"
-#include "ComponentGraphics.h"
+#include "Model.h"
 #include "AIBehaviour.h"
 #include "NavMesh.h"
 #include "RayVsOBB.h"
@@ -35,7 +35,7 @@ public:
 	bool alive;
 	float tmod;
 	GameObject* go;
-	ComponentGraphics* cg;
+	Model* cg;
 	ComponentCollision* cc;
 
 	AiBehaviour AiHandle;

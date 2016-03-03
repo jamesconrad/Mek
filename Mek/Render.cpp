@@ -51,14 +51,17 @@ void Render::createVBOs(VBOData* data, unsigned int num)
 	glBindVertexArray(0);
 }
 
-void Render::createTexture(char* filepath, char* target, TextureFlag usage)
+bool Render::createTexture(char* filepath, char* target, TextureFlag usage)
 {
+	Texture* tmp = new Texture(filepath);
+	if (!(tmp->originalHeight() > 0))
+		return false;
 	Tex* newtex = new Tex[_numtex + 1];
-	memcpy(newtex, _textures, (_numtex) * sizeof(Tex));
+	memcpy(newtex, _textures, (_numtex)* sizeof(Tex));
 	delete[] _textures;
 	_textures = newtex;
 
-	_textures[_numtex].texture = new Texture(filepath);
+	_textures[_numtex].texture = tmp;
 	_textures[_numtex].usage = usage;
 
 	Tex tex;
@@ -68,12 +71,12 @@ void Render::createTexture(char* filepath, char* target, TextureFlag usage)
 	_textures[_numtex] = tex;
 
 	_numtex++;
+	return true;
 }
 
-void Render::draw(char* shader, bool basevertex, unsigned int baseIndex, unsigned int baseVertex)
+void Render::draw(bool basevertex, unsigned int baseIndex, unsigned int baseVertex)
 {
 	glBindVertexArray(_vao);
-	Program::getInstance().bind(shader);
 	//img binding
 	for (int i = 0; i < _numtex; i++)
 	{
@@ -81,7 +84,18 @@ void Render::draw(char* shader, bool basevertex, unsigned int baseIndex, unsigne
 		glBindTexture(GL_TEXTURE_2D, _textures[i].texture->object());
 		Program::getInstance().setUniform(_textures[i].target, i);
 	}
+	if (_indexed && basevertex)
+		glDrawElementsBaseVertex(GL_TRIANGLES, _numindices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int)*baseIndex), baseVertex);
+	else if (_indexed)
+		glDrawElements(GL_TRIANGLES, _numindices, GL_UNSIGNED_INT, 0);
+	else
+		glDrawArrays(GL_TRIANGLES, 0, _numvertices);
+	glBindVertexArray(0);
+}
 
+void Render::drawShadowPass(bool basevertex, unsigned int baseIndex, unsigned int baseVertex)
+{
+	glBindVertexArray(_vao);
 	if (_indexed && basevertex)
 		glDrawElementsBaseVertex(GL_TRIANGLES, _numindices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int)*baseIndex), baseVertex);
 	else if (_indexed)
