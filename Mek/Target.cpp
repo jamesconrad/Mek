@@ -1,13 +1,13 @@
 #include "Target.h"
 
-Target::Target(char* fp, float t)
+Target::Target(char* fp, float t, std::vector<FSound*> _sounds)
 {
 	tmod = t;
 	hit = false;
 	alive = true;
 	go = new GameObject(0);
 	go->SetName("Target");
-	cg = new ComponentGraphics();
+	cg = new Model();
 	cg->setOwner(go);
 	cg->loadModel(fp);
 	cc = new ComponentCollision();
@@ -34,6 +34,7 @@ void Target::update(float dTime, NavMesh &mesh)
 	if (!hit && go->health <= 0) //go->scale == glm::vec3(0, 0, 0))
 	{
 		hit = true;
+		sounds[HIT]->Play();
 	}
 	else
 	{

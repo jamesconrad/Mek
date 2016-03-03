@@ -1,7 +1,7 @@
 #pragma once
 #include "Interpolation.h"
 #include "ComponentCollision.h"
-#include "ComponentGraphics.h"
+#include "Model.h"
 #include "AIBehaviour.h"
 #include "NavMesh.h"
 #include "RayVsOBB.h"
@@ -31,7 +31,7 @@ class Target
 {
 public:
 	//Must manually set the interpolation vars through the public accessor
-	Target(char* fp, float tmod);
+	Target(char* fp, float tmod, std::vector<FSound*> _sounds);
 	//should be called after the collision check
 	void update(float dTime, NavMesh &_mesh);
 	Interpolation interp;
@@ -39,8 +39,10 @@ public:
 	bool alive;
 	float tmod;
 	GameObject* go;
-	ComponentGraphics* cg;
+	Model* cg;
 	ComponentCollision* cc;
+
+	std::vector<FSound*> sounds;
 
 	AiBehaviour AiHandle;
 	NavFace tempPosition; //I don't like this, but it's my best idea atm. I'll try and improve this when it's not 4 am.

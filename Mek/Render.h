@@ -66,9 +66,10 @@ public:
 	//Must be called after prepareVBOs
 	void createVBOs(VBOData* data, unsigned int num);
 
-	void createTexture(char* filepath, char* target, TextureFlag usage);
+	bool createTexture(char* filepath, char* target, TextureFlag usage);
 
-	void draw(char* shader, bool basevertex = false, unsigned int baseIndex = 0, unsigned int baseVertex = 0);
+	void draw(bool basevertex = false, unsigned int baseIndex = 0, unsigned int baseVertex = 0);
+	void drawShadowPass(bool basevertex = false, unsigned int baseIndex = 0, unsigned int baseVertex = 0);
 
 	//This function should be avoided, however was put in for the model class usage.
 	void forceOverride(

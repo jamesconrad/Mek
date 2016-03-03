@@ -546,7 +546,6 @@ void ComponentGraphics::updateShader()
 	glm::mat4 W;// = _transform;
 	W = glm::translate(W, _owner->pos);
 	//W = glm::rotate(W, _owner->rot);
-	//W = glm::scale(W, _owner->scale);
 	W = glm::scale(W, 0.1f * _owner->scale);
 	
 	glm::mat4 VP;

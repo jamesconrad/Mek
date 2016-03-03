@@ -1,0 +1,9 @@
+MechTheme2.wav BACKGROUND SOUND_TYPE_2D_LOOP Background
+drumloop.wav BACKGROUND SOUND_TYPE_2D_LOOP Background
+laser6.wav PROJECTILE SOUND_TYPE_3D ROLLOFF_LINEAR 0.5 100.0 Player
+baller.mp3 
+drumloop.wav 
+jaguar.wav 
+rwalk.wav SMOVING SOUND_TYPE_3D_LOOP ROLLOFF_LINEAR 0.5 5 Target
+swish.wav HIT SOUND_TYPE_3D ROLLFF_LINEAR 0.5 100 Target
+wave.mp3 BACKGROUND SOUND_TYPE_3D_LOOP ROLLOFF_LINEAR 0.5 20 Background
