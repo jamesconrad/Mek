@@ -40,6 +40,12 @@ void FramebufferEffects::LoadFXAAShaders()
 	Program::getInstance().createShader("fxaa", GL_FRAGMENT_SHADER, "shaders/fxaa.frag");
 }
 
+void FramebufferEffects::LoadShadowMapShaders()
+{
+	Program::getInstance().createShader("skinnedShadow", GL_VERTEX_SHADER, "shaders/shadow.vert");
+	Program::getInstance().createShader("skinnedShadow", GL_FRAGMENT_SHADER, "shaders/shadow.frag");
+}
+
 void FramebufferEffects::Bloom(unsigned int numGaussPasses)
 {
 	//_fb->Bind();
@@ -86,4 +92,15 @@ void FramebufferEffects::FXAA()
 	Program::getInstance().setUniform("screensize", glm::vec2(_fb->Width(), _fb->Height()));
 	_fb->PassTextureToPreBoundShader("tex", 0);
 	_fb->RenderQuad();
+}
+
+void FramebufferEffects::PrepShadowMap()
+{
+	_wb[0]->Bind();
+	Program::getInstance().bind("skinnedShadow");
+}
+
+void FramebufferEffects::FinShadowMap()
+{
+	_fb->Bind();
 }

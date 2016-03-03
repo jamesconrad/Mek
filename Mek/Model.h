@@ -52,6 +52,7 @@ public:
 	void loadModel(char* fp);
 	void loadScene(aiScene* scene);
 	void render();
+	void renderShadowPass();
 
 	void setActiveAnimation(aiAnimation* animation);
 	void setActiveAnimation(aiAnimation* anim1, aiAnimation* anim2, float factor);

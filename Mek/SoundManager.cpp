@@ -7,6 +7,77 @@ void ERRCHECK(FMOD_RESULT result)
 		//	exit(-1);
 	}
 }
+static enum SOUND_TYPE getSoundType(int _type){
+	switch (_type){
+	case 0:
+		return SOUND_TYPE_NULL;
+		break;
+	case 1:
+		return SOUND_TYPE_2D;
+		break;
+	case 2:
+		return SOUND_TYPE_2D_LOOP;
+		break;
+	case 3:
+		return SOUND_TYPE_3D;
+		break;
+	case 4:
+		return SOUND_TYPE_3D_LOOP;
+		break;
+	}
+}
+static enum SOUND_TYPE getSoundType(std::string& _type){
+	if (_type == "SOUND_TYPE_2D")
+		return SOUND_TYPE_2D;
+	else if (_type == "SOUND_TYPE_2D_LOOP")
+		return SOUND_TYPE_2D_LOOP;
+	else if (_type == "SOUND_TYPE_3D")
+		return SOUND_TYPE_3D;
+	else if (_type == "SOUND_TYPE_3D_LOOP")
+		return SOUND_TYPE_3D_LOOP;
+}
+
+static enum ROLLOFF_TYPE getRollOff(int type){
+	switch (type){
+	case 0:
+		return ROLLOFF_LINEAR;
+		break;
+	case 1:
+		return ROLLOFF_LINEARSQUARE;
+		break;
+	case 2:
+		return ROLLOFF_INVERSE;
+		break;
+	}
+}
+static enum ROLLOFF_TYPE getRollOff(std::string& _type){
+	if (_type == "ROLLOFF_LINEAR")
+		return ROLLOFF_LINEAR;
+	else if (_type == "ROLLOFF_LINEARSSQUARE")
+		return ROLLOFF_LINEARSQUARE;
+	else if (_type == "ROLLOFF_INVERSE")
+		return ROLLOFF_INVERSE;
+}
+static enum SOUND_ATT getSoundAtt(std::string& _type){
+	if (_type == "BACKGROUND")
+		return BACKGROUND;
+	else if (_type == "HIT")
+		return HIT;
+	else if (_type == "SMOVING")
+		return SMOVING;
+	else if (_type == "DEATH")
+		return DEATH;
+	else if (_type == "PROJECTILE")
+		return PROJECTILE;
+}
+static enum OWNER getOwner(std::string& _type){
+	if (_type == "Background")
+		return Background;
+	else if (_type == "Player")
+		return Player;
+	else if (_type == "ETarget")
+		return ETarget;
+}
 FSystem::FSystem(){
 	sysVel = { 0.0, 0.0, 0.0 };
 	sysFor = { 0.0, 0.0, 0.0 };
@@ -103,18 +174,19 @@ void FSystem::Clear(){
 }
 
 //FSOUND________________________________________________________________________________________
-FSound::FSound(FSystem* _fsystem, char* _name, SOUND_TYPE _soundType){
+//VARIABLES: FSystem && ConstChar* Name && SOUND_TYPE
+FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType){
 	FSystemPtr = _fsystem;
-	name = _name;
+	name = _name.c_str();
 	soundType = _soundType;
 	soundPos = { 0.0, 0.0, 0.0 };
 	soundVel = { 0.0, 0.0, 0.0 };
 
 	LoadSound();
 }
-FSound::FSound(FSystem* _fsystem, char* _name, SOUND_TYPE _soundType,ROLLOFF_TYPE _rolloff, float _minDist, float _maxDist){
+FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType, ROLLOFF_TYPE _rolloff, float _minDist, float _maxDist){
 	FSystemPtr = _fsystem;
-	name = _name;
+	name = _name.c_str();
 	soundType = _soundType;
 	soundPos = { 0.0, 0.0, 0.0 };
 	soundVel = { 0.0, 0.0, 0.0 };
@@ -392,3 +464,155 @@ FMOD::Channel* FSound::Play(){
 	
 	return ChannelPtr;
 }
+void FSound::setSName(const std::string& _name){
+	sname = _name;
+}
+void FSound::setTarget( const std::string& _name){
+	target = _name;
+}
+void FSound::setOwner(OWNER _owner){
+	owner = _owner;
+}
+//_________________________SOUND MANAGER________________________________________________________________________
+
+SoundManager::SoundManager(FSystem* _FSystemPtr,std::string& _filePath, std::string& _fileName){
+	FSystemPtr = _FSystemPtr;
+	std::ifstream file;
+	std::string name = _filePath + _fileName;
+	file.open(((name).c_str()));
+	
+	std::string output;
+	std::string line;
+	
+	if (file.is_open())
+	{
+		//getline(file, line);
+		while (file.good())
+		{
+			//system("CLS");
+			getline(file, line);
+
+			std::string str(line);
+			std::string buf; // Have a buffer string
+			std::stringstream ss(str); // Insert the string into a stream 
+
+			std::vector<std::string> tokens; // Create vector to hold our words
+
+			while (ss >> buf)
+				tokens.push_back(buf);
+
+			SOUND_TYPE STYPE;
+			ROLLOFF_TYPE RTYPE;
+			SOUND_ATT ATYPE;
+			
+
+			std::string pname = _filePath + tokens[0];
+
+			if (tokens.size() == 4){
+				ATYPE = getSoundAtt(tokens[1]);
+				STYPE = getSoundType(tokens[2]);
+				FSound* temp = new FSound(FSystemPtr,pname,STYPE);
+				temp->setSName(tokens[0]);
+				temp->setTarget(tokens[3]);
+				temp->setOwner(getOwner(tokens[3]));
+				temp->setAtt(ATYPE);
+				sounds.push_back(temp);
+
+			} 
+
+			if (tokens.size() == 7){
+				ATYPE = getSoundAtt(tokens[1]);
+				STYPE = getSoundType(tokens[2]);
+				RTYPE = getRollOff(tokens[3]);
+				float minDist = std::stod(tokens[4], NULL);
+				float maxDist = std::stod(tokens[5], NULL);
+
+				FSound* temp = new FSound(FSystemPtr,pname,STYPE,RTYPE,minDist,maxDist);
+				temp->setSName(tokens[0]);
+				temp->setAtt(ATYPE);
+				temp->setTarget(tokens[6]);
+				temp->setOwner(getOwner(tokens[6]));
+				sounds.push_back(temp);
+			}
+			//
+		}
+	}
+	else
+	{
+		std::cout << "Unable to load Sounds: " << _filePath << std::endl;
+	}
+
+	Sort();
+}
+SoundManager::~SoundManager(){
+	for (int i = 0; i < sounds.size(); i++)
+		sounds.pop_back();
+	FSystemPtr = NULL;
+	delete FSystemPtr;
+}
+int SoundManager::findName(std::string& _name){
+	//for (int i = 0; i < sounds.size(); i++){
+	//	if (sounds[i]->->target == _name)
+	//		return i;
+	//	else
+	//		return 0;
+	//}
+	return 0;
+}
+
+void SoundManager::List(){
+	for (int i = 0; i < NOWNERS; i++){
+		for (int j = 0; j < vSounds[i].size(); j++){
+			if (vSounds[i][j] == NULL)
+				continue;
+			//vSounds[i][j]->Play();
+			std::cout << i << " " << j << vSounds[i][j]->target << " " << vSounds[i][j]->sname << " " << vSounds[i][j]->att << std::endl;
+		}
+	}
+}
+void SoundManager::Sort(){
+	int nTargets[NOWNERS] = { 0 };
+	for (int i = 0; i < sounds.size(); i++){
+		if (sounds[i]->target == "Background")
+			nTargets[Background] + 1;
+		else if (sounds[i]->target == "Player")
+			nTargets[Player] + 1;
+		else if (sounds[i]->target == "Target")
+			nTargets[ETarget] + 1;
+	}
+
+	vSounds.resize(NOWNERS);
+	for (int i = 0; i < NOWNERS; i++){
+		vSounds[i].resize(NOFATT);
+	}
+
+
+	FSound* temp;
+	for (int i = 0; i < sounds.size(); i++){
+		temp = sounds[i];
+		if (temp->target == "Background"){
+			vSounds[Background].push_back(temp);
+		}
+		else if (temp->target == "Target"){
+			if (temp->att == HIT)
+				vSounds[ETarget][HIT] = temp;
+			else if (temp->att ==SMOVING)
+				vSounds[ETarget][SMOVING] = temp;
+			else if (temp->att == DEATH)
+				vSounds[ETarget][DEATH] = temp;
+
+		}
+		else if (temp->target == "Player"){
+			if (temp->att == HIT)
+				vSounds[Player][HIT] = temp;
+			else if (temp->att == SMOVING)
+				vSounds[Player][SMOVING] = temp;
+			else if (temp->att == DEATH)
+				vSounds[Player][DEATH] = temp;
+			else if (temp->att == PROJECTILE)
+				vSounds[Player][PROJECTILE] = temp;
+		}
+	}
+}
+
+//__________________LinkedSNode________________________________________________________________________

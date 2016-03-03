@@ -25,6 +25,9 @@
     <Filter Include="Resource Files\AA\FXAA">
       <UniqueIdentifier>{501df8f7-4115-47df-84ec-dab8869b8451}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shadow">
+      <UniqueIdentifier>{75650a43-f52c-450f-8a89-ecaf58042665}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -46,9 +49,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ComponentGraphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ComponentCollision.cpp">
@@ -93,6 +93,9 @@
     <ClCompile Include="FramebufferEffects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="SoundManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,9 +120,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ComponentGraphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ComponentCollision.h">
@@ -183,6 +183,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FramebufferEffects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SoundManager.h">
@@ -260,6 +263,12 @@
     </None>
     <None Include="fxaa.frag">
       <Filter>Resource Files\AA\FXAA</Filter>
+    </None>
+    <None Include="shadow.frag">
+      <Filter>Resource Files\Shadow</Filter>
+    </None>
+    <None Include="shadow.vert">
+      <Filter>Resource Files\Shadow</Filter>
     </None>
   </ItemGroup>
 </Project>

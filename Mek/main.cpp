@@ -44,6 +44,7 @@ enum game_state { GAME, MENU };
 float runTime = 0;
 std::vector<GameObject*> goVec;
 std::vector<Target*> targets;
+int currentEnemyToUpdate = 0;
 int targetsKilled = 0;
 twodOverlay* crosshair;
 twodOverlay* startscreen;
@@ -58,13 +59,8 @@ unsigned int score;
 float playTime = 0;
 NavMesh testNaveMesh;
 
-
+SoundManager* SManager;
 FSystem* SoundSystem;
-FSound * background;
-FSound* laserSound;
-FSound* hitSound;
-FSound* music;
-FSound* rWalk;
 //Model* testmodel;
 
 Framebuffer* framebuff[3];
@@ -72,25 +68,22 @@ FramebufferEffects* framebuffeffects;
 
 bool numpadPress[9];
 
-
-GameObject* animatedMech;
-ComponentGraphics* animatedMechGC;
+//GameObject* animatedMech;
+//Model* animatedMechGC;
 Terrain* ground;
 Skybox* sky;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
 void initFSystem(){
 	SoundSystem = new FSystem;
+	SManager = new SoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
+	SManager->List();
 
-	hitSound = new FSound(SoundSystem, "../Debug/media/swish.wav", SOUND_TYPE_3D);
-	background = new FSound(SoundSystem, "../Debug/media/MechTheme2.wav", SOUND_TYPE_2D_LOOP);
-	laserSound = new FSound(SoundSystem, "../Debug/media/laser6.wav", SOUND_TYPE_3D, ROLLOFF_LINEARSQUARE, 0.5, 100.0);
-	music = new FSound(SoundSystem, "../Debug/media/baller.mp3", SOUND_TYPE_3D, ROLLOFF_LINEAR, 0.5, 20);
-	rWalk = new FSound(SoundSystem, "../Debug/media/rwalk.wav", SOUND_TYPE_3D, ROLLOFF_LINEAR, 0.5, 10);
-
-	music->soundPos = { 0.0, 28.0, 0.0 };
-	music->Play();
+	//SManager->vSounds[0][5]->Play();
+	//std::cout << SManager->vSounds[Player][PROJECTILE]->sname;
+	
 };
+
 void LoadShaders(char* vertFilename, char* fragFilename) 
 {
 	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
@@ -116,7 +109,7 @@ double gScrollY = 0.0;
 GLfloat gDegreesRotated = 0.0f;
 
 GameObject* model;
-ComponentGraphics* gModel;
+Model* gModel;
 ComponentCollision* gCol;
 
 float tElap = 0;
@@ -156,20 +149,25 @@ void wonGame()
 void startGame()
 {
 	gameState = GAME;
-	Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
-	Camera::getInstance().lookAt(glm::vec3(0, 1, 0));
+	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
+	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
+	model->pos = glm::vec3(15.5, 0.5, 1);
+	model->health = 100.f;
 	score = 0;
 	playTime = 0;
 	targetsKilled = 0;
 	for (int i = 0, s = targets.size(); i < s; i++)
 	{
 		targets[i]->go->scale = glm::vec3(1, 1, 1);
+		targets[i]->hasSpottedPlayer = false;
+		targets[i]->update(0.166f, testNaveMesh);
 		targets[i]->hit = false;
 		targets[i]->alive = true;
+		targets[i]->go->health = 100.f;
 	}
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
-	background->Play();
+	SManager->vSounds[0][5]->Play();
 }
 void LoadTargets()
 {
@@ -177,7 +175,7 @@ void LoadTargets()
 	//load in targets
 	for (int i = 0; i < 6; i++)
 	{
-		Target* tar = new Target("models/Dummy.dae", 0.5);
+		Target* tar = new Target("models/Dummy.dae", 0.5,SManager->vSounds[ETarget]);
 
 		//last point needs to == first point
 
@@ -193,6 +191,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			//tar->laserSound = laserSound; //Seriously need get sounds to the other classes in a better way than this.
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 1)
 		{
@@ -207,6 +207,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			//tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 2)
 		{
@@ -221,6 +223,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			//tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 3)
 		{
@@ -232,6 +236,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			//tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 4)
 		{
@@ -243,6 +249,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			//tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 		if (i == 5)
 		{
@@ -255,6 +263,8 @@ void LoadTargets()
 			randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
 			tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
 			tar->generatePath(testNaveMesh);
+			//tar->laserSound = laserSound;
+			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 		}
 
 
@@ -263,20 +273,38 @@ void LoadTargets()
 	}
 }
 
-// draws a single frame
-static void Render() {
-	framebuff[0]->Bind();
+static void DrawSceneShadowPass()
+{
+	//animatedMechGC->render(); //Source of the glError 1282
+	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
+	{
+		Model* cg = static_cast<Model*>(goVec[i]->GetComponent(GRAPHICS));
+		cg->renderShadowPass();
+	}
 
-    // clear everything
-    glClearColor(0, 0, 0, 1); // black
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
+	{
+		ObjectManager::instance().pMap[i]->cg->renderShadowPass();
+	}
 
+	for (unsigned int i = 0, s = targets.size(); i < s; i++)
+	{
+		if (targets[i]->alive)
+		{
+			targets[i]->cg->renderShadowPass();
+			//targets[i]->cc->renderHitbox();
+		}
+	}
+}
+
+static void DrawScene()
+{
 	sky->render();
 	ground->Render();
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
-		ComponentGraphics* cg = static_cast<ComponentGraphics*>(goVec[i]->GetComponent(GRAPHICS));
+		Model* cg = static_cast<Model*>(goVec[i]->GetComponent(GRAPHICS));
 		cg->render();
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
@@ -290,7 +318,13 @@ static void Render() {
 		ObjectManager::instance().pMap[i]->cg->render();
 		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
 	}
-	
+
+	for (unsigned int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+	{
+		ObjectManager::instance().enemyPMap[i]->cg->render();
+		//ObjectManager::instance().pMap[i]->cc->renderHitbox();
+	}
+
 	for (unsigned int i = 0, s = targets.size(); i < s; i++)
 	{
 		if (targets[i]->alive)
@@ -302,6 +336,20 @@ static void Render() {
 	//gCol->renderHitbox();
 
 	//testmodel->render();
+}
+// draws a single frame
+static void Render() {
+	framebuff[0]->Bind();
+
+    // clear everything
+    glClearColor(0, 0, 0, 1); // black
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//framebuffeffects->PrepShadowMap();
+	//DrawSceneShadowPass();
+	//framebuffeffects->FinShadowMap();
+
+	DrawScene();
 
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)
@@ -353,7 +401,7 @@ static void Render() {
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-	//fsystem->Update();
+	SoundSystem->Update();
 	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
@@ -423,7 +471,10 @@ static void Update(float secondsElapsed) {
 	if (gameState == GAME)
 	{
 		//Begin Camera code
-		model->pos += fmy * (c->getOwner()->vel * lInput.z);
+		model->pos += fmy * (c->getOwner()->vel * lInput.z) + model->force;
+		model->force = model->force / 1.2f;
+		if (glm::length(model->force) < 0.1f)
+			model->force = glm::vec3(0);
 		model->pos += cam->right() * (c->getOwner()->vel * lInput.x);
 
 		cam->offsetPosition(model->pos - cam->position());
@@ -435,30 +486,44 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 			ObjectManager::instance().pMap[i]->update(secondsElapsed);
+		for (unsigned int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+			ObjectManager::instance().enemyPMap[i]->update(secondsElapsed);
 
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD)
 		{
-			Projectile* pr = new Projectile(p, f, 0.5, 100, 10,laserSound);
+			FSound* sounds = SManager->vSounds[Player][PROJECTILE];
+			sounds->Play();
+			Projectile* pr = new Projectile(p, f, 0.5, 25, 10,SManager->vSounds[Player][PROJECTILE]);
 			ObjectManager::instance().pMap.push_back(pr);
 			shotcd = 0;
 		}
 
 
 		CollisionManager::instance().checkAll();
-
+		
 		ObjectManager::instance().updateProjectile(secondsElapsed);
+		ObjectManager::instance().updateEnemyProjectile(secondsElapsed);
+		
+		if (targets[currentEnemyToUpdate]->hasSpottedPlayer == true && targets[currentEnemyToUpdate]->alive)
+		{
+			targets[currentEnemyToUpdate]->selectedToDoCombatUpdate = true;
+		}
+		currentEnemyToUpdate++;
+		if (currentEnemyToUpdate >= targets.size())
+		{
+			currentEnemyToUpdate = 0;
+		}
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
-			targets[i]->update(secondsElapsed/5, testNaveMesh);
+			
+			targets[i]->update(secondsElapsed / 5, testNaveMesh);
 			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) + 0.4; //this moves the targets to the correct position above the ground.
-			if (targets[i]->hasSpottedPlayer == false)
+
+			if (targets[i]->hasSpottedPlayer == false && targets[i]->alive)
 			{
-				if (targets[i]->canSeePlayer(model->pos))
-				{
-					targets[i]->determineCombatRoute(testNaveMesh);
-				}
+				targets[i]->canSeePlayer(model->pos);
 			}
 
 			//if (shoot)
@@ -476,6 +541,18 @@ static void Update(float secondsElapsed) {
 				targets[i]->alive = false;
 				skull->play();
 				targetsKilled++;
+			}
+			
+			targets[i]->fireTimer += secondsElapsed;
+			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
+			{
+				targets[i]->fireTimer = 0.f;
+				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->vSounds[Player][PROJECTILE]);
+				targets[i]->weaponProjectile->go->scale = glm::vec3(1.5f);
+				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
+				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
+				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
+				targets[i]->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
 			}
 		}
 
@@ -499,6 +576,12 @@ static void Update(float secondsElapsed) {
 
 		if (targetsKilled == targets.size() || c->IsPressed(XINPUT_GAMEPAD_BACK))
 			wonGame();
+		
+		//Only a different if statement because we need a loseGame function to replace the wonGame function.
+		if (model->health <= 0)
+		{
+			wonGame();
+		}
 
 		
 		//printf("%f\n", ground->HeightAtLocation(model->pos));
@@ -533,7 +616,7 @@ static void Update(float secondsElapsed) {
 	tElap += secondsElapsed;
 
 	//Will need to uncomment the following and have gModel relate to the mech's graphics
-	animatedMechGC->BoneTransform(tElap, trans);
+	//animatedMechGC->BoneTransform(tElap, trans);
 }
 // records how far the y axis has been scrolled
 void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
@@ -627,6 +710,7 @@ void AppMain() {
 	framebuffeffects = new FramebufferEffects(framebuff);
 	framebuffeffects->LoadBloomShaders();
 	framebuffeffects->LoadFXAAShaders();
+	framebuffeffects->LoadShadowMapShaders();
 
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
@@ -650,8 +734,8 @@ void AppMain() {
 	prepProjectiles();
 
 	model = new GameObject(0);
-	model->SetName("Moving");
-	gModel = new ComponentGraphics();
+	model->SetName("Player");
+	gModel = new Model();
 	gModel->setOwner(model);
 	gModel->loadModel("models/TallCube.dae");
 	Component* gp = gModel;
@@ -677,7 +761,7 @@ void AppMain() {
 		if (i != 3 && i != 0 && i != 4 && i != 8 && i != 18 && i != 19 && i != 20 && i !=21)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
-			ComponentGraphics *cModel = new ComponentGraphics();
+			Model *cModel = new Model();
 			ComponentCollision *cCollision = new ComponentCollision();
 			Component *c;
 
@@ -992,13 +1076,13 @@ void AppMain() {
 		}
 	}
 
-	animatedMech = new GameObject(100);
-	animatedMechGC = new ComponentGraphics();
-	animatedMechGC->loadModel("models/Test_Animation_DAE.dae");
-	Component* c = animatedMechGC;
-	animatedMech->AddComponent(GRAPHICS, c);
-	animatedMech->pos = glm::vec3(0, 0, 0);
-	animatedMech->scale = glm::vec3(1, 1, 1);
+	//animatedMech = new GameObject(100);
+	//animatedMechGC = new Model();
+	//animatedMechGC->loadModel("models/Test_Animation_DAE.dae");
+	//Component* c = animatedMechGC;
+	//animatedMech->AddComponent(GRAPHICS, c);
+	//animatedMech->pos = glm::vec3(0, 0, 0);
+	//animatedMech->scale = glm::vec3(1, 1, 1);
 
 	//END MODEL INITS
 	camInterp.points.push_back(glm::vec3(1025, 1, 0));

@@ -21,7 +21,7 @@ inline bool RayVsPlane(float &origin, float &dir, float axisMin, float axisMax, 
 	if (tMax < tFirst || tMin > tLast) // If it is outside the 1d plane, return false;
 		return false;
 
-	if (tMin > tFirst) tFirst = tMin; //Not sure which these are going yet. Gimme a minute.
+	if (tMin > tFirst) tFirst = tMin; //Not sure which these are doing yet. Gimme a minute.
 	if (tMax < tLast) tLast = tMax;
 
 		return true;
@@ -31,12 +31,13 @@ inline bool RayVsOBB(glm::vec3 origin, glm::vec3 &Direction, glm::vec3 minVert, 
 {
 	float tFirst = 0.0f;
 	float tLast = LONG_MAX;
+	float t;
 
 	if (!RayVsPlane(origin.x, Direction.x, minVert.x, maxVert.x, tFirst, tLast)) return false;
 	if (!RayVsPlane(origin.y, Direction.y, minVert.y, maxVert.y, tFirst, tLast)) return false;
 	if (!RayVsPlane(origin.z, Direction.z, minVert.z, maxVert.z, tFirst, tLast)) return false;
 
-	//t = tFirst;
+	t = tFirst;
 	// I'm not sure what t is yet. I'll figure it out eventually.
 	return true;
 }
