@@ -1,11 +1,14 @@
-#version 330
+#version 430
 
 uniform sampler2D t0;
 uniform sampler2D t1;
 //uniform vec3 u;
 //uniform vec3 d;
 
-out vec4 colour;
+layout(location = 0) out vec4 colour;
+layout(location = 1) out vec4 Depth;
+layout(location = 2) out vec4 Normal;
+
 in vec3 p;
 in vec3 n;
 in float h;
@@ -40,4 +43,7 @@ void main()
 	//	if (p.z > u.z && p.z < d.z)
 	//		colour.r = 1;
 	//colour = vec4(normalize(n) * 0.5 + 0.5, 1);
+
+	Depth = vec4(0, 0, 0, 1.0);
+	Normal = vec4(0, 0, 0, 1.0);
 }

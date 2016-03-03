@@ -11,11 +11,12 @@ FramebufferEffects::FramebufferEffects(Framebuffer* fb, Framebuffer* wb0, Frameb
 	pixsizeY = 1.f / (_size.y);
 }
 
-FramebufferEffects::FramebufferEffects(Framebuffer* fbwbwb[3])
+FramebufferEffects::FramebufferEffects(Framebuffer* fbwbwb[4])
 {
 	_fb = fbwbwb[0];
 	_wb[0] = fbwbwb[1];
 	_wb[1] = fbwbwb[2];
+	_wb[2] = fbwbwb[3];
 
 	_size = glm::vec2(_wb[0]->Width(), _wb[0]->Height());
 	pixsizeX = 1.f / (_size.x / 2.f);
@@ -43,6 +44,12 @@ void FramebufferEffects::LoadFXAAShaders()
 void FramebufferEffects::LoadShadowMapShaders()
 {
 
+}
+
+void FramebufferEffects::loadToonShaders()
+{
+	Program::getInstance().createShader("toon", GL_VERTEX_SHADER, "shaders/pass.vert");
+	Program::getInstance().createShader("toon", GL_FRAGMENT_SHADER, "shaders/toon.frag");
 }
 
 void FramebufferEffects::Bloom(unsigned int numGaussPasses)
@@ -102,3 +109,21 @@ void FramebufferEffects::FinShadowMap()
 {
 
 }
+
+void FramebufferEffects::Toon()
+{
+	_wb[2]->Bind();
+
+	Program::getInstance().bind("toon");
+	_fb->PassTextureToPreBoundShader("rgbTexture", 0);
+	_fb->PassTextureToPreBoundShader("depthTexture", 1);
+	_fb->PassTextureToPreBoundShader("normalTexture", 2);
+	Program::getInstance().setUniform("fboSize", glm::vec2(_wb[2]->Width(), _wb[2]->Height()));
+	_wb[2]->RenderQuad();
+
+	_fb->Bind();
+	Program::getInstance().bind("pass");
+	_wb[2]->PassTextureToPreBoundShader("tex0", 0);
+	_fb->RenderQuad();
+
+}									  

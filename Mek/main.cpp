@@ -68,7 +68,7 @@ FSound* music;
 FSound* rWalk;
 //Model* testmodel;
 
-Framebuffer* framebuff[3];
+Framebuffer* framebuff[4];
 FramebufferEffects* framebuffeffects;
 
 bool numpadPress[9];
@@ -325,6 +325,8 @@ static void DrawScene()
 static void Render() {
 	framebuff[0]->Bind();
 
+
+
     // clear everything
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -338,13 +340,20 @@ static void Render() {
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)
 
-	if (numpadPress[1])
-		framebuffeffects->Bloom(4);
-	if (numpadPress[2])
+	//if (numpadPress[3])
+		framebuffeffects->Toon();
+	//if (numpadPress[2])
 		framebuffeffects->FXAA();
+	//if (numpadPress[1])
+		framebuffeffects->Bloom(4);
+	
+
+		
 
 	framebuff[0]->Unbind();
-	framebuff[0]->Render("pass");
+	Program::getInstance().bind("pass");
+	framebuff[0]->PassTextureToPreBoundShader("tex0", 0);
+	framebuff[0]->RenderQuad();
 
 	//Render HUD
 	glDisable(GL_DEPTH_TEST);
@@ -682,16 +691,20 @@ void AppMain() {
 
 	framebuff[0] = new Framebuffer();
 	framebuff[0]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
-	framebuff[0]->CreateColorTexture(1, SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[0]->CreateColorTexture(3, SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuff[1] = new Framebuffer();
 	framebuff[1]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
 	framebuff[1]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
 	framebuff[2] = new Framebuffer();
 	framebuff[2]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
 	framebuff[2]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[3] = new Framebuffer();
+	framebuff[3]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[3]->CreateColorTexture(1, SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuffeffects = new FramebufferEffects(framebuff);
 	framebuffeffects->LoadBloomShaders();
 	framebuffeffects->LoadFXAAShaders();
+	framebuffeffects->loadToonShaders();
 
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));

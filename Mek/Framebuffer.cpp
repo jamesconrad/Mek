@@ -48,15 +48,16 @@ void Framebuffer::CreateColorTexture(unsigned int num, unsigned int width, unsig
 		glGenTextures(1, &cbo);
 		glBindTexture(GL_TEXTURE_2D, cbo);
 		//GL_RGBA8, GL_RGB, and GL_UNSIGNED_BYTE might be changed
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, cbo, 0);
 		_cbo.push_back(cbo);
-		_buf.push_back(GL_COLOR_ATTACHMENT0 + _cbo.size());
+		_buf.push_back(GL_COLOR_ATTACHMENT0 + i);
 	}
+	glDrawBuffers(num, _buf.data());
 	Unbind();
 }
 
@@ -76,6 +77,7 @@ void Framebuffer::CreateDepthTexture(unsigned int width, unsigned int height)
 void Framebuffer::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
 }
 
 void Framebuffer::Unbind()
@@ -100,7 +102,7 @@ void Framebuffer::Render(char* shader)
 {
 	Program::getInstance().bind(shader);
 	glBindVertexArray(ScreenQuadVAO);
-	for (int i = 0, s = _cbo.size(); i < s && i <= 9; i++)
+	for (int i = 0, s = _cbo.size(); i < s && i <= 9; i++)//currently this seems to work. If you can find a way to fix the problem with i<=9, change it back.
 	{
 		std::string tex("tex");
 		tex += 48 + i;
