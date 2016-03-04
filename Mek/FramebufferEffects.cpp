@@ -110,7 +110,7 @@ void FramebufferEffects::FinShadowMap()
 
 }
 
-void FramebufferEffects::Toon()
+void FramebufferEffects::Toon(bool doCraziness)
 {
 	_wb[2]->Bind();
 
@@ -118,7 +118,20 @@ void FramebufferEffects::Toon()
 	_fb->PassTextureToPreBoundShader("rgbTexture", 0);
 	_fb->PassTextureToPreBoundShader("depthTexture", 1);
 	_fb->PassTextureToPreBoundShader("normalTexture", 2);
-	Program::getInstance().setUniform("fboSize", glm::vec2(_wb[2]->Width(), _wb[2]->Height()));
+	if (doCraziness)
+	{
+		Program::getInstance().setUniform("fboSize", glm::vec3(0));
+		Program::getInstance().setUniform("sobelCorrection", 0);
+		Program::getInstance().setUniform("magnitudeCorrection", 1);
+		Program::getInstance().setUniform("magnitudeFix", 1);
+	}
+	else
+	{
+		Program::getInstance().setUniform("fboSize", glm::vec3(_wb[2]->Width(), _wb[2]->Height(), 0.0f));
+		Program::getInstance().setUniform("sobelCorrection", 1);
+		Program::getInstance().setUniform("magnitudeCorrection", -1);
+		Program::getInstance().setUniform("magnitudeFix", 0);
+	}
 	_wb[2]->RenderQuad();
 
 	_fb->Bind();

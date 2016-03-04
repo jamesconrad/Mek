@@ -10,7 +10,13 @@ uniform samplerCube skybox;
 void main()
 {
 	colour = texture(skybox, uvw);
-	Depth = vec4(0, 0, 0, 1.0);
-	Normal = vec4(0, 0, 0, 1.0);
+
+	Depth = colour;
+	Normal = colour;
+	//These two are the correct ones
+	//Depth = vec4(0, 0, 0, 1.0);
+	//Normal = vec4(0, 0, 0, 1.0);
+
+
 	//colour  = vec4(uvw,1);
 }

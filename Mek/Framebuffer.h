@@ -30,7 +30,7 @@ public:
 	void Render(char * shader);
 	void RenderQuad();
 	void PassTextureToPreBoundShader(char* uniform, int cbo);
-
+	static GLint Texture; //Set this variable back to private.
 private:
 	GLuint _fbo;
 	GLuint _dbo;
@@ -42,5 +42,5 @@ private:
 
 	static GLuint ScreenQuadVAO;
 	static GLuint ScreenQuadVBO;
-	static GLint Texture;
+	
 };

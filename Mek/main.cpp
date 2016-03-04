@@ -357,7 +357,10 @@ static void Render() {
     // swap the display buffers (displays what was just drawn)
 
 	//if (numpadPress[3])
-		framebuffeffects->Toon();
+	if (gameState == GAME)
+		framebuffeffects->Toon(false);
+	else if (gameState == MENU)
+		framebuffeffects->Toon(true);
 	//if (numpadPress[2])
 		framebuffeffects->FXAA();
 	//if (numpadPress[1])

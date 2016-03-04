@@ -5,7 +5,11 @@ uniform sampler2D rgbTexture;
 uniform sampler2D depthTexture;
 uniform sampler2D normalTexture;
 
-uniform vec2 fboSize;
+uniform int sobelCorrection = 1;
+uniform int magnitudeCorrection = -1;
+uniform int magnitudeFix = 0;
+
+uniform vec3 fboSize;
 
 mat3 Gx = mat3(-1, -2, -1,
 			    0,  0,  0, 
@@ -32,11 +36,11 @@ void main()
 	float sumY = 0.0;
 
 	//////Depth Texture
-	sumX = sumX + texture2D(depthTexture, vec2(uv.x + pixelSize.x * -1, uv.y)).r * -2;
-	sumX = sumX + texture2D(depthTexture, vec2(uv.x + pixelSize.x * 1, uv.y)).r * 2;
+	sumX = sumX + texture2D(depthTexture, vec2(uv.x + pixelSize.x * -1, uv.y)).r * -8;
+	sumX = sumX + texture2D(depthTexture, vec2(uv.x + pixelSize.x * 1, uv.y)).r * 8;
 	
-	sumY = sumY + texture2D(depthTexture, vec2(uv.x, uv.y + pixelSize.y * -1)).r * -2;
-	sumY = sumY + texture2D(depthTexture, vec2(uv.x, uv.y + pixelSize.y * 1)).r * 2;
+	sumY = sumY + texture2D(depthTexture, vec2(uv.x, uv.y + pixelSize.y * -1)).r * -8;
+	sumY = sumY + texture2D(depthTexture, vec2(uv.x, uv.y + pixelSize.y * 1)).r * 8;
 
 
 
@@ -61,12 +65,14 @@ void main()
 	sumY = sumY + texture2D(normalTexture, vec2(uv.x, uv.y + pixelSize.y *1)).b * 2;
 
 
-
-	float magnitude = 1 - length(vec2(sumX, sumY));
-	//magnitude = sumX;
-	//magnitude = ceil(magnitude);
+	float magnitude = sobelCorrection + length(vec2(sumX, sumY)) * magnitudeCorrection;
 	vec3 rgbColour = texture2D(rgbTexture, uv.xy).rgb;
-	FragColour.rgb = rgbColour * vec3(magnitude);
+	
+	//This is a temporary and incorrect assignment of fragColour
+	FragColour.rgb = vec3(magnitude);
+
+	//This line is the correct assignment of fragColour
+	FragColour.rgb = sobelCorrection * (rgbColour * vec3(magnitude)) + (magnitudeFix * vec3(magnitude));
 
 	FragColour.a = 1.0;
 }

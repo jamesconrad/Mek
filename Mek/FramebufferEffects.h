@@ -18,7 +18,7 @@ public:
 
 	void Bloom(unsigned int numGaussPasses);
 	void FXAA();
-	void Toon();
+	void Toon(bool doCraziness);
 
 	void PrepShadowMap();
 	void FinShadowMap();

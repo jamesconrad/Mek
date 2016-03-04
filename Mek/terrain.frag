@@ -7,7 +7,10 @@ uniform sampler2D terrainG3;
 //uniform vec3 u;
 //uniform vec3 d;
 
-out vec4 colour;
+layout(location = 0) out vec4 colour;
+layout(location = 1) out vec4 depth;
+layout(location = 2) out vec4 normals;
+
 in vec3 p;
 in vec3 n;
 in float h;
@@ -78,4 +81,12 @@ void main()
 	//if (p.x > d.x && p.x < u.x)
 	//	if (p.z > u.z && p.z < d.z)
 	//		colour.r = 1;
+	
+	
+	
+	
+	
+	
+	depth = vec4(vec3(gl_FragCoord.z), 1.0);
+	normals = vec4(vec3(n), 1.0);
 }
