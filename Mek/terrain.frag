@@ -44,6 +44,8 @@ void main()
 	//		colour.r = 1;
 	//colour = vec4(normalize(n) * 0.5 + 0.5, 1);
 
-	Depth = vec4(0, 0, 0, 1.0);
-	Normal = vec4(0, 0, 0, 1.0);
+	Depth = vec4(vec3(gl_FragCoord.z), 1.0);
+	//Depth = vec4(0, 0, 0, 1.0);
+	Normal = vec4(vec3(n), 1.0);
+	//Normal = vec4(0, 0, 0, 1.0);
 }

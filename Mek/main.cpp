@@ -101,7 +101,7 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 }
 // constants
 //const glm::vec2 SCREEN_SIZE(1920, 1080);
-const glm::vec2 SCREEN_SIZE(1280, 800);
+const glm::vec2 SCREEN_SIZE(1920, 1080);
 
 // globals
 GLFWwindow* gWindow = NULL;
@@ -561,7 +561,7 @@ static void Update(float secondsElapsed) {
 				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
 				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
-				targets[i]->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+				targets[i]->fireTimeTolerance = randomClampedFloat(0.5f, 2.f);
 			}
 		}
 

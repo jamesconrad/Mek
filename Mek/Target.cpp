@@ -20,7 +20,9 @@ Target::Target(char* fp, float t, std::vector<FSound*> _sounds)
 	go->AddComponent(GRAPHICS, c);
 	c = cc;
 	go->AddComponent(PHYSICS, c);
-	 
+	
+	sounds = _sounds;
+
 	ObjectManager::instance().addObject(go);
 
 	go->dir = glm::vec3(1.0f, 0.0f, 0.0f);

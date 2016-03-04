@@ -32,12 +32,11 @@ void main()
 	float sumY = 0.0;
 
 	//////Depth Texture
-	
 	sumX = sumX + texture2D(depthTexture, vec2(uv.x + pixelSize.x * -1, uv.y)).r * -2;
 	sumX = sumX + texture2D(depthTexture, vec2(uv.x + pixelSize.x * 1, uv.y)).r * 2;
 	
 	sumY = sumY + texture2D(depthTexture, vec2(uv.x, uv.y + pixelSize.y * -1)).r * -2;
-	sumY = sumY + texture2D(depthTexture, vec2(uv.x, uv.y + pixelSize.y *1)).r * 2;
+	sumY = sumY + texture2D(depthTexture, vec2(uv.x, uv.y + pixelSize.y * 1)).r * 2;
 
 
 
@@ -52,8 +51,9 @@ void main()
 	sumX = sumX + texture2D(normalTexture, vec2(uv.x + pixelSize.x * 1, uv.y)).g * 2;
 	
 	sumY = sumY + texture2D(normalTexture, vec2(uv.x, uv.y + pixelSize.y * -1)).g * -2;
-	sumY = sumY + texture2D(normalTexture, vec2(uv.x, uv.y + pixelSize.y *1)).g * 2;
+	sumY = sumY + texture2D(normalTexture, vec2(uv.x, uv.y + pixelSize.y * 1)).g * 2;
 	
+
 	sumX = sumX + texture2D(normalTexture, vec2(uv.x + pixelSize.x * -1, uv.y)).b * -2;
 	sumX = sumX + texture2D(normalTexture, vec2(uv.x + pixelSize.x * 1, uv.y)).b * 2;
 	
@@ -63,9 +63,8 @@ void main()
 
 
 	float magnitude = 1 - length(vec2(sumX, sumY));
-	//	magnitude = sumX;
-	//magnitude = clamp(magnitude, 0, 1);
-	magnitude = ceil(magnitude);
+	//magnitude = sumX;
+	//magnitude = ceil(magnitude);
 	vec3 rgbColour = texture2D(rgbTexture, uv.xy).rgb;
 	FragColour.rgb = rgbColour * vec3(magnitude);
 
