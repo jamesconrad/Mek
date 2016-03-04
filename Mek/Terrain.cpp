@@ -22,8 +22,11 @@ struct tri
 
 Terrain::Terrain()
 {
-	_textures.push_back(new Texture("ground.png", GL_LINEAR, GL_REPEAT));
-	_textures.push_back(new Texture("rock.jpg", GL_LINEAR, GL_REPEAT));
+	//Ordered from 0 to n, where 0 is the flatest texture and n is the steepest
+	_textures.push_back(new Texture("terrainG0.png", GL_LINEAR, GL_REPEAT));
+	_textures.push_back(new Texture("terrainG1.png", GL_LINEAR, GL_REPEAT));
+	_textures.push_back(new Texture("terrainG2.png", GL_LINEAR, GL_REPEAT));
+	_textures.push_back(new Texture("terrainG3.png", GL_LINEAR, GL_REPEAT));
 }
 
 void Terrain::InitRender()
@@ -126,12 +129,27 @@ void Terrain::Render()
 	glBindVertexArray(_vao);
 
 	//bind ground
-	glActiveTexture(GL_TEXTURE0);
+	//for (int i = 0, s = _textures.size(); i < s; i++)
+	//{
+	//	std::string uniform("terrainG");
+	//	uniform += 48 + i;
+	//	glActiveTexture(GL_TEXTURE0 + i);
+	//	glBindTexture(GL_TEXTURE_2D, _textures[i]->object());
+	//	Program::getInstance().setUniform((char*)uniform.c_str(), i);
+	//}
+
+	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, _textures[0]->object());
-	Program::getInstance().setUniform("t0", 0);
-	glActiveTexture(GL_TEXTURE1);
+	Program::getInstance().setUniform("terrainG0", 0);
+	glActiveTexture(GL_TEXTURE0 + 1);
 	glBindTexture(GL_TEXTURE_2D, _textures[1]->object());
-	Program::getInstance().setUniform("t1", 1);
+	Program::getInstance().setUniform("terrainG1", 1);
+	glActiveTexture(GL_TEXTURE0 + 2);
+	glBindTexture(GL_TEXTURE_2D, _textures[2]->object());
+	Program::getInstance().setUniform("terrainG2", 2);
+	glActiveTexture(GL_TEXTURE0 + 3);
+	glBindTexture(GL_TEXTURE_2D, _textures[3]->object());
+	Program::getInstance().setUniform("terrainG3", 3);
 
 	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);

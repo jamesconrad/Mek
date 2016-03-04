@@ -8,6 +8,7 @@ out vec3 n;
 out vec3 p;
 out float h;
 
+
 uniform float _min;
 uniform float _max;
 
