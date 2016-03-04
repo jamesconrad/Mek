@@ -1,4 +1,4 @@
-#version 330
+#version 430
 
 const int MAX_POINT_LIGHTS = 16;
 const int MAX_SPOT_LIGHTS = 16;
@@ -184,7 +184,9 @@ float getRimFresnelTerm(VSOutput In)
 }
 
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 Depth;
+layout(location = 2) out vec4 Normal;
 
 vec3 warmColour = vec3(0.5, 0.0, 0.0);
 float alphaWarm = 0.1;
@@ -251,5 +253,7 @@ void main()
 	RimHighlights += clamp(dot(In.Normal,WorldUp), 0.0, 1.0) * RimFresnel * ConstantAmbient; /** (ConstantAmbient * normalize(gEyeWorldPos - In.WorldPos));*/
 	
 	FragColor = vec4(((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights), 1.0);
+	Depth = vec4(vec3(gl_FragCoord.z), 1.0);
+	Normal = vec4(vec3(In.Normal), 1.0);
 	//FragColor = vec4((Albedo + goochColour), 1.0);
 }

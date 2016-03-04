@@ -16,6 +16,7 @@
     <ClCompile Include="Bitmap.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ComponentCollision.cpp" />
+    <ClCompile Include="ComponentGraphics.cpp" />
     <ClCompile Include="Framebuffer.cpp" />
     <ClCompile Include="FramebufferEffects.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentCollision.h" />
+    <ClInclude Include="ComponentGraphics.h" />
     <ClInclude Include="ComponentPhysics.h" />
     <ClInclude Include="Framebuffer.h" />
     <ClInclude Include="FramebufferEffects.h" />
@@ -52,7 +54,6 @@
     <ClInclude Include="ComponentForce.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="LightComponent.h" />
-    <ClInclude Include="Model.h" />
     <ClInclude Include="NavMesh.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="Projectile.h" />
@@ -82,8 +83,6 @@
     <None Include="NavMesh.inl" />
     <None Include="pass.frag" />
     <None Include="pass.vert" />
-    <None Include="shadow.frag" />
-    <None Include="shadow.vert" />
     <None Include="skinning.frag" />
     <None Include="skinning.vert" />
     <None Include="skinningA.frag" />
@@ -95,6 +94,8 @@
     <None Include="text.frag" />
     <None Include="text.vert" />
     <None Include="tonemap.frag" />
+    <None Include="toon.frag" />
+    <None Include="toon.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{222737CC-70B8-41BB-A92B-095192302DFF}</ProjectGuid>

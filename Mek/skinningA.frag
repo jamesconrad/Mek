@@ -1,4 +1,4 @@
-#version 330
+#version 430
 
 const int MAX_POINT_LIGHTS = 16;
 const int MAX_SPOT_LIGHTS = 16;
