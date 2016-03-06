@@ -104,7 +104,7 @@ FSystem::FSystem(){
 				std::cout << "Failed to set DSP Buffer Size! Error: "; ERRCHECK(result); std::cout << std::endl;
 			}
 		}
-
+		
 		result = SystemPtr->getDriverInfo(0, name, 256, 0);
 		if (result != FMOD_OK){
 			std::cout << "Failed to get Driver Info! Error: "; ERRCHECK(result); std::cout << std::endl;
@@ -118,7 +118,7 @@ FSystem::FSystem(){
 		if (result != FMOD_OK){
 			std::cout << "Failed to set Speakermode to Stereo! Error: "; ERRCHECK(result); std::cout << std::endl;
 		}
-
+		
 		result = SystemPtr->init(100, FMOD_INIT_NORMAL, 0);
 		if (result != FMOD_OK){
 			std::cout << "Failed to Initialize System Stereo! Error: "; ERRCHECK(result); std::cout << std::endl;
@@ -234,7 +234,7 @@ void FSound::LoadSound(){
 				std::cout << "Failed to set Sound Mode: "; ERRCHECK(result); std::cout << std::endl;
 			}
 			break;
-		}
+		}		
 		break;
 	case SOUND_TYPE_3D_LOOP:
 		result = FSystemPtr->SystemPtr->createSound(name, FMOD_3D, 0, &SoundPtr);
@@ -378,7 +378,7 @@ void FSound::Update(){
 		std::cout << "Failed to set Channel 3D Attributes in: " << name << " "; ERRCHECK(result); std::cout << std::endl;
 	}
 
-	result = FSystemPtr->SystemPtr->set3DListenerAttributes(0, &FSystemPtr->sysPos, &FSystemPtr->sysVel, &FSystemPtr->sysFor, &FSystemPtr->sysUp);
+	result = FSystemPtr->SystemPtr->set3DListenerAttributes(0, &FSystemPtr->sysPos,&FSystemPtr->sysVel, &FSystemPtr->sysFor, &FSystemPtr->sysUp);
 	if (result != FMOD_OK){
 		std::cout << "Failed to set 3D Listener Attributes: "; ERRCHECK(result); std::cout << std::endl;
 	}
@@ -442,7 +442,7 @@ FMOD::Channel* FSound::Play(){
 		result = ChannelPtr->setPaused(false);
 		ERRCHECK(result);
 	}
-
+	
 	return ChannelPtr;
 }
 void FSound::setSName(const std::string& _name){
@@ -450,15 +450,15 @@ void FSound::setSName(const std::string& _name){
 }
 //_________________________SOUND MANAGER________________________________________________________________________
 
-SoundManager::SoundManager(FSystem* _FSystemPtr, std::string& _filePath, std::string& _fileName){
+SoundManager::SoundManager(FSystem* _FSystemPtr,std::string& _filePath, std::string& _fileName){
 	FSystemPtr = _FSystemPtr;
 	std::ifstream file;
 	std::string name = _filePath + _fileName;
 	file.open(((name).c_str()));
-
+	
 	std::string output;
 	std::string line;
-
+	
 	if (file.is_open())
 	{
 		//getline(file, line);
@@ -487,7 +487,7 @@ SoundManager::SoundManager(FSystem* _FSystemPtr, std::string& _filePath, std::st
 				towner = tokens[1];
 				tattribute = tokens[2];
 				STYPE = getSoundType(tokens[3]);
-				FSound* temp = new FSound(FSystemPtr, pname, STYPE);
+				FSound* temp = new FSound(FSystemPtr,pname,STYPE);
 				temp->setSName(tokens[0]);
 				temp->soundType = getSoundType(tokens[3]);
 				temp->setOwner(towner);
@@ -508,7 +508,7 @@ SoundManager::SoundManager(FSystem* _FSystemPtr, std::string& _filePath, std::st
 					if (uOwnerF == false)
 						uOwners.push_back(towner);
 				}
-			}
+			} 
 
 			if (tokens.size() == 7){
 				//0= FName, 1= Owner, 2 = Attribute, 3 = Sound Type, 4 = Rolloff, 5=minDist, 6=maxDist
@@ -572,7 +572,7 @@ int SoundManager::findName(std::string& _name){
 void SoundManager::List(){
 	for (int i = 0; i < vSounds.size(); i++)
 		for (int j = 0; j < nuOwners[i]; j++)
-			std::cout << "\n" << "O:" << i << " " << "A:" << j << " " << vSounds[i][j]->sname << " " << vSounds[i][j]->owner << " " << vSounds[i][j]->attribute;
+			std::cout << "\n" << "O:"<< i << " " << "A:" << j << " " << vSounds[i][j]->sname << " " << vSounds[i][j]->owner << " " << vSounds[i][j]->attribute;
 }
 void SoundManager::Sort(){
 	nuOwners.resize(uOwners.size());
@@ -583,129 +583,20 @@ void SoundManager::Sort(){
 			if (uOwners[j] == sounds[i]->owner)
 				count++;
 		}
-
+		
 		nuOwners[j] = count;
 		j++;
 	}
-
+	
 	vSounds.resize(uOwners.size());
-	//list.resize(uOwners.size());
 	int k = 0;
 	while (k < uOwners.size()){
 		for (int l = 0; l < sounds.size(); l++){
 			if (uOwners[k] == sounds[l]->owner)
-			{
 				vSounds[k].push_back(sounds[l]);
-				//list[k].push_back(sounds[l]);
-			}
 		}
 		k++;
 	}
-
-	//oList.resize(uOwners.size());
-	
-	std::vector<FSound*> tempList;
-	int p = 0;
-	while (p < uOwners.size()){
-		for (int i = 0; i < sounds.size(); i++){
-			if (uOwners[p] == sounds[i]->owner){
-				//std::cout << uOwners[p] << " " << sounds[i]->owner << std::endl;
-				tempList.push_back(sounds[i]);
-			}
-		}
-		if (tempList.size() == nuOwners[p]){
-			//std::cout << "\n List Full";
-			OwnerList* list = new OwnerList(tempList[0]->owner);
-			list->list = tempList;
-			oList.push_back(list);
-			tempList.clear();
-		}
-			
-		p++;
-	}
 }
 
-void SoundManager::printOList(){
-		for (int i = 0; i < oList.size(); i++)
-			for (int j = 0; j < oList[i]->list.size(); j++)
-				std::cout << oList[i]->owner << " " << oList[i]->list[j]->attribute << std::endl;
-}
-int SoundManager::findOwner(char* _owner){
-	std::string owner = std::string(_owner);
-	bool isFound = false;
-	int index = 0;
-	for (int i = 0; i < oList.size(); i++){
-		if (oList[i]->owner == owner){
-			isFound = true;
-			index = i;
-		}
-	}
-
-	if (isFound)
-		return index;
-	else{
-		std::cout << owner << " not found";
-		return -1;
-	}
-}
-int SoundManager::findAttribute(char* _attribute){
-	bool isFound = false;
-	int index = 0;
-	for (int i = 0; i < oList.size(); i++){
-		int index = oList[i]->findAttribute(_attribute);
-	}
-	if (index != -1)
-		return index;
-	else{
-		return -1;
-	}
-}
-FSound* SoundManager::findSound(char* _owner, char* _attribute){
-	int owner = findOwner(_owner);
-	int attribute = findAttribute(_attribute);
-
-	if (owner != -1 && attribute != -1)
-		return oList[owner]->list[attribute];
-	else
-		std::cout << "Did not find sound: " << _owner << " " << _attribute;
-}
-void SoundManager::findAndPlay(char* _owner, char* _attribute){
-	int owner = findOwner(_owner);
-	int attribute = findAttribute(_attribute);
-
-	if (owner != -1 && attribute != -1)
-		oList[owner]->list[attribute]->Play();
-	else{
-		std::cout << "Did not find sound: " << _owner << " " << _attribute;
-	}
-}
-OwnerList* SoundManager::getOwnerList(char* _owner){
-	int owner = findOwner(_owner);
-
-	if (owner != -1)
-		return oList[owner];
-}
-//__________________Owner List________________________________________________________________________
-
-int OwnerList::findAttribute(char* _attribute){
-	std::string attribute = std::string(_attribute);
-	for (int i = 0; i < this->list.size(); i++){
-		if (this->list[i]->attribute == attribute)
-			return i;
-		else{
-			std::cout << "Attribute not found " << attribute;
-			return -1;
-		}
-	}
-}
-
-void OwnerList::findAndPlay(char* _attribute){
-	std::string attribute = std::string(_attribute);
-	for (int i = 0; i < this->list.size(); i++){
-		if (this->list[i]->attribute == attribute)
-			list[i]->Play();
-		else{
-			std::cout << "Attribute not found " << attribute;
-		}
-	}
-}
+//__________________LinkedSNode________________________________________________________________________

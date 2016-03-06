@@ -77,10 +77,12 @@ Skybox* sky;
 void initFSystem(){
 	SoundSystem = new FSystem;
 	SManager = new SoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
-	SManager->List();
-
+	//SManager->List();
+	//SManager->findAndPlay("Target", "Moving");
+	//SManager->printOwners();
 	//SManager->vSounds[0][5]->Play();
 	//std::cout << SManager->vSounds[Player][PROJECTILE]->sname;
+
 	
 };
 
@@ -148,6 +150,7 @@ void wonGame()
 }
 void startGame()
 {
+	SManager->findAndPlay("Background", "one");
 	gameState = GAME;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
@@ -167,7 +170,7 @@ void startGame()
 	}
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
-	SManager->vSounds[0][5]->Play();
+	//SManager->vSounds[0][5]->Play();
 }
 void LoadTargets()
 {
@@ -175,7 +178,7 @@ void LoadTargets()
 	//load in targets
 	for (int i = 0; i < 6; i++)
 	{
-		Target* tar = new Target("models/Dummy.dae", 0.5,SManager->vSounds[ETarget]);
+		Target* tar = new Target("models/Dummy.dae", 0.5, SManager->getOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -482,6 +485,7 @@ static void Update(float secondsElapsed) {
 
 	if (gameState == GAME)
 	{
+		
 		//Begin Camera code
 		model->pos += fmy * (c->getOwner()->vel * lInput.z) + model->force;
 		model->force = model->force / 1.2f;
@@ -504,9 +508,9 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD)
 		{
-			FSound* sounds = SManager->vSounds[Player][PROJECTILE];
-			sounds->Play();
-			Projectile* pr = new Projectile(p, f, 0.5, 25, 10,SManager->vSounds[Player][PROJECTILE]);
+			FSound* sounds = SManager->findSound("Player","Projectile");
+			//sounds->Play();
+			Projectile* pr = new Projectile(p, f, 0.5, 25, 10, SManager->findSound("Player", "Projectile"));
 			ObjectManager::instance().pMap.push_back(pr);
 			shotcd = 0;
 		}
@@ -559,7 +563,7 @@ static void Update(float secondsElapsed) {
 			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
 			{
 				targets[i]->fireTimer = 0.f;
-				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->vSounds[Player][PROJECTILE]);
+				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->findSound("Player", "Projectile"));
 				targets[i]->weaponProjectile->go->scale = glm::vec3(1.5f);
 				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
@@ -584,7 +588,7 @@ static void Update(float secondsElapsed) {
 			score = ((gameTime * 100) / pow(gameTime, 2)) * 100 - 15;
 		}
 		else
-			score == 0;
+			score = 0;
 
 		if (targetsKilled == targets.size() || c->IsPressed(XINPUT_GAMEPAD_BACK))
 			wonGame();
