@@ -101,7 +101,7 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 }
 // constants
 //const glm::vec2 SCREEN_SIZE(1920, 1080);
-const glm::vec2 SCREEN_SIZE(1920, 1080);
+const glm::vec2 SCREEN_SIZE(1280, 800);
 
 // globals
 GLFWwindow* gWindow = NULL;
@@ -358,15 +358,20 @@ static void Render() {
 
 	//if (numpadPress[3])
 	if (gameState == GAME)
+	{
 		framebuffeffects->Toon(false);
+		framebuffeffects->GodRays(glm::vec3(-8.f, 9.f, 10.f));
+	}
 	else if (gameState == MENU)
+	{
 		framebuffeffects->Toon(true);
-	//if (numpadPress[2])
-		framebuffeffects->FXAA();
+	}
 	//if (numpadPress[1])
-		framebuffeffects->Bloom(4);
-	
+	framebuffeffects->Bloom(4);
+	//if (numpadPress[2])
+	framebuffeffects->FXAA();
 
+		
 		
 
 	framebuff[0]->Unbind();
@@ -712,7 +717,7 @@ void AppMain() {
 
 	framebuff[0] = new Framebuffer();
 	framebuff[0]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
-	framebuff[0]->CreateColorTexture(3, SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[0]->CreateColorTexture(4, SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuff[1] = new Framebuffer();
 	framebuff[1]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
 	framebuff[1]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
@@ -721,12 +726,13 @@ void AppMain() {
 	framebuff[2]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
 	framebuff[3] = new Framebuffer();
 	framebuff[3]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
-	framebuff[3]->CreateColorTexture(1, SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[3]->CreateColorTexture(4, SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuffeffects = new FramebufferEffects(framebuff);
 	framebuffeffects->LoadBloomShaders();
 	framebuffeffects->LoadFXAAShaders();
 	framebuffeffects->loadToonShaders();
 	framebuffeffects->LoadShadowMapShaders();
+	framebuffeffects->LoadGodRayShaders();
 
     // setup Camera::getInstance()
     Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
@@ -1079,15 +1085,15 @@ void AppMain() {
 			lc->Base.Base.Color = spotLightColour;
 			lc->Base.Base.AmbientIntensity = 0.04f;
 			lc->Base.Base.DiffuseIntensity = 0.04f;
-
+			
 			lc->Base.Atten.Constant = 1.0f;
 			lc->Base.Atten.Exp = 0;
 			lc->Base.Atten.Linear = 0;
-
+			
 			lc->Cutoff = 0.9f;
 			lc->Base.Position = glm::vec3(-10, 10, -10);//4 1 0
 			lc->Direction = glm::vec3(-1, 0, -1);// 5 0 0
-
+			
 			light->SetVars(lSPOT, lc);
 		}
 	}

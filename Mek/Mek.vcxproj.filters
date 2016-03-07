@@ -28,6 +28,9 @@
     <Filter Include="Resource Files\Toon">
       <UniqueIdentifier>{205663ca-43dd-4275-9610-d1393eb09891}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Godrays">
+      <UniqueIdentifier>{05d82bea-0c86-4393-9db8-ab8815ad5882}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -272,6 +275,9 @@
     </None>
     <None Include="toon.vert">
       <Filter>Resource Files\Toon</Filter>
+    </None>
+    <None Include="godrays.frag">
+      <Filter>Resource Files\Godrays</Filter>
     </None>
   </ItemGroup>
 </Project>
