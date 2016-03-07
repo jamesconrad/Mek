@@ -31,7 +31,7 @@ class Target
 {
 public:
 	//Must manually set the interpolation vars through the public accessor
-	Target(char* fp, float tmod, std::vector<FSound*> _sounds);
+	Target(char* fp, float tmod, OwnerList* _list);
 	//should be called after the collision check
 	void update(float dTime, NavMesh &_mesh);
 	Interpolation interp;
@@ -42,7 +42,7 @@ public:
 	Model* cg;
 	ComponentCollision* cc;
 
-	std::vector<FSound*> sounds;
+	OwnerList* oList;
 
 	AiBehaviour AiHandle;
 	NavFace tempPosition; //I don't like this, but it's my best idea atm. I'll try and improve this when it's not 4 am.

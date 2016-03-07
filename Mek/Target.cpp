@@ -1,6 +1,6 @@
 #include "Target.h"
 
-Target::Target(char* fp, float t, std::vector<FSound*> _sounds)
+Target::Target(char* fp, float t, OwnerList* _oList)
 {
 	tmod = t;
 	hit = false;
@@ -21,7 +21,7 @@ Target::Target(char* fp, float t, std::vector<FSound*> _sounds)
 	c = cc;
 	go->AddComponent(PHYSICS, c);
 	
-	sounds = _sounds;
+	oList = _oList;
 
 	ObjectManager::instance().addObject(go);
 
@@ -36,7 +36,7 @@ void Target::update(float dTime, NavMesh &mesh)
 	if (!hit && go->health <= 0) //go->scale == glm::vec3(0, 0, 0))
 	{
 		hit = true;
-		sounds[HIT]->Play();
+		oList->findAndPlay("Hit");
 	}
 	else
 	{
