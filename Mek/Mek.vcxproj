@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="2dOverlay.cpp" />
+    <ClCompile Include="2dOverlayAnim.cpp" />
+    <ClCompile Include="Bitmap.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ComponentCollision.cpp" />
+    <ClCompile Include="ComponentGraphics.cpp" />
+    <ClCompile Include="Framebuffer.cpp" />
+    <ClCompile Include="FramebufferEffects.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="ComponentInput.cpp" />
+    <ClCompile Include="Interpolation.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Program.cpp" />
+    <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="RayVsTriangle.cpp" />
+    <ClCompile Include="Render.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="Target.cpp" />
+    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TextRendering.cpp" />
+    <ClCompile Include="Texture.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="2dOverlay.h" />
+    <ClInclude Include="2dOverlayAnim.h" />
+    <ClInclude Include="AIBehaviour.h" />
+    <ClInclude Include="Bitmap.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Component.h" />
+    <ClInclude Include="ComponentCollision.h" />
+    <ClInclude Include="ComponentGraphics.h" />
+    <ClInclude Include="ComponentPhysics.h" />
+    <ClInclude Include="Framebuffer.h" />
+    <ClInclude Include="FramebufferEffects.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="ComponentInput.h" />
+    <ClInclude Include="ComponentLight.h" />
+    <ClInclude Include="ComponentForce.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="LightComponent.h" />
+    <ClInclude Include="NavMesh.h" />
+    <ClInclude Include="Program.h" />
+    <ClInclude Include="Projectile.h" />
+    <ClInclude Include="RayVsTriangle.h" />
+    <ClInclude Include="Render.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Interpolation.h" />
+    <ClInclude Include="Skybox.h" />
+    <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="Target.h" />
+    <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TextRendering.h" />
+    <ClInclude Include="Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="fragment-shader.frag" />
+    <Text Include="vertex-shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AIBehaviour.inl" />
+    <None Include="combine.frag" />
+    <None Include="fxaa.frag" />
+    <None Include="gblurH.frag" />
+    <None Include="gblurV.frag" />
+    <None Include="godrays.frag" />
+    <None Include="hud.frag" />
+    <None Include="hud.vert" />
+    <None Include="NavMesh.inl" />
+    <None Include="pass.frag" />
+    <None Include="pass.vert" />
+    <None Include="skinning.frag" />
+    <None Include="skinning.vert" />
+    <None Include="skinningA.frag" />
+    <None Include="skinningA.vert" />
+    <None Include="skybox.frag" />
+    <None Include="skybox.vert" />
+    <None Include="terrain.frag" />
+    <None Include="terrain.vert" />
+    <None Include="text.frag" />
+    <None Include="text.vert" />
+    <None Include="tonemap.frag" />
+    <None Include="toon.frag" />
+    <None Include="toon.vert" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{222737CC-70B8-41BB-A92B-095192302DFF}</ProjectGuid>
+    <RootNamespace>Mek</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3.lib;DevIL.lib;ILU.lib;ILUT.lib;opengl32.lib;xinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3.lib;DevIL.lib;ILU.lib;ILUT.lib;fmodex_vc.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib</AdditionalLibraryDirectories>
+    </Link>
+    <PreBuildEvent>
+      <Command>echo $(ProjectDir)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>Win32\assimp.lib;Win32\glew32.lib;glfw3.lib;DevIL.lib;ILU.lib;ILUT.lib;fmodex_vc.lib;opengl32.lib;xinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\lib</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
