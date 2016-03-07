@@ -279,5 +279,8 @@
     <None Include="godrays.frag">
       <Filter>Resource Files\Godrays</Filter>
     </None>
+    <None Include="skybox2.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

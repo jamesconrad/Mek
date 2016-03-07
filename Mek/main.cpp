@@ -72,6 +72,7 @@ bool numpadPress[9];
 //Model* animatedMechGC;
 Terrain* ground;
 Skybox* sky;
+Skybox* skyObs;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 
 void initFSystem(){
@@ -302,7 +303,9 @@ static void DrawSceneShadowPass()
 
 static void DrawScene()
 {
-	sky->render();
+	skyObs->render(true);
+	sky->render(false);
+
 	ground->Render();
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
@@ -755,6 +758,8 @@ void AppMain() {
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	sky = new Skybox(sb);
+	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O.png", "fr-O.png" };
+	skyObs = new Skybox(Osb);
 	//MODEL INITS
 
 	prepProjectiles();

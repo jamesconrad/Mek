@@ -51,6 +51,8 @@ Skybox::Skybox(char* fp[6])
 	Program::getInstance().createShader("skybox", GL_VERTEX_SHADER, "shaders/skybox.vert");
 	Program::getInstance().createShader("skybox", GL_FRAGMENT_SHADER, "shaders/skybox.frag");
 
+	Program::getInstance().createShader("skybox2", GL_VERTEX_SHADER, "shaders/skybox.vert");
+	Program::getInstance().createShader("skybox2", GL_FRAGMENT_SHADER, "shaders/skybox2.frag");
 
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
@@ -91,11 +93,16 @@ Skybox::Skybox(char* fp[6])
 	glBindVertexArray(0);
 }
 
-void Skybox::render()
+void Skybox::render(bool ObscurityMap)
 {
 	//update shader vars
-	Program::getInstance().use("skybox");
-
+	if (ObscurityMap)
+		Program::getInstance().use("skybox2");
+	else
+	{
+		Program::getInstance().use("skybox");
+	}
+	
 	glBindVertexArray(_vao);
 
 	glm::mat4 skyMap = glm::translate(Camera::getInstance().projection() * Camera::getInstance().view(), Camera::getInstance().position());
