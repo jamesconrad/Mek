@@ -49,6 +49,8 @@ int targetsKilled = 0;
 twodOverlay* crosshair;
 twodOverlay* startscreen;
 twodOverlayAnim* skull;
+twodOverlay* ShieldBack;
+twodOverlay* HPback;
 //todo: revert back to menu
 game_state gameState = MENU;
 Interpolation camInterp;
@@ -400,12 +402,14 @@ static void Render() {
 	{
 		crosshair->render();
 		skull->render();
+    ShieldBack->render();
+    HPback->render();
 		char buffer[5];
 		_snprintf_s(buffer, 5, "%i/%i", targetsKilled, targets.size());
 		TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
 		char scbuff[64];
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
-		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
+		TextRendering::getInstance().printText2D(scbuff, -0.90f, -0.55f, 0.055f, fontColour);
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -740,6 +744,8 @@ void AppMain() {
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
 	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
+  ShieldBack = new twodOverlay("ShieldBarBack.png", 0, 0.85, 35);
+  HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
 	startscreen = new twodOverlay("pressStart.png", 0, 0, 10);
 	skull->updatePos(-0.85f, -0.75f, 4);
 	skull->cycle = true;
