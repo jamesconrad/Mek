@@ -14,7 +14,7 @@ void main()
 
 	Depth = colour;
 	Normal = colour;
-	LightObscurers = vec4(0.0);
+	LightObscurers = colour;
 	//These two are the correct ones
 	//Depth = vec4(0, 0, 0, 1.0);
 	//Normal = vec4(0, 0, 0, 1.0);

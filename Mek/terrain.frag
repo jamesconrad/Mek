@@ -10,6 +10,7 @@ uniform sampler2D terrainG3;
 layout(location = 0) out vec4 colour;
 layout(location = 1) out vec4 depth;
 layout(location = 2) out vec4 normals;
+layout(location = 3) out vec4 LightObscurers;
 
 in vec3 p;
 in vec3 n;
@@ -89,4 +90,5 @@ void main()
 	
 	depth = vec4(vec3(gl_FragCoord.z), 1.0);
 	normals = vec4(vec3(n), 1.0);
+	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0);
 }

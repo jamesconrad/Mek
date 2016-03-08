@@ -52,6 +52,12 @@ void FramebufferEffects::loadToonShaders()
 	Program::getInstance().createShader("toon", GL_FRAGMENT_SHADER, "shaders/toon.frag");
 }
 
+void FramebufferEffects::LoadGodRayShaders()
+{
+	Program::getInstance().createShader("godrays", GL_VERTEX_SHADER, "shaders/pass.vert");
+	Program::getInstance().createShader("godrays", GL_FRAGMENT_SHADER, "shaders/godrays.frag");
+}
+
 void FramebufferEffects::Bloom(unsigned int numGaussPasses)
 {
 	//_fb->Bind();
@@ -118,6 +124,7 @@ void FramebufferEffects::Toon(bool doCraziness)
 	_fb->PassTextureToPreBoundShader("rgbTexture", 0);
 	_fb->PassTextureToPreBoundShader("depthTexture", 1);
 	_fb->PassTextureToPreBoundShader("normalTexture", 2);
+	_fb->PassTextureToPreBoundShader("occluderTexture", 3);
 	if (doCraziness)
 	{
 		Program::getInstance().setUniform("fboSize", glm::vec3(0));
@@ -137,6 +144,30 @@ void FramebufferEffects::Toon(bool doCraziness)
 	_fb->Bind();
 	Program::getInstance().bind("pass");
 	_wb[2]->PassTextureToPreBoundShader("tex0", 0);
+	_wb[2]->PassTextureToPreBoundShader("tex1", 1);
+	_wb[2]->PassTextureToPreBoundShader("tex2", 2);
+	_wb[2]->PassTextureToPreBoundShader("tex3", 3);
 	_fb->RenderQuad();
 
+
+	
 }									  
+
+#include <iostream>
+void FramebufferEffects::GodRays(glm::vec3 &sunLocation)
+{
+	_wb[2]->Bind();
+	Program::getInstance().bind("godrays");
+	_fb->PassTextureToPreBoundShader("tex0", 3);
+	_fb->PassTextureToPreBoundShader("rgbTexture", 0);
+	glm::vec4 lightPosInScreenSpace = glm::vec4(glm::project(sunLocation + glm::vec3(-1500, 500, 2300), Camera::getInstance().view(), Camera::getInstance().projection(), glm::vec4(0.f, 0.f, (float)_fb->Width(), (float)_fb->Height())), 1.0f);
+	lightPosInScreenSpace.x /= _fb->Width();
+	lightPosInScreenSpace.y /= _fb->Height();
+	Program::getInstance().setUniform("lightPositionOnScreen", lightPosInScreenSpace);
+	_wb[2]->RenderQuad();
+
+	_fb->Bind();
+	Program::getInstance().bind("pass");
+	_wb[2]->PassTextureToPreBoundShader("tex0", 0);
+	_fb->RenderQuad();
+}

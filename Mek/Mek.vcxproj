@@ -78,6 +78,7 @@
     <None Include="fxaa.frag" />
     <None Include="gblurH.frag" />
     <None Include="gblurV.frag" />
+    <None Include="godrays.frag" />
     <None Include="hud.frag" />
     <None Include="hud.vert" />
     <None Include="NavMesh.inl" />
@@ -89,6 +90,7 @@
     <None Include="skinningA.vert" />
     <None Include="skybox.frag" />
     <None Include="skybox.vert" />
+    <None Include="skybox2.frag" />
     <None Include="terrain.frag" />
     <None Include="terrain.vert" />
     <None Include="text.frag" />

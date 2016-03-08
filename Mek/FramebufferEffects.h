@@ -2,6 +2,7 @@
 
 #include "Framebuffer.h"
 #include "Program.h"
+#include "lib\glm\gtc\matrix_transform.hpp"
 
 class FramebufferEffects
 {
@@ -15,10 +16,12 @@ public:
 	void LoadFXAAShaders();
 	void LoadShadowMapShaders();
 	void loadToonShaders();
+	void LoadGodRayShaders();
 
 	void Bloom(unsigned int numGaussPasses);
 	void FXAA();
 	void Toon(bool doCraziness);
+	void GodRays(glm::vec3 &sunLocation);
 
 	void PrepShadowMap();
 	void FinShadowMap();

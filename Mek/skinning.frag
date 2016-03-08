@@ -187,6 +187,7 @@ float getRimFresnelTerm(VSOutput In)
 layout(location = 0) out vec4 FragColor;
 layout(location = 1) out vec4 Depth;
 layout(location = 2) out vec4 Normal;
+layout(location = 3) out vec4 LightObscurers;
 
 vec3 warmColour = vec3(0.5, 0.0, 0.0);
 float alphaWarm = 0.1;
@@ -255,5 +256,6 @@ void main()
 	FragColor = vec4(((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights), 1.0);
 	Depth = vec4(vec3(gl_FragCoord.z), 1.0);
 	Normal = vec4(vec3(In.Normal), 1.0);
+	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0);
 	//FragColor = vec4((Albedo + goochColour), 1.0);
 }
