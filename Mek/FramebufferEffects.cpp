@@ -148,9 +148,6 @@ void FramebufferEffects::Toon(bool doCraziness)
 	_wb[2]->PassTextureToPreBoundShader("tex2", 2);
 	_wb[2]->PassTextureToPreBoundShader("tex3", 3);
 	_fb->RenderQuad();
-
-
-	
 }									  
 
 #include <iostream>
