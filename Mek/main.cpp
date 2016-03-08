@@ -56,6 +56,8 @@ glm::vec3 fontColour = glm::vec3(117, 176, 221);
 glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
+unsigned int ammo = 11;
+float reloadTimer = 0.0f;
 float playTime = 0;
 NavMesh testNaveMesh;
 
@@ -159,6 +161,8 @@ void startGame()
 	model->health = 100.f;
 	score = 0;
 	playTime = 0;
+	ammo = 10;
+	reloadTimer = 0.0f;
 	targetsKilled = 0;
 	for (int i = 0, s = targets.size(); i < s; i++)
 	{
@@ -175,6 +179,7 @@ void startGame()
 }
 void LoadTargets()
 {
+	targets.reserve(100);
 	float randomX, randomY;
 	//load in targets
 	for (int i = 0; i < 6; i++)
@@ -408,12 +413,15 @@ static void Render() {
 	{
 		crosshair->render();
 		skull->render();
-		char buffer[5];
-		_snprintf_s(buffer, 5, "%i/%i", targetsKilled, targets.size());
+		char buffer[8];
+		_snprintf_s(buffer, 8, "%i/%i", targetsKilled, targets.size());
 		TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
 		char scbuff[64];
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
 		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
+		char amBuff[8];
+		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
+		TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, fontColour);
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -479,6 +487,8 @@ static void Update(float secondsElapsed) {
 			shoot = true;
 
 		}
+		if (glfwGetKey(gWindow, 'R') && ammo < 10 && reloadTimer == 0.0f)
+			reloadTimer = 0.0001f;
 
 		//rotate camera based on mouse movement
 		const float mouseSensitivity = 0.05f;
@@ -514,13 +524,24 @@ static void Update(float secondsElapsed) {
 			ObjectManager::instance().enemyPMap[i]->update(secondsElapsed);
 
 		glm::vec3 p = Camera::getInstance().position();
-		if (shoot && shotcd > SHOT_CD)
+		if (shoot && shotcd > SHOT_CD && ammo > 0 && reloadTimer == 0.0f)
 		{
 			FSound* sounds = SManager->findSound("Player","Projectile");
 			//sounds->Play();
-			Projectile* pr = new Projectile(p, f, 0.5, 25, 10, SManager->findSound("Player", "Projectile"));
+			Projectile* pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f))), 0.5, 25, 10, SManager->findSound("Player", "Projectile"));
 			ObjectManager::instance().pMap.push_back(pr);
+			ammo--;
 			shotcd = 0;
+		}
+
+		if (reloadTimer > 0.0f)
+		{
+			reloadTimer += secondsElapsed;
+			if (reloadTimer > 2.f)
+			{
+				reloadTimer = 0.0f;
+				ammo = 10;
+			}
 		}
 
 
@@ -571,8 +592,8 @@ static void Update(float secondsElapsed) {
 			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
 			{
 				targets[i]->fireTimer = 0.f;
-				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f), randomClampedFloat(-1.f, 1.f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->findSound("Player", "Projectile"));
-				targets[i]->weaponProjectile->go->scale = glm::vec3(1.5f);
+				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->findSound("Player", "Projectile"));
+				targets[i]->weaponProjectile->go->scale = glm::vec3(1.2f);
 				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
 				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
@@ -807,7 +828,7 @@ void AppMain() {
 			else if (i == 1)
 			{
 				gObject->SetName("Water Tower");
-				cModel->loadModel("models/Watertower.dae");
+				cModel->loadModel("models/Watertower-LP.dae");
 
 				gObject->scale = glm::vec3(3, 3, 3);
 				gObject->pos = glm::vec3(-65, 0, -90);
