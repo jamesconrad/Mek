@@ -420,7 +420,7 @@ static void Render() {
 		TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
 		char scbuff[64];
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
-		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
+		TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
 		char amBuff[8];
 		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
 		TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, fontColour);
@@ -816,7 +816,7 @@ void AppMain() {
 	//PROPER INIT
 	for (int i = 0; i < 22; i++)
 	{
-		if (i != 3 && i != 0 && i != 4 && i != 8 && i != 18 && i != 19 && i != 20 && i !=21)
+		if (i != 5 && i != 10 && i != 11 && i != 12)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
 			Model *cModel = new Model();
@@ -826,10 +826,11 @@ void AppMain() {
 			if (i == 0)
 			{
 				gObject->SetName("Spawn Container 1");
-				cModel->loadModel("models/Container.dae");
+				cModel->loadModel("models/Tree 1.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
-				gObject->pos = glm::vec3(60, 0, -110);
+				gObject->pos = glm::vec3(-10.526, 0, -176.58);
+				gObject->rot = glm::vec3(0, -34.f, 0);
 			}
 			else if (i == 1)
 			{
@@ -837,31 +838,31 @@ void AppMain() {
 				cModel->loadModel("models/Watertower-LP.dae");
 
 				gObject->scale = glm::vec3(3, 3, 3);
-				gObject->pos = glm::vec3(-65, 0, -90);
+				gObject->pos = glm::vec3(-112.75, 0, 105);
 			}
 			else if (i == 2)
 			{
 				gObject->SetName("MenuScene");
-				cModel->loadModel("models/Warehouse_One_mesh_No_roof.dae");
+				cModel->loadModel("models/Warehouse.dae");
 
 				gObject->scale = glm::vec3(1, 1, 1);// glm::vec3(1.6, 1.6, 1.6);
-				gObject->pos = glm::vec3(10000, 0, 0);
+				gObject->pos = glm::vec3(50, 0, 145);
 			}
 			else if (i == 3)
 			{
 				gObject->SetName("Spawn Container 2");
-				cModel->loadModel("models/Container90.dae");
+				cModel->loadModel("models/Tree 2.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
-				gObject->pos = glm::vec3(85, 0, -75);
+				gObject->pos = glm::vec3(-69.65f, 0, 108.334);
 			}
 			else if (i == 4)
 			{
 				gObject->SetName("Middle Plus");
-				cModel->loadModel("models/Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
-				gObject->pos = glm::vec3(15, 0, -20);
+				gObject->pos = glm::vec3(-14, 0, -73);
 			}
 			else if (i == 5)
 			{
@@ -874,17 +875,18 @@ void AppMain() {
 			else if (i == 6)
 			{
 				gObject->SetName("Dumbster");//Crane
-				cModel->loadModel("models/Dumspter2.dae");
-				gObject->pos = glm::vec3(0, 0, -140);
+				cModel->loadModel("models/Garbage Bin.dae");
+				gObject->pos = glm::vec3(59.751, 0, -76.667);
 				gObject->scale = glm::vec3(0.4, 0.4, 0.4);
+				gObject->rot = glm::vec3(0, 130.6, 0);
 			}
 			else if (i == 7)
 			{
-				gObject->SetName("Shack");
-				cModel->loadModel("models/Shack.dae");
+				gObject->SetName("Tall Rock");
+				cModel->loadModel("models/Tall Rock.dae");
 
 				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
-				gObject->pos = glm::vec3(0, 0, 120);
+				gObject->pos = glm::vec3(-92.424f, 0, -106.131);
 			}
 			else if (i == 8)
 			{
@@ -897,10 +899,11 @@ void AppMain() {
 			else if (i == 9)
 			{
 				gObject->SetName("Container 2");
-				cModel->loadModel("models/Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
-				gObject->pos = glm::vec3(80, 0, 100);
+				gObject->pos = glm::vec3(-14, 0, 73);
+				gObject->rot = glm::vec3(0, 65.44f , 0);
 			}
 			else if (i == 10)
 			{
@@ -929,74 +932,77 @@ void AppMain() {
 			else if (i == 13)
 			{
 				gObject->SetName("Container 2");
-				cModel->loadModel("models/Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
-				gObject->pos = glm::vec3(60, 0, 100);
+				gObject->pos = glm::vec3(-55, 0, -47);
 			}
 			else if (i == 14)
 			{
 				gObject->SetName("Container 90");
-				cModel->loadModel("models/Container90.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
-				gObject->pos = glm::vec3(70, 0, 70);
+				gObject->pos = glm::vec3(-94.87, 0, -125.5);
+				gObject->rot = glm::vec3(0, -48.489f, 0);
 			}
 			else if (i == 15)
 			{
-				gObject->SetName("Shack");
-				cModel->loadModel("models/Shack.dae");
+				gObject->SetName("Small Rock 1");
+				cModel->loadModel("models/Rock 1 Round.dae");
 
 				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
-				gObject->pos = glm::vec3(-30, 0, 120);
+				gObject->pos = glm::vec3(-94.393, 0, -103.22);
 			}
 			else if (i == 16)
 			{
-				gObject->SetName("Shack");
-				cModel->loadModel("models/Shack.dae");
+				gObject->SetName("Small Rock 1");
+				cModel->loadModel("models/Rock 1 Round.dae");
 
 				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
-				gObject->pos = glm::vec3(30, 0, 120);
+				gObject->pos = glm::vec3(-3.347f, 0, -180.318f);
 			}
 			else if (i == 17)
 			{
-				gObject->SetName("Shack");
-				cModel->loadModel("models/Shack.dae");
+				gObject->SetName("Small Rock 2");
+				cModel->loadModel("models/Rock 2 Round.dae");
 
 				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
-				gObject->pos = glm::vec3(-60, 0, 120);
+				gObject->pos = glm::vec3(-5.196f, 0, -172.384f);
 			}
 			else if (i == 18)
 			{
 				gObject->SetName("Middle Plus North");
-				cModel->loadModel("models/Container90.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
-				gObject->pos = glm::vec3(27, 0, -5);
+				gObject->pos = glm::vec3(-110, 0, -149);
+				gObject->rot = glm::vec3(0, -48.5f, 0);
 			}
 			else if (i == 19)
 			{
-				gObject->SetName("Middle Plus North");
-				cModel->loadModel("models/Container90.dae");
+				gObject->SetName("Fountain");
+				cModel->loadModel("models/Fountain.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
-				gObject->pos = glm::vec3(27, 0, 15);
+				gObject->pos = glm::vec3(0, 0, 0);
 			}
 			else if (i == 20)
 			{
-				gObject->SetName("Middle Plus North");
-				cModel->loadModel("models/Container90.dae");
+				gObject->SetName("Crane");
+				cModel->loadModel("models/Crane.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
-				gObject->pos = glm::vec3(-20, 0, 15);
+				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
 			}
 			else if (i == 21)
 			{
-				gObject->SetName("Middle Plus North");
-				cModel->loadModel("models/Container90.dae");
+				gObject->SetName("Destroyed House");
+				cModel->loadModel("models/Destroyed Building.dae");
 
 				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
-				gObject->pos = glm::vec3(-20, 0, -5);
+				gObject->pos = glm::vec3(-35, 0, -167.582f);
+				gObject->rot = glm::vec3(0, -90.f, 0);
 			}
 
 			gObject->pos /= 10.f;
