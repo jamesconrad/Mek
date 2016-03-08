@@ -816,7 +816,7 @@ void AppMain() {
 	//PROPER INIT
 	for (int i = 0; i < 22; i++)
 	{
-		if (i != 5 && i != 10 && i != 11 && i != 12)
+		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
 			Model *cModel = new Model();
