@@ -82,12 +82,9 @@ Skybox* skyObs;
 void initFSystem(){
 	SoundSystem = new FSystem;
 	SManager = new SoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
-	//SManager->List();
-	//SManager->findAndPlay("Target", "Moving");
-	//SManager->printOwners();
-	//SManager->vSounds[0][5]->Play();
-	//std::cout << SManager->vSounds[Player][PROJECTILE]->sname;
-
+	//FSound* laserSound = new FSound(SoundSystem, "../Debug/media/drumloop.wav", SOUND_TYPE_3D_LOOP, ROLLOFF_LINEARSQUARE, 0.5, 20);
+	//laserSound->Play();
+	//laserSound->soundPos = FMOD_VECTOR{ 0, -28, 0 };
 	
 };
 
@@ -155,7 +152,7 @@ void wonGame()
 }
 void startGame()
 {
-	SManager->findAndPlay("Background", "one");
+	//SManager->FindAndPlay("Background", "one");
 	gameState = GAME;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
@@ -184,9 +181,9 @@ void LoadTargets()
 	targets.reserve(100);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 1; i++)
 	{
-		Target* tar = new Target("models/Dummy.dae", 0.5, SManager->getOwnerList("Target"));
+		Target* tar = new Target("models/Dummy.dae", 0.5, SManager->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -436,7 +433,7 @@ static void Render() {
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-	SoundSystem->Update();
+	SManager->Update();
 	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
@@ -453,7 +450,7 @@ static void Update(float secondsElapsed) {
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
 
-	SoundSystem->Set(_pos, _for, _up);
+	SManager->UpdateSysO(cam->position(), cam->forward(), cam->up(), glm::vec3(0, 0, 0));
 
 	for (int i = 0; i < 9; i++)
 	{
@@ -530,9 +527,9 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD && ammo > 0 && reloadTimer == 0.0f)
 		{
-			FSound* sounds = SManager->findSound("Player","Projectile");
+			FSound* sounds = SManager->FindSound("Player","Projectile");
 			//sounds->Play();
-			Projectile* pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f))), 0.5, 25, 10, SManager->findSound("Player", "Projectile"));
+			Projectile* pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f))), 0.5, 25, 10, SManager->FindSound("Player", "Projectile"));
 			ObjectManager::instance().pMap.push_back(pr);
 			ammo--;
 			shotcd = 0;
@@ -596,7 +593,7 @@ static void Update(float secondsElapsed) {
 			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
 			{
 				targets[i]->fireTimer = 0.f;
-				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->findSound("Player", "Projectile"));
+				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->FindSound("Player", "Projectile"));
 				targets[i]->weaponProjectile->go->scale = glm::vec3(1.2f);
 				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
