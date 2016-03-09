@@ -31,6 +31,9 @@
     <Filter Include="Resource Files\Godrays">
       <UniqueIdentifier>{05d82bea-0c86-4393-9db8-ab8815ad5882}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shadow">
+      <UniqueIdentifier>{54d3ac61-f1b9-4f83-91db-aed559db7151}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -281,6 +284,15 @@
     </None>
     <None Include="skybox2.frag">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shadow.frag">
+      <Filter>Resource Files\Shadow</Filter>
+    </None>
+    <None Include="shadow.vert">
+      <Filter>Resource Files\Shadow</Filter>
+    </None>
+    <None Include="terrainshadow.vert">
+      <Filter>Resource Files\Shadow</Filter>
     </None>
   </ItemGroup>
 </Project>

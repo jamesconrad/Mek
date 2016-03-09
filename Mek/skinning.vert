@@ -9,6 +9,8 @@ layout (location = 4) in vec4 Weights;
 out vec2 TexCoord0;
 out vec3 Normal0;
 out vec3 WorldPos0;
+out vec3 FragPos;
+out vec4 FragPosLightSpace;
 
 out vec4 Debug0;
 out ivec4 Debug1;
@@ -18,6 +20,7 @@ const int MAX_BONES = 100;
 uniform mat4 gWVP;
 uniform mat4 gWorld;
 uniform mat4 gBones[MAX_BONES];
+uniform mat4 depthMVP;
 
 void main()
 {
@@ -36,4 +39,7 @@ void main()
     vec4 NormalL = /*BoneTransform */ vec4(Normal, 0.0);
     Normal0      = (gWorld * NormalL).xyz;
     WorldPos0    = (gWorld * vec4(Position,0.0)).xyz;
+
+	FragPos = vec3(gWorld * vec4(Position, 1.0));
+	FragPosLightSpace = depthMVP * vec4(FragPos, 1.0);
 }

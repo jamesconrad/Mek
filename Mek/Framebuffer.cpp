@@ -13,6 +13,11 @@ static const GLfloat quadVBData[] = {
 	1.0f, 1.0f, 0.0f,
 };
 
+int Framebuffer::GetTextureID(int cbo)
+{
+	return _cbo[cbo];
+}
+
 Framebuffer::Framebuffer()
 {
 	glGenFramebuffers(1, &_fbo);

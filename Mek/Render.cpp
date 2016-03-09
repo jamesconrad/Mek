@@ -26,6 +26,11 @@ void Render::destroy()
 	
 }
 
+int Render::numTextures()
+{
+	return _numtex;
+}
+
 void Render::createVBOs(VBOData* data, unsigned int num)
 {
 	glBindVertexArray(_vao);
@@ -103,7 +108,7 @@ void Render::drawShadowPass(bool basevertex, unsigned int baseIndex, unsigned in
 	else
 		glDrawArrays(GL_TRIANGLES, 0, _numvertices);
 
-	Program::getInstance().unbind();
+	//Program::getInstance().unbind();
 	glBindVertexArray(0);
 }
 
