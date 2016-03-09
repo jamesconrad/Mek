@@ -498,7 +498,7 @@ void Model::renderShadowPass()
 		0.0, 0.0, 0.5, 0.0,
 		0.5, 0.5, 0.5, 1.0
 		);
-	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
+	glm::mat4 depthBiasMVP = /*biasMatrix**/depthMVP;
 
 
 	Program::getInstance().setUniform("LVP", depthBiasMVP);
