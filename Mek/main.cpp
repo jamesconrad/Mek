@@ -82,12 +82,9 @@ Skybox* skyObs;
 void initFSystem(){
 	SoundSystem = new FSystem;
 	SManager = new SoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
-	//SManager->List();
-	//SManager->findAndPlay("Target", "Moving");
-	//SManager->printOwners();
-	//SManager->vSounds[0][5]->Play();
-	//std::cout << SManager->vSounds[Player][PROJECTILE]->sname;
-
+	//FSound* laserSound = new FSound(SoundSystem, "../Debug/media/drumloop.wav", SOUND_TYPE_3D_LOOP, ROLLOFF_LINEARSQUARE, 0.5, 20);
+	//laserSound->Play();
+	//laserSound->soundPos = FMOD_VECTOR{ 0, -28, 0 };
 	
 };
 
@@ -155,7 +152,7 @@ void wonGame()
 }
 void startGame()
 {
-	SManager->findAndPlay("Background", "one");
+	//SManager->FindAndPlay("Background", "one");
 	gameState = GAME;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
@@ -184,9 +181,9 @@ void LoadTargets()
 	targets.reserve(100);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 1; i++)
 	{
-		Target* tar = new Target("models/Dummy.dae", 0.5, SManager->getOwnerList("Target"));
+		Target* tar = new Target("models/Dummy.dae", 0.5, SManager->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -286,6 +283,7 @@ void LoadTargets()
 
 static void DrawSceneShadowPass()
 {
+	//ground->RenderShadowPass();
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
@@ -308,16 +306,17 @@ static void DrawSceneShadowPass()
 	}
 }
 
-static void DrawScene()
+static void DrawScene(int shadowMapTexID)
 {
 	skyObs->render(true);
 	sky->render(false);
 
-	ground->Render();
+	ground->Render(shadowMapTexID);
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
 		Model* cg = static_cast<Model*>(goVec[i]->GetComponent(GRAPHICS));
+		cg->setShadowMapID(shadowMapTexID);
 		cg->render();
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
@@ -360,11 +359,9 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//framebuffeffects->PrepShadowMap();
-	//DrawSceneShadowPass();
-	//framebuffeffects->FinShadowMap();
-
-	DrawScene();
+	framebuffeffects->PrepShadowMap();
+	DrawSceneShadowPass();
+	DrawScene(framebuffeffects->FinShadowMap());
 
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)
@@ -382,10 +379,7 @@ static void Render() {
 	//if (numpadPress[1])
 	framebuffeffects->Bloom(4);
 	//if (numpadPress[2])
-	framebuffeffects->FXAA();
-
-		
-		
+	framebuffeffects->FXAA();		
 
 	framebuff[0]->Unbind();
 	Program::getInstance().bind("pass");
@@ -429,14 +423,13 @@ static void Render() {
 	}
 	glEnable(GL_DEPTH_TEST);
 
-
     glfwSwapBuffers(gWindow);
 }
 #define SHOT_CD 0.1
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-	SoundSystem->Update();
+	SManager->Update();
 	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
@@ -453,7 +446,7 @@ static void Update(float secondsElapsed) {
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
 
-	SoundSystem->Set(_pos, _for, _up);
+	SManager->UpdateSysO(cam->position(), cam->forward(), cam->up(), glm::vec3(0, 0, 0));
 
 	for (int i = 0; i < 9; i++)
 	{
@@ -530,9 +523,9 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD && ammo > 0 && reloadTimer == 0.0f)
 		{
-			FSound* sounds = SManager->findSound("Player","Projectile");
+			FSound* sounds = SManager->FindSound("Player","Projectile");
 			//sounds->Play();
-			Projectile* pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f))), 0.5, 25, 10, SManager->findSound("Player", "Projectile"));
+			Projectile* pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f))), 0.5, 25, 10, SManager->FindSound("Player", "Projectile"));
 			ObjectManager::instance().pMap.push_back(pr);
 			ammo--;
 			shotcd = 0;
@@ -596,7 +589,7 @@ static void Update(float secondsElapsed) {
 			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
 			{
 				targets[i]->fireTimer = 0.f;
-				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->findSound("Player", "Projectile"));
+				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->FindSound("Player", "Projectile"));
 				targets[i]->weaponProjectile->go->scale = glm::vec3(1.2f);
 				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
@@ -774,8 +767,8 @@ void AppMain() {
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
 	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
-  ShieldBack = new twodOverlay("ShieldBarBack.png", 0, 0.85, 35);
-  HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
+	ShieldBack = new twodOverlay("ShieldBarBack.png", 0, 0.85, 35);
+	HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
 	startscreen = new twodOverlay("pressStart.png", 0, 0, 10);
 	skull->updatePos(-0.85f, -0.75f, 4);
 	skull->cycle = true;
@@ -785,7 +778,7 @@ void AppMain() {
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	sky = new Skybox(sb);
-	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O.png", "fr-O.png" };
+	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O2.png", "fr-O.png" };
 	skyObs = new Skybox(Osb);
 	//MODEL INITS
 
@@ -816,7 +809,7 @@ void AppMain() {
 	//PROPER INIT
 	for (int i = 0; i < 22; i++)
 	{
-		if (i != 5 && i != 10 && i != 11 && i != 12)
+		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
 			Model *cModel = new Model();

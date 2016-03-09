@@ -43,7 +43,11 @@ void FramebufferEffects::LoadFXAAShaders()
 
 void FramebufferEffects::LoadShadowMapShaders()
 {
-
+	Program::getInstance().createShader("skinnedShadow", GL_VERTEX_SHADER, "shaders/shadow.vert");
+	Program::getInstance().createShader("skinnedShadow", GL_FRAGMENT_SHADER, "shaders/shadow.frag");
+	Program::getInstance().createShader("terrainShadow", GL_VERTEX_SHADER, "shaders/terrainshadow.vert");
+	Program::getInstance().createShader("terrainShadow", GL_FRAGMENT_SHADER, "shaders/shadow.frag");
+	
 }
 
 void FramebufferEffects::loadToonShaders()
@@ -108,12 +112,19 @@ void FramebufferEffects::FXAA()
 
 void FramebufferEffects::PrepShadowMap()
 {
-
+	_wb[2]->Bind();
+	glClearColor(1, 1, 1, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
+	//glViewport(0, 0, _size.x, _size.y);
 }
 
-void FramebufferEffects::FinShadowMap()
+int FramebufferEffects::FinShadowMap()
 {
-
+	glCullFace(GL_BACK);
+	//glViewport(0, 0, _size.x * 2, _size.y * 2);
+	_fb->Bind();
+	return _wb[2]->GetTextureID(0);
 }
 
 void FramebufferEffects::Toon(bool doCraziness)
@@ -150,7 +161,6 @@ void FramebufferEffects::Toon(bool doCraziness)
 	_fb->RenderQuad();
 }									  
 
-#include <iostream>
 void FramebufferEffects::GodRays(glm::vec3 &sunLocation)
 {
 	_wb[2]->Bind();
@@ -160,8 +170,12 @@ void FramebufferEffects::GodRays(glm::vec3 &sunLocation)
 	glm::vec4 lightPosInScreenSpace = glm::vec4(glm::project(sunLocation + glm::vec3(-1500, 500, 2300), Camera::getInstance().view(), Camera::getInstance().projection(), glm::vec4(0.f, 0.f, (float)_fb->Width(), (float)_fb->Height())), 1.0f);
 	lightPosInScreenSpace.x /= _fb->Width();
 	lightPosInScreenSpace.y /= _fb->Height();
+	//glm::vec4 lightPosInScreenSpace = glm::vec4(sunLocation + glm::vec3(-1500, 500, 2300), 1.0f);
 	Program::getInstance().setUniform("lightPositionOnScreen", lightPosInScreenSpace);
 	_wb[2]->RenderQuad();
+
+	glm::mat4 thing = Camera::getInstance().projection() * Camera::getInstance().view();
+	Program::getInstance().setUniform("mvp", thing);
 
 	_fb->Bind();
 	Program::getInstance().bind("pass");

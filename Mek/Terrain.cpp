@@ -1,5 +1,6 @@
 #include "Terrain.h"
 #include "Program.h"
+#include "lib\glm\gtc\matrix_transform.hpp"
 
 #include "RayVsTriangle.h"
 
@@ -118,7 +119,22 @@ void Terrain::InitRender()
 	glBindVertexArray(0);
 }
 
-void Terrain::Render()
+void Terrain::RenderShadowPass()
+{
+	Program::getInstance().use("terrainShadow");
+	glBindVertexArray(_vao);
+
+	// Compute the MVP matrix from the light's point of view
+	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
+	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
+	glm::mat4 depthMVP = depthProj * depthView;
+	Program::getInstance().setUniform("depthMVP", depthMVP);
+
+	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void Terrain::Render(int shadowMapID)
 {
 	Program::getInstance().use("terrain");
 	Program::getInstance().setUniform("gWVP", Camera::getInstance().matrix());
@@ -127,16 +143,19 @@ void Terrain::Render()
 	//Program::getInstance().setUniform("u", u);
 	//Program::getInstance().setUniform("d", d);
 	glBindVertexArray(_vao);
-
-	//bind ground
-	//for (int i = 0, s = _textures.size(); i < s; i++)
-	//{
-	//	std::string uniform("terrainG");
-	//	uniform += 48 + i;
-	//	glActiveTexture(GL_TEXTURE0 + i);
-	//	glBindTexture(GL_TEXTURE_2D, _textures[i]->object());
-	//	Program::getInstance().setUniform((char*)uniform.c_str(), i);
-	//}
+	
+	// Compute the MVP matrix from the light's point of view
+	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
+	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
+	glm::mat4 depthMVP = depthProj * depthView;
+	glm::mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+		);
+	depthMVP = biasMatrix*depthMVP;
+	Program::getInstance().setUniform("depthMVP", depthMVP);
 
 	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, _textures[0]->object());
@@ -150,6 +169,9 @@ void Terrain::Render()
 	glActiveTexture(GL_TEXTURE0 + 3);
 	glBindTexture(GL_TEXTURE_2D, _textures[3]->object());
 	Program::getInstance().setUniform("terrainG3", 3);
+	glActiveTexture(GL_TEXTURE0 + 4);
+	glBindTexture(GL_TEXTURE_2D, shadowMapID);
+	Program::getInstance().setUniform("shadowMap", 4);
 
 	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);

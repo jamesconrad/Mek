@@ -53,6 +53,7 @@ public:
 	void loadScene(aiScene* scene);
 	void render();
 	void renderShadowPass();
+	void setShadowMapID(int id);
 
 	void setActiveAnimation(aiAnimation* animation);
 	void setActiveAnimation(aiAnimation* anim1, aiAnimation* anim2, float factor);
@@ -105,6 +106,8 @@ private:
 	bool _animBlending;
 	aiAnimation* _activeAnim[3];
 	float _blendFactor;
+
+	static int shadowMapTexID;
 
 	bool _animated;
 	Render* _render;
