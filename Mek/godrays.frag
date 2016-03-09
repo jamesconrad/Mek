@@ -5,7 +5,8 @@ uniform sampler2D tex0;
 uniform sampler2D rgbTexture;
 
 //uniform mat4 mvp;
-//uniform vec4 viewport;
+//uniform vec4 viewport = vec4(0.0, 0.0, 1280.0, 800.0);
+//uniform vec2 depthRange = vec2(0.1, 1024.0);
 uniform vec4 lightPositionOnScreen = vec4(0.3, 0.7, 0.0, 0.0);
 
 float exposure = 0.006;
@@ -21,7 +22,23 @@ layout(location = 0) out vec4 colour;
 
 void main()
 {
+//	vec4 lightPos = mvp * lightPositionOnScreen;
+//
+//    double rhw = 1 / lightPos.w;
+//	lightPos = vec4(
+//	(1 + lightPos.x * rhw) * viewport[2] / 2 + viewport[0],
+//   (1 - lightPos.y * rhw) * viewport[3] / 2 + viewport[1],
+//   (lightPos.z * rhw) * (depthRange[1] - depthRange[0]) + depthRange[0],
+//   rhw);
+//
+// 
+//   lightPos.x /= 1280.0;
+//   lightPos.y /= 800.0;
+
+
+
 	vec2 dTexCoord = vec2(uv.xy - lightPositionOnScreen.xy);
+//	dTexCoord = vec2(uv.xy - lightPos.xy);
 	vec2 actualCoord = uv.xy;
 	dTexCoord *= 1.0 / float(numSamples) * density;
 	vec3 texSample = vec3(0.0, 0.0, 0.0);

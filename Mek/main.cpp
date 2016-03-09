@@ -785,7 +785,7 @@ void AppMain() {
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	sky = new Skybox(sb);
-	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O.png", "fr-O.png" };
+	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O2.png", "fr-O.png" };
 	skyObs = new Skybox(Osb);
 	//MODEL INITS
 

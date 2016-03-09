@@ -160,8 +160,12 @@ void FramebufferEffects::GodRays(glm::vec3 &sunLocation)
 	glm::vec4 lightPosInScreenSpace = glm::vec4(glm::project(sunLocation + glm::vec3(-1500, 500, 2300), Camera::getInstance().view(), Camera::getInstance().projection(), glm::vec4(0.f, 0.f, (float)_fb->Width(), (float)_fb->Height())), 1.0f);
 	lightPosInScreenSpace.x /= _fb->Width();
 	lightPosInScreenSpace.y /= _fb->Height();
+	//glm::vec4 lightPosInScreenSpace = glm::vec4(sunLocation + glm::vec3(-1500, 500, 2300), 1.0f);
 	Program::getInstance().setUniform("lightPositionOnScreen", lightPosInScreenSpace);
 	_wb[2]->RenderQuad();
+
+	glm::mat4 thing = Camera::getInstance().projection() * Camera::getInstance().view();
+	Program::getInstance().setUniform("mvp", thing);
 
 	_fb->Bind();
 	Program::getInstance().bind("pass");
