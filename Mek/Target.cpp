@@ -61,8 +61,8 @@ void Target::update(float dTime, NavMesh &mesh)
 		glm::vec3 temp = glm::vec3(ceil(npos.x), ceil(npos.y), ceil(npos.z));
 		glm::vec3 temp2 = glm::vec3(ceil(pPos.x), ceil(pPos.y), ceil(pPos.z));
 
-		std::cout << "SPos: " << oList->FindSound("Moving2")->soundPos.x << " " << oList->FindSound("Moving2")->soundPos.y << " " << oList->FindSound("Moving2")->soundPos.z << std::endl;
-		std::cout << "TPos: " << temp.x << " " << temp.y << " " << temp.z << std::endl;
+		//std::cout << "SPos: " << oList->FindSound("Moving2")->soundPos.x << " " << oList->FindSound("Moving2")->soundPos.y << " " << oList->FindSound("Moving2")->soundPos.z << std::endl;
+		//std::cout << "TPos: " << temp.x << " " << temp.y << " " << temp.z << std::endl;
 		if (pPos != npos){
 			//oList->FindAndUnpause("Moving2");
 			laserSound->ChannelPtr->setPaused(false);

@@ -11,6 +11,18 @@
 #include "Camera.h"
 #include "Projectile.h"
 
+//#include "ShieldVariables.h"
+extern float shieldHealth;
+extern float maxShieldHealth;
+extern float shieldRechargeTimer;
+extern float shieldMaxTimer;
+extern float shieldRechargeAmount;
+
+extern bool  playerIsHit;
+extern float hitInvulnTimer;
+extern float maxInvulnTime;
+
+
 ComponentCollision::ComponentCollision()
 {
 	//collisionPackage = new CollisionPacket;
@@ -493,22 +505,30 @@ void CollisionManager::checkAll()
 
 	// STAGE 3 PlAYER VS ENEMY PROJECTILES
 	{
-		for (int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+		if (!playerIsHit)
 		{
-			ObjectManager::instance().enemyPMap[i]->cc->updateFrame(NULL, FALSE);
-			
-			GameObject* playerGO = static_cast<GameObject*>(ObjectManager::instance().gMap[0]);
-			ComponentCollision* playerCC = static_cast<ComponentCollision*>(playerGO->GetComponent(PHYSICS));
-
-			playerCC->updateFrame(playerGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (playerCC->_cMesh[0]->boneNum == -1 ? false : true));
-
-			if (ObjectManager::instance().enemyPMap[i]->go->health > 0)
+			for (int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
 			{
-				if (playerCC->checkVs(ObjectManager::instance().enemyPMap[i]->cc))
-				{
-					playerGO->health -= ObjectManager::instance().enemyPMap[i]->dmg;
-					playerGO->force = ObjectManager::instance().enemyPMap[i]->go->dir * 0.105f;
+				ObjectManager::instance().enemyPMap[i]->cc->updateFrame(NULL, FALSE);
 
+				GameObject* playerGO = static_cast<GameObject*>(ObjectManager::instance().gMap[0]);
+				ComponentCollision* playerCC = static_cast<ComponentCollision*>(playerGO->GetComponent(PHYSICS));
+
+				playerCC->updateFrame(playerGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (playerCC->_cMesh[0]->boneNum == -1 ? false : true));
+
+				if (ObjectManager::instance().enemyPMap[i]->go->health > 0)
+				{
+					if (playerCC->checkVs(ObjectManager::instance().enemyPMap[i]->cc))
+					{
+						shieldHealth -= ObjectManager::instance().enemyPMap[i]->dmg;
+						playerIsHit = true;
+						hitInvulnTimer = maxInvulnTime;
+						shieldRechargeTimer = shieldMaxTimer;
+						if (shieldHealth < 0)
+							playerGO->health -= ObjectManager::instance().enemyPMap[i]->dmg;
+						playerGO->force = ObjectManager::instance().enemyPMap[i]->go->dir * 0.105f;
+
+					}
 				}
 			}
 		}

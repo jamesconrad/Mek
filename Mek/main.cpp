@@ -60,6 +60,9 @@ std::vector<unsigned int> scoreTable;
 unsigned int score;
 unsigned int ammo = 11;
 float reloadTimer = 0.0f;
+#include "ShieldVariables.h"
+
+
 float playTime = 0;
 NavMesh testNaveMesh;
 
@@ -149,6 +152,8 @@ void wonGame()
 	std::reverse(scoreTable.begin(), scoreTable.end());
 	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
+
+	shieldHealth = 100.f; //Just work with me.
 }
 void startGame()
 {
@@ -160,8 +165,16 @@ void startGame()
 	model->health = 100.f;
 	score = 0;
 	playTime = 0;
-	ammo = 10;
+	ammo = 11;
 	reloadTimer = 0.0f;
+	maxShieldHealth = 100.f;
+	shieldRechargeTimer = 0.f;
+	shieldMaxTimer = 3.5f;
+	shieldRechargeAmount = 30.f;
+
+	playerIsHit = false;
+	hitInvulnTimer = 0.0f;
+	maxInvulnTime = 0.5f;
 	targetsKilled = 0;
 	for (int i = 0, s = targets.size(); i < s; i++)
 	{
@@ -181,7 +194,7 @@ void LoadTargets()
 	targets.reserve(100);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		Target* tar = new Target("models/Dummy.dae", 0.5, SManager->GetOwnerList("Target"));
 
@@ -421,7 +434,9 @@ static void Render() {
 		char amBuff[8];
 		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
 		TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, fontColour);
+		ShieldBack->cutoffPercent(shieldHealth / maxShieldHealth);
 	    ShieldBack->render();
+		HPback->cutoffPercent(model->health / 100.f);
 	    HPback->render();
 	}
 	glEnable(GL_DEPTH_TEST);
@@ -545,6 +560,27 @@ static void Update(float secondsElapsed) {
 			}
 		}
 
+		if (hitInvulnTimer >= 0.0f)
+		{
+			hitInvulnTimer -= secondsElapsed;
+			if (hitInvulnTimer < 0.0f)
+			{
+				playerIsHit = false;
+			}
+		}
+
+		if (shieldHealth < maxShieldHealth)
+		{
+			shieldRechargeTimer -= secondsElapsed;
+			if (shieldRechargeTimer <= 0.0f)
+			{
+				shieldHealth += shieldRechargeAmount * secondsElapsed;
+
+				if (shieldHealth > maxShieldHealth)
+					shieldHealth = maxShieldHealth;
+			}
+		}
+		
 
 		CollisionManager::instance().checkAll();
 		

@@ -378,7 +378,7 @@ void FSound::LoadSound(float _minDist, float _maxDist){
 void FSound::Update(){
 	ChannelPtr->isPlaying(&isPlaying);
 	if ((isPlaying && soundType == SOUND_TYPE_3D) || (isPlaying && soundType == SOUND_TYPE_3D_LOOP)){
-		std::cout << "Updating: " << this->sname << std::endl;
+		//std::cout << "Updating: " << this->sname << std::endl;
 		result = ChannelPtr->set3DAttributes(&soundPos, &soundVel);
 		if (result != FMOD_OK){
 			std::cout << "cFS->U Failed to set Channel 3D Attributes in: " << name << " "; ERRCHECK(result); std::cout << std::endl;
