@@ -12,12 +12,17 @@ static const float vertices[] = {
 };
 static const unsigned int indicies[] = { 0, 2, 1, 0, 3, 2 };
 
+void twodOverlay::cutoffPercent(float c)
+{
+	cutoff = c;
+}
 
 twodOverlay::twodOverlay(char* fp, float x, float y, float scale)
 {
 	_tex = new Texture(fp);
 
 	pos = glm::vec3(x, y, scale);
+	cutoff = 1;
 
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
@@ -43,6 +48,7 @@ void twodOverlay::render()
 	glBindVertexArray(_vao);
 	
 	Program::getInstance().setUniform("transformationdata", pos);
+	Program::getInstance().setUniform("cutoff", cutoff);
 	//Program::getInstance().setUniform("hud", "proj", glm::ortho(0.f, 1920.f, 1080.f, 0.f) * Camera::getInstance().view());
 
 	glActiveTexture(GL_TEXTURE0);
