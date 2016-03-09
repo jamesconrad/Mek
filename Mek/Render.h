@@ -71,6 +71,8 @@ public:
 	void draw(bool basevertex = false, unsigned int baseIndex = 0, unsigned int baseVertex = 0);
 	void drawShadowPass(bool basevertex = false, unsigned int baseIndex = 0, unsigned int baseVertex = 0);
 
+	int numTextures();
+
 	//This function should be avoided, however was put in for the model class usage.
 	void forceOverride(
 		unsigned int vao,

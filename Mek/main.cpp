@@ -301,16 +301,17 @@ static void DrawSceneShadowPass()
 	}
 }
 
-static void DrawScene()
+static void DrawScene(int shadowMapTexID)
 {
 	skyObs->render(true);
 	sky->render(false);
 
-	ground->Render();
+	ground->Render(shadowMapTexID);
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
 		Model* cg = static_cast<Model*>(goVec[i]->GetComponent(GRAPHICS));
+		cg->setShadowMapID(shadowMapTexID);
 		cg->render();
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
@@ -353,11 +354,9 @@ static void Render() {
     glClearColor(0, 0, 0, 1); // black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//framebuffeffects->PrepShadowMap();
-	//DrawSceneShadowPass();
-	//framebuffeffects->FinShadowMap();
-
-	DrawScene();
+	framebuffeffects->PrepShadowMap();
+	DrawSceneShadowPass();
+	DrawScene(framebuffeffects->FinShadowMap());
 
 	//_snprintf_s(buffer, 5, "%i", score);
     // swap the display buffers (displays what was just drawn)
@@ -375,10 +374,7 @@ static void Render() {
 	//if (numpadPress[1])
 	framebuffeffects->Bloom(4);
 	//if (numpadPress[2])
-	framebuffeffects->FXAA();
-
-		
-		
+	framebuffeffects->FXAA();		
 
 	framebuff[0]->Unbind();
 	Program::getInstance().bind("pass");
@@ -416,7 +412,6 @@ static void Render() {
 		TextRendering::getInstance().printText2D(scbuff, -0.38f, 0.85f, 0.075f, fontColour);
 	}
 	glEnable(GL_DEPTH_TEST);
-
 
     glfwSwapBuffers(gWindow);
 }

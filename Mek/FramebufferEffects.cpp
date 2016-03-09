@@ -43,7 +43,8 @@ void FramebufferEffects::LoadFXAAShaders()
 
 void FramebufferEffects::LoadShadowMapShaders()
 {
-
+	Program::getInstance().createShader("skinnedShadow", GL_VERTEX_SHADER, "shaders/shadow.vert");
+	Program::getInstance().createShader("skinnedShadow", GL_FRAGMENT_SHADER, "shaders/shadow.frag");
 }
 
 void FramebufferEffects::loadToonShaders()
@@ -108,12 +109,19 @@ void FramebufferEffects::FXAA()
 
 void FramebufferEffects::PrepShadowMap()
 {
-
+	_wb[2]->Bind();
+	glClearColor(1, 1, 1, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
+	//glViewport(0, 0, _size.x, _size.y);
 }
 
-void FramebufferEffects::FinShadowMap()
+int FramebufferEffects::FinShadowMap()
 {
-
+	glCullFace(GL_BACK);
+	//glViewport(0, 0, _size.x * 2, _size.y * 2);
+	_fb->Bind();
+	return _wb[2]->GetTextureID(0);
 }
 
 void FramebufferEffects::Toon(bool doCraziness)
@@ -153,7 +161,6 @@ void FramebufferEffects::Toon(bool doCraziness)
 	
 }									  
 
-#include <iostream>
 void FramebufferEffects::GodRays(glm::vec3 &sunLocation)
 {
 	_wb[2]->Bind();

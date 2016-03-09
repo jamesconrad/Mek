@@ -16,7 +16,6 @@ public:
 	void CreateColorTexture(unsigned int num, unsigned int width = 1920, unsigned int = 1080);
 	bool Check();
 
-	void BindTextureForSampling(int texIndex, GLenum texUnit);
 	void UnbindTexture(GLenum texUnit);
 
 	unsigned int Width();
@@ -26,6 +25,8 @@ public:
 	static void Unbind();
 
 	void Clear();
+
+	int GetTextureID(int cbo);
 
 	void Render(char * shader);
 	void RenderQuad();

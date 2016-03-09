@@ -4,6 +4,7 @@ uniform sampler2D terrainG0;
 uniform sampler2D terrainG1;
 uniform sampler2D terrainG2;
 uniform sampler2D terrainG3;
+uniform sampler2D shadowMap;
 //uniform vec3 u;
 //uniform vec3 d;
 
@@ -15,6 +16,20 @@ layout(location = 3) out vec4 LightObscurers;
 in vec3 p;
 in vec3 n;
 in float h;
+
+in vec4 fpls;
+
+vec3 ldir = vec3(-2.0, 4.0, -1.0);
+
+float IsNotShadowed(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal)
+{
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	//serialize the projcords
+	projCoords = projCoords * 0.5 + 0.5;
+	float depth = texture2D(shadowMap, projCoords.xy).r;
+	return (projCoords.z/* - bias*/ > depth) ? 1.0 : 0.25;
+}
 
 void main()
 {
@@ -41,33 +56,16 @@ void main()
 		colour = texture2D(terrainG1, uv);
 	else if (dn <= trange3)
 	{
-		//scale0 = dn - trange3;
-		//scale1 = 1 - scale0;
-		//colour = texture2D(terrainG1, uv) * scale0;
-		//colour += texture2D(terrainG2, uv) * scale1;
-		//colour = vec4(0,1,0,1);
 		colour = mix(texture2D(terrainG1, uv), texture2D(terrainG2, uv), (dn - trange2) / (trange3 - trange2));
 	}
 	else if (dn <= trange4) 
 		colour = texture2D(terrainG2, uv);
 	else if (dn <= trange5)
 	{
-		//scale0 = dn - trange5;
-		//scale1 = 1 - scale0;
-		//colour = texture2D(terrainG2, uv) * scale0;
-		//colour += texture2D(terrainG3, uv) * scale1;
-		//colour = vec4(0,0,1,1);
 		colour = mix(texture2D(terrainG2, uv), texture2D(terrainG3, uv), (dn - trange4) / (trange5 - trange4));
 	}
 	else
 		colour = texture2D(terrainG3, uv);
-
-	//colour = vec4(dn,0,0, 1);
-	//colour = (texture2D(terrainG0, uv) + texture2D(terrainG1, uv) + texture2D(terrainG2, uv) + texture2D(terrainG3, uv)) * 0.25;
-	//colour = texture2D(terrainG2, uv);
-	//lets just use the y val to determine the texture
-
-	//colour = vec4(h,0,0,1);
 
 	//The following is for enabling the terrain grid for determining distances
 	//if (p.x < 0.1 && p.x > -0.1)
@@ -86,8 +84,13 @@ void main()
 	
 	
 	
-	
-	
+	//colour.xyz *= IsNotShadowed(fpls, ldir, n);
+
+	if (texture2D(shadowMap, fpls.xy).r < fpls.z)
+		colour.xyz = colour.xyz * 0.25;
+
+	colour.r = texture2D(shadowMap, fpls.xy).r;
+
 	depth = vec4(vec3(gl_FragCoord.z), 1.0);
 	normals = vec4(vec3(n), 1.0);
 	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0);

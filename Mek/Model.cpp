@@ -3,6 +3,8 @@
 
 #define BUFFER_OFFSET(i) (char*)0 + (i)
 
+int Model::shadowMapTexID = 0;
+
 void Model::update()
 {
 
@@ -18,6 +20,11 @@ void CopyaiMat(const aiMatrix4x4& from, glm::mat4 &to)
 	to[2][2] = from.c3; to[3][2] = from.c4;
 	to[0][3] = from.d1; to[1][3] = from.d2;
 	to[2][3] = from.d3; to[3][3] = from.d4;
+}
+
+void Model::setShadowMapID(int id)
+{
+	shadowMapTexID = id;
 }
 
 const aiScene* Model::getScene()
@@ -445,6 +452,19 @@ void Model::render()
 		Program::getInstance().updateLighting("skinning");
 	}
 
+	int nt = _render->numTextures();
+	glActiveTexture(GL_TEXTURE0 + nt);
+	glBindTexture(GL_TEXTURE_2D, shadowMapTexID);
+	Program::getInstance().setUniform("shadowMap", nt);
+	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
+
+	// Compute the MVP matrix from the light's point of view
+	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -16, 16.f);
+	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
+	glm::mat4 depthMVP = depthProj * depthView * W;
+
+	Program::getInstance().setUniform("depthMVP", depthMVP);
+
 	for (int i = 0, s = _entries.size(); i < s; i++)
 	{
 		_render->draw(true, _entries[i].baseIndex, _entries[i].baseVertex);
@@ -459,11 +479,11 @@ void Model::renderShadowPass()
 		Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
 	}
 
-	glm::vec3 lightInvDir = glm::vec3(0, 1, 1);
+	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
 
 	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-	glm::mat4 depthView = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8.f);
+	glm::mat4 depthView = glm::lookAt(glm::vec3(1.0f, 1.0f, 4.0f), glm::vec3(0), glm::vec3(0, 1, 0));
 
 	glm::mat4 depthModel;
 	depthModel = glm::translate(depthModel, _owner->pos);
