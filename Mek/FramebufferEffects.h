@@ -24,7 +24,7 @@ public:
 	void GodRays(glm::vec3 &sunLocation);
 
 	void PrepShadowMap();
-	void FinShadowMap();
+	int FinShadowMap();
 
 private:
 	Framebuffer* _fb;

@@ -30,9 +30,6 @@ Target::Target(char* fp, float t, OwnerList* _oList)
 
 	surroundingPositions.reserve(11);
 	
-	laserSound = new FSound(oList->list[0]->FSystemPtr, "../Debug/media/drumloop.wav", SOUND_TYPE_3D_LOOP,ROLLOFF_LINEARSQUARE, 0.5, 5);
-	laserSound->Play();
-	//laserSound->ChannelPtr->get
 }
 
 void Target::update(float dTime, NavMesh &mesh)
@@ -40,7 +37,6 @@ void Target::update(float dTime, NavMesh &mesh)
 	oList->UpdateOwnerSoundPos(go->pos);
 	glm::vec3 pPos = go->pos;
 	FMOD_VECTOR fpos = { pPos.x, pPos.y, pPos.z };
-	laserSound->UpdateSoundPos(pPos);
 	if (!hit && go->health <= 0) //go->scale == glm::vec3(0, 0, 0))
 	{
 		hit = true;
@@ -64,12 +60,10 @@ void Target::update(float dTime, NavMesh &mesh)
 		//std::cout << "SPos: " << oList->FindSound("Moving2")->soundPos.x << " " << oList->FindSound("Moving2")->soundPos.y << " " << oList->FindSound("Moving2")->soundPos.z << std::endl;
 		//std::cout << "TPos: " << temp.x << " " << temp.y << " " << temp.z << std::endl;
 		if (pPos != npos){
-			//oList->FindAndUnpause("Moving2");
-			laserSound->ChannelPtr->setPaused(false);
+		 oList->FindAndUnpause("Moving");
 		}
 		else{
-			//oList->FindAndPause("Moving2");
-			laserSound->Pause();
+			oList->FindAndPause("Moving");
 		}
 	}
 	

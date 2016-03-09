@@ -16,8 +16,8 @@ public:
 	void GenerateHeightMap(int mode, float* heightmap, float heightmod);
 
 	void InitRender();
-	void Render();
-
+	void Render(int shadowMapID);
+	void RenderShadowPass();
 	float HeightAtLocation(glm::vec3 pos);
 private:
 	unsigned int IndexAt(int x, int y);

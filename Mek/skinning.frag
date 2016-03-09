@@ -6,8 +6,10 @@ const int MAX_SPOT_LIGHTS = 16;
 in vec2 TexCoord0;
 in vec3 Normal0;
 in vec3 WorldPos0;
-in vec4 Debug0;
-in ivec4 Debug1;
+in vec3 FragPos;
+in vec4 FragPosLightSpace;
+
+uniform sampler2D shadowMap;
 
 struct VSOutput
 {
@@ -62,7 +64,6 @@ uniform vec3 EyeViewVec;
 uniform float gMatSpecularIntensity;
 
 uniform float gSpecularPower;
-
 
 //New code by Jordan Culver
 vec3 PointLambert(VSOutput In, PointLight Light)
@@ -253,7 +254,10 @@ void main()
 	}
 	RimHighlights += clamp(dot(In.Normal,WorldUp), 0.0, 1.0) * RimFresnel * ConstantAmbient; /** (ConstantAmbient * normalize(gEyeWorldPos - In.WorldPos));*/
 	
-	FragColor = vec4(((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights), 1.0);
+	float ShadowCoeff = 1;
+	if (texture2D(shadowMap, FragPosLightSpace.xy).r < FragPosLightSpace.z)
+		ShadowCoeff = 0.25;
+	FragColor = vec4((((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights)) * ShadowCoeff, 1.0);
 	Depth = vec4(vec3(gl_FragCoord.z), 1.0);
 	Normal = vec4(vec3(In.Normal), 1.0);
 	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0);
