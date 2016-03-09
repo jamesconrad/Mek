@@ -279,6 +279,7 @@ void LoadTargets()
 
 static void DrawSceneShadowPass()
 {
+	//ground->RenderShadowPass();
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{

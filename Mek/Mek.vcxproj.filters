@@ -291,5 +291,8 @@
     <None Include="shadow.vert">
       <Filter>Resource Files\Shadow</Filter>
     </None>
+    <None Include="terrainshadow.vert">
+      <Filter>Resource Files\Shadow</Filter>
+    </None>
   </ItemGroup>
 </Project>

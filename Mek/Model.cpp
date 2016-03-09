@@ -459,9 +459,17 @@ void Model::render()
 	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
 
 	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -16, 16.f);
+	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
 	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
-	glm::mat4 depthMVP = depthProj * depthView * W;
+	glm::mat4 depthMVP = depthProj * depthView;
+	glm::mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+		);
+	depthMVP = biasMatrix*depthMVP;
+	Program::getInstance().setUniform("depthMVP", depthMVP);
 
 	Program::getInstance().setUniform("depthMVP", depthMVP);
 
@@ -482,26 +490,17 @@ void Model::renderShadowPass()
 	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
 
 	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8.f);
-	glm::mat4 depthView = glm::lookAt(glm::vec3(1.0f, 1.0f, 4.0f), glm::vec3(0), glm::vec3(0, 1, 0));
+	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
+	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
 
 	glm::mat4 depthModel;
 	depthModel = glm::translate(depthModel, _owner->pos);
 	//depthModel = glm::rotate(depthModel, _owner->rot);
 	depthModel = glm::scale(depthModel, 0.1f * _owner->scale);
-
 	glm::mat4 depthMVP = depthProj * depthView * depthModel;
 
-	glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-		);
-	glm::mat4 depthBiasMVP = /*biasMatrix**/depthMVP;
 
-
-	Program::getInstance().setUniform("LVP", depthBiasMVP);
+	Program::getInstance().setUniform("LVP", depthMVP);
 
 	for (int i = 0, s = _entries.size(); i < s; i++)
 	{

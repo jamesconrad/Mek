@@ -95,6 +95,7 @@
     <None Include="skybox2.frag" />
     <None Include="terrain.frag" />
     <None Include="terrain.vert" />
+    <None Include="terrainshadow.vert" />
     <None Include="text.frag" />
     <None Include="text.vert" />
     <None Include="tonemap.frag" />

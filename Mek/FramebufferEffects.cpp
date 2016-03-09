@@ -45,6 +45,9 @@ void FramebufferEffects::LoadShadowMapShaders()
 {
 	Program::getInstance().createShader("skinnedShadow", GL_VERTEX_SHADER, "shaders/shadow.vert");
 	Program::getInstance().createShader("skinnedShadow", GL_FRAGMENT_SHADER, "shaders/shadow.frag");
+	Program::getInstance().createShader("terrainShadow", GL_VERTEX_SHADER, "shaders/terrainshadow.vert");
+	Program::getInstance().createShader("terrainShadow", GL_FRAGMENT_SHADER, "shaders/shadow.frag");
+	
 }
 
 void FramebufferEffects::loadToonShaders()

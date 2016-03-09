@@ -17,7 +17,7 @@ public:
 
 	void InitRender();
 	void Render(int shadowMapID);
-
+	void RenderShadowPass();
 	float HeightAtLocation(glm::vec3 pos);
 private:
 	unsigned int IndexAt(int x, int y);
