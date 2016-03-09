@@ -430,6 +430,8 @@ float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
 	SManager->Update();
+	SoundSystem->Update();
+	
 	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
@@ -446,7 +448,7 @@ static void Update(float secondsElapsed) {
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
 
-	SManager->UpdateSysO(cam->position(), cam->forward(), cam->up(), glm::vec3(0, 0, 0));
+	SManager->UpdateSysO(cam->position(), -cam->forward(), cam->up(), glm::vec3(0, 0, 0));
 
 	for (int i = 0; i < 9; i++)
 	{

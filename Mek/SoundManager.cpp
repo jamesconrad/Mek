@@ -36,6 +36,9 @@ static enum SOUND_TYPE getSoundType(std::string& _type){
 		return SOUND_TYPE_3D;
 	else if (_type == "SOUND_TYPE_3D_LOOP")
 		return SOUND_TYPE_3D_LOOP;
+	else{
+		return SOUND_TYPE_2D;
+	}
 }
 static enum ROLLOFF_TYPE getRollOff(int type){
 	switch (type){
@@ -57,6 +60,8 @@ static enum ROLLOFF_TYPE getRollOff(std::string& _type){
 		return ROLLOFF_LINEARSQUARE;
 	else if (_type == "ROLLOFF_INVERSE")
 		return ROLLOFF_INVERSE;
+	else
+		return ROLLOFF_LINEAR;
 }
 FSystem::FSystem(){
 	sysVel = { 0.0, 0.0, 0.0 };
@@ -143,7 +148,7 @@ void FSystem::Update(){
 	}
 	SystemPtr->update();
 }
-void FSystem::Set(FMOD_VECTOR _pos, FMOD_VECTOR _for, FMOD_VECTOR _up,FMOD_VECTOR _vel){
+void FSystem::Set(FMOD_VECTOR _pos, FMOD_VECTOR _for, FMOD_VECTOR _up, FMOD_VECTOR _vel){
 	sysPos = _pos;
 	sysFor = _for;
 	sysUp = _up;
@@ -184,6 +189,7 @@ FSound::~FSound(){
 }
 void FSound::LoadSound(){
 	//Picks appropriate SOUND_TYPE and creates a sound with that type
+
 	switch (soundType){
 	case SOUND_TYPE_2D:
 		result = FSystemPtr->SystemPtr->createSound(name, FMOD_2D, 0, &SoundPtr);
@@ -251,19 +257,19 @@ void FSound::LoadSound(){
 
 		switch (rollOff){
 		case ROLLOFF_LINEAR:
-			result = SoundPtr->setMode(FMOD_3D_LINEARROLLOFF | FMOD_LOOP_OFF);
+			result = SoundPtr->setMode(FMOD_3D_LINEARROLLOFF && FMOD_LOOP_NORMAL);
 			if (result != FMOD_OK){
 				std::cout << "Failed to set Sound Mode: "; ERRCHECK(result); std::cout << std::endl;
 			}
 			break;
 		case ROLLOFF_LINEARSQUARE:
-			result = SoundPtr->setMode(FMOD_3D_LINEARSQUAREROLLOFF | FMOD_LOOP_OFF);
+			result = SoundPtr->setMode(FMOD_3D_LINEARSQUAREROLLOFF && FMOD_LOOP_NORMAL);
 			if (result != FMOD_OK){
 				std::cout << "Failed to set Sound Mode: "; ERRCHECK(result); std::cout << std::endl;
 			}
 			break;
 		case ROLLOFF_INVERSE:
-			result = SoundPtr->setMode(FMOD_3D_INVERSEROLLOFF | FMOD_LOOP_NORMAL);
+			result = SoundPtr->setMode(FMOD_3D_INVERSEROLLOFF && FMOD_LOOP_NORMAL);
 			if (result != FMOD_OK){
 				std::cout << "Failed to set Sound Mode: "; ERRCHECK(result); std::cout << std::endl;
 			}
@@ -378,17 +384,16 @@ void FSound::LoadSound(float _minDist, float _maxDist){
 void FSound::Update(){
 	ChannelPtr->isPlaying(&isPlaying);
 	if ((isPlaying && soundType == SOUND_TYPE_3D) || (isPlaying && soundType == SOUND_TYPE_3D_LOOP)){
-		std::cout << "Updating: " << this->sname << std::endl;
+		//std::cout << "Updating: " << this->sname << std::endl;
 		result = ChannelPtr->set3DAttributes(&soundPos, &soundVel);
 		if (result != FMOD_OK){
-			std::cout << "cFS->U Failed to set Channel 3D Attributes in: " << name << " "; ERRCHECK(result); std::cout << std::endl;
+			std::cout << "cFS->U Failed to set Channel 3D Attributes in: " << sname << " "; ERRCHECK(result); std::cout << std::endl;
 		}
 
-		result = FSystemPtr->SystemPtr->set3DListenerAttributes(0, &FSystemPtr->sysPos, &FSystemPtr->sysVel, &FSystemPtr->sysFor, &FSystemPtr->sysUp);
-		if (result != FMOD_OK){
-			std::cout << "cFS->UFailed to set 3D Listener Attributes: "; ERRCHECK(result); std::cout << std::endl;
-		}
-		FSystemPtr->Update();
+		//result = FSystemPtr->SystemPtr->set3DListenerAttributes(0, &FSystemPtr->sysPos, &FSystemPtr->sysVel, &FSystemPtr->sysFor, &FSystemPtr->sysUp);
+		//if (result != FMOD_OK){
+		//	std::cout << "cFS->UFailed to set 3D Listener Attributes: "; ERRCHECK(result); std::cout << std::endl;
+		//}
 	}
 }
 void FSound::Clear(){
@@ -456,6 +461,22 @@ void FSound::SetSName(const std::string& _name){
 }
 bool FSound::IsPlaying(){
 	return isPlaying;
+}
+void FSound::DistanceToFSystem(){
+	FMOD_VECTOR sp = FSystemPtr->sysPos;
+	FMOD_VECTOR ssp = soundPos;
+
+	std::cout << sname << " to system: " << sqrt(pow((sp.x - ssp.x), 2) + pow((sp.y - ssp.y), 2 + pow((sp.z - ssp.z), 2))) << std::endl;
+}
+void FSound::printSound(){
+	std::cout << "Name: " << sname << std::endl;;
+	std::cout << "Owner: " << owner << std::endl;
+	std::cout << "Tag: " << attribute << std::endl;
+	std::cout << "SoundType: " << soundType << std::endl;
+	std::cout << "RollOff: " << rollOff << std::endl;
+	std::cout << "min: " << min << std::endl;
+	std::cout << "Max: " << max << std::endl;
+	printPos();
 }
 //__________________Owner List________________________________________________________________________
 
@@ -623,7 +644,9 @@ SoundManager::SoundManager(FSystem* _FSystemPtr, std::string& _filePath, std::st
 
 				towner = tokens[1];
 				tattribute = tokens[2];
-				FSound* temp = new FSound(FSystemPtr, pname, STYPE);
+				FSound* temp = new FSound(FSystemPtr, pname, STYPE, RTYPE, minDist, maxDist);
+				temp->min = minDist;
+				temp->max = maxDist;
 				temp->SetSName(tokens[0]);
 				temp->soundType = getSoundType(tokens[3]);
 				temp->SetOwner(towner);

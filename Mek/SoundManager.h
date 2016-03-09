@@ -39,7 +39,7 @@ enum SOUND_TYPE{
 	SOUND_TYPE_3D_LOOP,
 };
 enum ROLLOFF_TYPE{
-	ROLLOFF_LINEAR,
+	ROLLOFF_LINEAR = 0,
 	ROLLOFF_LINEARSQUARE,
 	ROLLOFF_INVERSE,
 };
@@ -55,8 +55,10 @@ public:
 	FSystem();
 	~FSystem();
 	void Update();
-	void Set(FMOD_VECTOR _pos, FMOD_VECTOR _for, FMOD_VECTOR _up,FMOD_VECTOR _vel);
+	void Set(FMOD_VECTOR _pos, FMOD_VECTOR _for, FMOD_VECTOR _up, FMOD_VECTOR _vel);
 	void Clear();
+	inline void printPos(){ std::cout << "SysPos" << sysPos.x << " " << sysPos.y << " " << sysPos.z << std::endl; }
+
 };
 class FSound{
 public:
@@ -72,7 +74,7 @@ public:
 	std::string sname; //Short file name sound.wav
 	std::string attribute; //attribute of sound or tag
 	std::string owner; //Owner of the sound
-
+	float min, max;
 	unsigned int length;
 
 	FSound(FSystem*, std::string, SOUND_TYPE);
@@ -91,6 +93,9 @@ public:
 	void UpdatePosition(glm::vec3 _pos){ if ((soundType != SOUND_TYPE_2D) || (soundType != SOUND_TYPE_2D_LOOP)) { FMOD_VECTOR pos = { _pos.x, _pos.y, _pos.z }; soundPos = pos; } }//Updates Pos
 	inline void Pause(){ ChannelPtr->setPaused(true); }
 	inline void UpdateSoundPos(glm::vec3 _pos){ FMOD_VECTOR fpos = { _pos.x, _pos.y, _pos.z }; soundPos = fpos; }
+	void DistanceToFSystem();
+	inline void printPos(){ std::cout << sname << soundPos.x << " " << soundPos.y << " " << soundPos.z << std::endl; }
+	void printSound();
 };
 //OwnerList is a data structure that stores all sounds that belong to a particular owner
 //Easy to use whinin game 
