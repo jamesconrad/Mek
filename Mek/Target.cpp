@@ -22,21 +22,29 @@ Target::Target(char* fp, float t, OwnerList* _oList)
 	go->AddComponent(PHYSICS, c);
 	
 	oList = _oList;
-
+	oList->PlayAndPauseAll();
 	ObjectManager::instance().addObject(go);
 
 	go->dir = glm::vec3(1.0f, 0.0f, 0.0f);
 	go->vel = 2.f;
 
 	surroundingPositions.reserve(11);
+	
+	laserSound = new FSound(oList->list[0]->FSystemPtr, "../Debug/media/drumloop.wav", SOUND_TYPE_3D_LOOP,ROLLOFF_LINEARSQUARE, 0.5, 5);
+	laserSound->Play();
+	//laserSound->ChannelPtr->get
 }
 
 void Target::update(float dTime, NavMesh &mesh)
 {
+	oList->UpdateOwnerSoundPos(go->pos);
+	glm::vec3 pPos = go->pos;
+	FMOD_VECTOR fpos = { pPos.x, pPos.y, pPos.z };
+	laserSound->UpdateSoundPos(pPos);
 	if (!hit && go->health <= 0) //go->scale == glm::vec3(0, 0, 0))
 	{
 		hit = true;
-		oList->findAndPlay("Hit");
+		oList->FindAndPlay("Hit");
 	}
 	else
 	{
@@ -49,6 +57,20 @@ void Target::update(float dTime, NavMesh &mesh)
 		go->dir = go->pos;// glm::normalize(interp.pos - go->dir);
 		followPath(dTime, mesh, hasSpottedPlayer);
 		go->dir = glm::normalize(go->pos - go->dir);
+		glm::vec3 npos = go->pos;
+		glm::vec3 temp = glm::vec3(ceil(npos.x), ceil(npos.y), ceil(npos.z));
+		glm::vec3 temp2 = glm::vec3(ceil(pPos.x), ceil(pPos.y), ceil(pPos.z));
+
+		std::cout << "SPos: " << oList->FindSound("Moving2")->soundPos.x << " " << oList->FindSound("Moving2")->soundPos.y << " " << oList->FindSound("Moving2")->soundPos.z << std::endl;
+		std::cout << "TPos: " << temp.x << " " << temp.y << " " << temp.z << std::endl;
+		if (pPos != npos){
+			//oList->FindAndUnpause("Moving2");
+			laserSound->ChannelPtr->setPaused(false);
+		}
+		else{
+			//oList->FindAndPause("Moving2");
+			laserSound->Pause();
+		}
 	}
 	
 }
