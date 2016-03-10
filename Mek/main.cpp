@@ -60,7 +60,10 @@ std::vector<unsigned int> scoreTable;
 unsigned int score;
 unsigned int ammo = 11;
 float reloadTimer = 0.0f;
+bool zoomingIn = false;
+float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 #include "ShieldVariables.h"
+#include "WeaponVariables.h"
 
 
 float playTime = 0;
@@ -472,6 +475,8 @@ static void Update(float secondsElapsed) {
 		else
 			numpadPress[i] = false;
 	}
+
+	
 	//system("CLS");
 	//cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
 	//cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
@@ -501,11 +506,53 @@ static void Update(float secondsElapsed) {
 			shoot = true;
 
 		}
+		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_LEFT))
+		{
+			shoot = true;
+		}
 		if (glfwGetKey(gWindow, 'R') && ammo < 10 && reloadTimer == 0.0f)
 			reloadTimer = 0.0001f;
 
+		if (glfwGetKey(gWindow, '1'))
+		{
+			currentWeapon = machineGun;
+		}
+		if (glfwGetKey(gWindow, '2'))
+		{
+			currentWeapon = shotgun;
+		}
+		if (glfwGetKey(gWindow, '3'))
+		{
+			currentWeapon = bfg;
+		}
+
+
+
 		//rotate camera based on mouse movement
-		const float mouseSensitivity = 0.05f;
+		float mouseSensitivity = 0.05f;
+		zoomingIn = false;
+		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_RIGHT))
+		{
+			zoomingIn = true;
+		}
+		if (zoomingIn)
+		{
+			zoomingTimer += secondsElapsed * 7;
+			if (zoomingTimer > 1.0f)
+				zoomingTimer = 1.0f;
+			currentFOV = lerp(maxFOV, minFOV, zoomingTimer);
+			Camera::getInstance().setFieldOfView(currentFOV);
+			mouseSensitivity = 0.02f;
+		}
+		else
+		{
+			zoomingTimer -= secondsElapsed * 7;
+			if (zoomingTimer < 0.0f)
+				zoomingTimer = 0.0f;
+			currentFOV = lerp(maxFOV, minFOV, zoomingTimer);
+			Camera::getInstance().setFieldOfView(currentFOV);
+			mouseSensitivity = 0.05f;
+		}
 		double mouseX, mouseY;
 		glfwGetCursorPos(gWindow, &mouseX, &mouseY);
 		//Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
@@ -542,10 +589,54 @@ static void Update(float secondsElapsed) {
 		{
 			FSound* sounds = SManager->FindSound("Player","Projectile");
 			//sounds->Play();
-			Projectile* pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f))), 0.5, 25, 10, SManager->FindSound("Player", "Projectile"));
-			ObjectManager::instance().pMap.push_back(pr);
-			ammo--;
-			shotcd = 0;
+			Projectile* pr;
+
+			if (currentWeapon == machineGun)
+			{
+				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 0.5, 25, 10, SManager->FindSound("Player", "Projectile"));
+				ObjectManager::instance().pMap.push_back(pr);
+				ammo--;
+			}
+			else if (currentWeapon == shotgun)
+			{
+				if (ammo >= shotgun)
+				{
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+				}
+			}
+			else if (currentWeapon == bfg)
+			{
+				if (ammo >= bfg)
+				{
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 0.3, 100, 10, SManager->FindSound("Player", "Projectile"));
+					pr->go->scale = glm::vec3(1.5f);
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo -= bfg;
+				}
+			}
+
+
+
+				shotcd = 0;
+			
 		}
 
 		if (reloadTimer > 0.0f)
@@ -628,7 +719,7 @@ static void Update(float secondsElapsed) {
 			{
 				targets[i]->fireTimer = 0.f;
 				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->FindSound("Player", "Projectile"));
-				targets[i]->weaponProjectile->go->scale = glm::vec3(1.2f);
+				targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
 				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
 				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
@@ -801,7 +892,7 @@ void AppMain() {
     Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
-	Camera::getInstance().setFieldOfView(50);
+	Camera::getInstance().setFieldOfView(maxFOV);
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
 	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
@@ -859,7 +950,7 @@ void AppMain() {
 				gObject->SetName("Spawn Container 1");
 				cModel->loadModel("models/Tree 1.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-10.526, 0, -176.58);
 				gObject->rot = glm::vec3(0, -34.f, 0);
 			}
@@ -884,7 +975,7 @@ void AppMain() {
 				gObject->SetName("Spawn Container 2");
 				cModel->loadModel("models/Tree 2.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-69.65f, 0, 108.334);
 			}
 			else if (i == 4)
@@ -892,7 +983,7 @@ void AppMain() {
 				gObject->SetName("Middle Plus");
 				cModel->loadModel("models/Shipping Container.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, -73);
 			}
 			else if (i == 5)
@@ -900,7 +991,7 @@ void AppMain() {
 				gObject->SetName("North Wall");
 				cModel->loadModel("models/Container_Wal_LPl.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(100, 0, 165);
 			}
 			else if (i == 6)
@@ -908,7 +999,7 @@ void AppMain() {
 				gObject->SetName("Dumbster");//Crane
 				cModel->loadModel("models/Garbage Bin.dae");
 				gObject->pos = glm::vec3(59.751, 0, -76.667);
-				gObject->scale = glm::vec3(0.4, 0.4, 0.4);
+				gObject->scale = glm::vec3(1);
 				gObject->rot = glm::vec3(0, 130.6, 0);
 			}
 			else if (i == 7)
@@ -916,7 +1007,7 @@ void AppMain() {
 				gObject->SetName("Tall Rock");
 				cModel->loadModel("models/Tall Rock.dae");
 
-				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-92.424f, 0, -106.131);
 			}
 			else if (i == 8)
@@ -924,7 +1015,7 @@ void AppMain() {
 				gObject->SetName("Middle Plus");
 				cModel->loadModel("models/Container.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-5, 0, -20);
 			}
 			else if (i == 9)
@@ -932,7 +1023,7 @@ void AppMain() {
 				gObject->SetName("Container 2");
 				cModel->loadModel("models/Shipping Container.dae");
 
-				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, 73);
 				gObject->rot = glm::vec3(0, 65.44f , 0);
 			}
@@ -982,7 +1073,7 @@ void AppMain() {
 				gObject->SetName("Small Rock 1");
 				cModel->loadModel("models/Rock 1 Round.dae");
 
-				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-94.393, 0, -103.22);
 			}
 			else if (i == 16)
@@ -990,7 +1081,7 @@ void AppMain() {
 				gObject->SetName("Small Rock 1");
 				cModel->loadModel("models/Rock 1 Round.dae");
 
-				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-3.347f, 0, -180.318f);
 			}
 			else if (i == 17)
@@ -998,7 +1089,7 @@ void AppMain() {
 				gObject->SetName("Small Rock 2");
 				cModel->loadModel("models/Rock 2 Round.dae");
 
-				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-5.196f, 0, -172.384f);
 			}
 			else if (i == 18)
@@ -1006,7 +1097,7 @@ void AppMain() {
 				gObject->SetName("Middle Plus North");
 				cModel->loadModel("models/Shipping Container.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-110, 0, -149);
 				gObject->rot = glm::vec3(0, -48.5f, 0);
 			}
@@ -1015,7 +1106,7 @@ void AppMain() {
 				gObject->SetName("Fountain");
 				cModel->loadModel("models/Fountain.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(0, 0, 0);
 			}
 			else if (i == 20)
@@ -1023,7 +1114,7 @@ void AppMain() {
 				gObject->SetName("Crane");
 				cModel->loadModel("models/Crane.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
 			}
 			else if (i == 21)
@@ -1031,7 +1122,7 @@ void AppMain() {
 				gObject->SetName("Destroyed House");
 				cModel->loadModel("models/Destroyed Building.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-35, 0, -167.582f);
 				gObject->rot = glm::vec3(0, -90.f, 0);
 			}
