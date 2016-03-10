@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2016-03-10T22:56:41Z</created><keywords></keywords><modified>2016-03-10T22:56:41Z</modified><revision></revision><subject></subject><title></title><unit meter="0.010000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
+  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2016-03-10T22:31:41Z</created><keywords></keywords><modified>2016-03-10T22:31:41Z</modified><revision></revision><subject></subject><title></title><unit meter="0.010000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
   <library_images>
     <image id="file1-image" name="file1"><init_from>file://C:/Users/100488896/Documents/UOIT WORK/Semester 2/Graphics/UV Textures/mekt.png</init_from></image>
   </library_images>
@@ -2064,12 +2064,12 @@
     </geometry>
   </library_geometries>
   <library_visual_scenes>
-    <visual_scene id="Mek2" name="Mek2">
+    <visual_scene id="Mek" name="Mek">
       <node name="pPlane3" id="pPlane3" sid="pPlane3"><matrix sid="matrix">1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000</matrix><instance_geometry url="#pPlane3-lib"><bind_material><technique_common><instance_material symbol="lambert1" target="#lambert1"/></technique_common></bind_material></instance_geometry><extra><technique profile="FCOLLADA"><visibility>1.000000</visibility></technique></extra></node>
       <extra><technique profile="MAX3D"><frame_rate>24.000000</frame_rate></technique><technique profile="FCOLLADA"><start_time>0.041667</start_time><end_time>8.333333</end_time></technique></extra>
     </visual_scene>
   </library_visual_scenes>
   <scene>
-    <instance_visual_scene url="#Mek2"></instance_visual_scene>
+    <instance_visual_scene url="#Mek"></instance_visual_scene>
   </scene>
 </COLLADA>

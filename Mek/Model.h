@@ -123,4 +123,6 @@ private:
 	std::vector<glm::mat4> _finalFrameTransform;
 
 	glm::mat4 _rootTransform;
+
+	char* _fp;
 };
