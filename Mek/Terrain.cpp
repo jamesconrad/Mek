@@ -145,7 +145,7 @@ void Terrain::Render(int shadowMapID)
 	glBindVertexArray(_vao);
 	
 	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
+	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
 	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
 	glm::mat4 depthMVP = depthProj * depthView;
 	glm::mat4 biasMatrix(

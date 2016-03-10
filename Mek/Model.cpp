@@ -425,11 +425,23 @@ aiNodeAnim* Model::findAnimNode(aiAnimation* anim, std::string nodename)
 	}
 }
 
+glm::mat4 rotationMatrix(glm::vec3 &dir, glm::vec3 &baseDir)
+{
+	glm::vec3 direction = glm::normalize(glm::vec3(baseDir - dir));
+	glm::vec3 rotationZ = direction;
+	glm::vec3 rotationX = glm::normalize(glm::cross(glm::vec3(0, 1, 0), rotationZ));
+	glm::vec3 rotationY = glm::normalize(glm::cross(rotationZ, rotationX));
+	glm::mat3 rotation(rotationX.x, rotationY.x, rotationZ.x, rotationX.y, rotationY.y, rotationZ.y, rotationX.z, rotationY.z, rotationZ.z);
+	return glm::mat4(rotation);
+}
+
 void Model::render()
 {
 	glm::mat4 W;// = _transform;
-	W = glm::translate(W, _owner->pos);
 	//W = glm::rotate(W, _owner->rot);
+	W = glm::translate(W, _owner->pos);
+
+	W *= rotationMatrix(_owner->dir, glm::vec3(0, 0, 1));
 	W = glm::scale(W, 0.1f * _owner->scale);
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
@@ -452,14 +464,14 @@ void Model::render()
 		Program::getInstance().updateLighting("skinning");
 	}
 
-	int nt = _render->numTextures();
+	int nt = _render->numTextures() + 1;
 	glActiveTexture(GL_TEXTURE0 + nt);
 	glBindTexture(GL_TEXTURE_2D, shadowMapTexID);
 	Program::getInstance().setUniform("shadowMap", nt);
 	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
 
 	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
+	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
 	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
 	glm::mat4 depthMVP = depthProj * depthView;
 	glm::mat4 biasMatrix(
@@ -490,7 +502,7 @@ void Model::renderShadowPass()
 	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
 
 	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
+	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
 	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
 
 	glm::mat4 depthModel;

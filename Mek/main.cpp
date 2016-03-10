@@ -197,7 +197,7 @@ void LoadTargets()
 	targets.reserve(100);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 1; i++)
 	{	
 		OwnerList temp = *SManager->GetOwnerList("Target");
 		soundcopy.push_back(temp);
