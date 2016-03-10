@@ -3,7 +3,7 @@ drumloop.wav Background two SOUND_TYPE_2D_LOOP
 laser6.wav Player Projectile SOUND_TYPE_3D ROLLOFF_LINEAR 0.5 100.0
 baller.mp3 
 drumloop.wav 
-jaguar.wav 
+mechHitNoShield2.wav Player NoShield SOUND_TYPE_2D
 rwalk.wav Target Moving SOUND_TYPE_3D_LOOP ROLLOFF_LINEAR 0.5 10
 swish.wav Target Hit SOUND_TYPE_3D ROLLFF_LINEAR 0.5 100
 wave.mp3 Target Moving2 SOUND_TYPE_3D_LOOP ROLLOFF_LINEARSQUARE 0.5 3

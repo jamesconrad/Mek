@@ -99,5 +99,6 @@ public:
 	float fireTimer = 0.f;
 	float fireTimeTolerance = 2.0f;
 	FSound *laserSound;
+	FMOD::Channel* movingsound;
 };
 

@@ -38,7 +38,7 @@
 #include "RayVsOBB.h"
 
 enum game_state { GAME, MENU };
-
+float hitTimer = 0.0;
 //Bad Inits need to fix at a later time
 //Pls no kill future me.  I sorry
 float runTime = 0;
@@ -65,7 +65,7 @@ float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 #include "ShieldVariables.h"
 #include "WeaponVariables.h"
 
-
+std::vector<OwnerList> soundcopy;
 float playTime = 0;
 NavMesh testNaveMesh;
 
@@ -160,7 +160,7 @@ void wonGame()
 }
 void startGame()
 {
-	//SManager->FindAndPlay("Background", "one");
+	SManager->FindAndPlay("Background", "one");
 	gameState = GAME;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
@@ -198,8 +198,10 @@ void LoadTargets()
 	float randomX, randomY;
 	//load in targets
 	for (int i = 0; i < 6; i++)
-	{
-		Target* tar = new Target("models/Dummy.dae", 0.5, SManager->GetOwnerList("Target"));
+	{	
+		OwnerList temp = *SManager->GetOwnerList("Target");
+		soundcopy.push_back(temp);
+		Target* tar = new Target("models/Dummy.dae", 0.5,&soundcopy[i]);
 
 		//last point needs to == first point
 
@@ -449,7 +451,6 @@ float shotcd = 0;
 static void Update(float secondsElapsed) {
 	SManager->Update();
 	SoundSystem->Update();
-	
 	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
@@ -649,6 +650,14 @@ static void Update(float secondsElapsed) {
 			}
 		}
 
+		
+		hitTimer += secondsElapsed;
+		if (playerIsHit){
+			if (hitTimer > 0.25){
+				hitTimer = 0;
+				SManager->FindAndPlay("Player", "NoShield");
+			}
+		}
 		if (hitInvulnTimer >= 0.0f)
 		{
 			hitInvulnTimer -= secondsElapsed;

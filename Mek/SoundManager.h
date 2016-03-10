@@ -105,7 +105,6 @@ public:
 	std::vector<FSound*> list;// vector of FSounds
 
 	OwnerList(std::string _name) { owner = _name; };
-	~OwnerList();
 	int FindAttribute(char* _tag);//Finds a sound with a particular tag in the list, returns int
 	void FindAndPlay(char* _tag); //Find a sound with a particular tag and play it, returns nothing
 	void PlayAndPauseAll(); //Plays and Pauses all sounds// cannot play a sound within update, so have to have to do this magic and unpause in update

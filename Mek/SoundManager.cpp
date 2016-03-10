@@ -568,8 +568,9 @@ void OwnerList::FindAndPause(char* _tag){
 }
 void OwnerList::UpdateOwnerSoundPos(glm::vec3 _pos){
 	for (int c = 0; c < list.size(); c++){
-		list[c]->UpdateSoundPos(_pos);
+			list[c]->UpdateSoundPos(_pos);
 	}
+	
 }
 //_________________________SOUND MANAGER________________________________________________________________________
 
