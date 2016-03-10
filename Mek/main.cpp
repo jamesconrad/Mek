@@ -39,6 +39,7 @@
 
 enum game_state { GAME, MENU };
 float hitTimer = 0.0;
+float dshield = 0.0;
 //Bad Inits need to fix at a later time
 //Pls no kill future me.  I sorry
 float runTime = 0;
@@ -70,7 +71,7 @@ float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 std::vector<OwnerList> soundcopy;
 float playTime = 0;
 NavMesh testNaveMesh;
-
+bool dShield = false;
 SoundManager* SManager;
 FSystem* SoundSystem;
 //Model* testmodel;
@@ -93,7 +94,8 @@ void initFSystem(){
 	//FSound* laserSound = new FSound(SoundSystem, "../Debug/media/drumloop.wav", SOUND_TYPE_3D_LOOP, ROLLOFF_LINEARSQUARE, 0.5, 20);
 	//laserSound->Play();
 	//laserSound->soundPos = FMOD_VECTOR{ 0, -28, 0 };
-	
+	SManager->printOList(); 
+	SManager->FindAndPlay("Player", "ShieldWarning");
 };
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
@@ -199,11 +201,11 @@ void LoadTargets()
 	targets.reserve(100);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 1; i++)
 	{	
-		OwnerList temp = *SManager->GetOwnerList("Target");
-		soundcopy.push_back(temp);
-		Target* tar = new Target("models/Dummy.dae", 0.5,&soundcopy[i]);
+		//OwnerList temp = *SManager->GetOwnerList("Target");
+		//soundcopy.push_back(temp);
+		Target* tar = new Target("models/Dummy.dae", 0.5,SManager->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -653,14 +655,25 @@ static void Update(float secondsElapsed) {
 				ammo = 10;
 			}
 		}
-
-		
+		std::cout << SManager->IsPlaying("Player", "ShieldWarning");
+		dshield += secondsElapsed;
 		hitTimer += secondsElapsed;
 		if (playerIsHit){
-			if (hitTimer > 0.25){
+			if (hitTimer > 0.5 && shieldHealth>1){
 				hitTimer = 0;
+				SManager->FindAndPlay("Player", "ShieldHit");
+				dShield = false;
+			}
+			if (hitTimer > 0.5 && shieldHealth < 0){
+				dShield = true;
 				SManager->FindAndPlay("Player", "NoShield");
 			}
+			if (dShield = true && dshield >5){
+				SManager->FindAndPlay("Player", "ShieldWarning");
+				dShield = false;
+				dshield = 0;
+			}
+			
 		}
 		if (hitInvulnTimer >= 0.0f)
 		{
