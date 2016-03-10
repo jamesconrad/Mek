@@ -54,22 +54,33 @@ twodOverlay* ShieldBack;
 twodOverlay* ShieldFront;
 twodOverlay* HPback;
 twodOverlay* HPFront;
+twodOverlay* machineIcon;
+twodOverlay* shotgunIcon;
+twodOverlay* bfgIcon;
+twodOverlay* iconGlow;
 //todo: revert back to menu
 game_state gameState = MENU;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
+glm::vec3 white = glm::vec3(1.0, 1.0, 1.0);
+glm::vec3 red = glm::vec3(1.0f, 0, 0);
 glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
 unsigned int ammo = 11;
+float ammoInterp = 0.0f;
+float noammoInterp = 0.0f;
+bool noammoInterpIsIncreasing = false;
 float reloadTimer = 0.0f;
 bool zoomingIn = false;
 float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 #include "ShieldVariables.h"
 #include "WeaponVariables.h"
-
 std::vector<OwnerList> soundcopy;
 float playTime = 0;
+float openingMessageTimer = 3.5f;
+float openningMessageInterp = 0.0f;
+bool openningMessageInterpIsIncreasing = false;
 NavMesh testNaveMesh;
 bool dShield = false;
 SoundManager* SManager;
@@ -437,15 +448,27 @@ static void Render() {
 		char scbuff[64];
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
 		TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
+		if (openingMessageTimer >= 0.0f)
+		{
+			char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
+			TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
+		}
 		char amBuff[8];
 		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
-		TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, fontColour);
+		if (ammo > 0)
+			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, glm::normalize(fontColour), ammo / 10.f));
+		else if (ammo == 0)
+			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, white, noammoInterp));
 		ShieldBack->render();
 		ShieldFront->cutoffPercent(shieldHealth / maxShieldHealth);
 	    ShieldFront->render();
 		HPback->render();
 		HPFront->cutoffPercent(model->health / 100.f);
 	    HPFront->render();
+		machineIcon->render();
+		shotgunIcon->render();
+		bfgIcon->render();
+		iconGlow->render();
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -458,6 +481,28 @@ static void Update(float secondsElapsed) {
 	SManager->Update();
 	SoundSystem->Update();
 	runTime += secondsElapsed;
+
+	
+	if (openningMessageInterpIsIncreasing)
+	{
+		openningMessageInterp += secondsElapsed;
+		if (openningMessageInterp >= 1.0f)
+		{
+			openningMessageInterp = 1.0f;
+			openningMessageInterpIsIncreasing = false;
+		}
+	}
+	else if (!openningMessageInterpIsIncreasing)
+	{
+		openningMessageInterp -= secondsElapsed;
+		if (openningMessageInterp <= 0.0f)
+		{
+			openningMessageInterp = 0.0f;
+			openningMessageInterpIsIncreasing = true;
+		}
+	}
+	if (openingMessageTimer >= 0.0f)
+		openingMessageTimer -= secondsElapsed;
 
 	glm::vec3 lInput;
 	glm::vec2 rInput;
@@ -523,14 +568,17 @@ static void Update(float secondsElapsed) {
 		if (glfwGetKey(gWindow, '1'))
 		{
 			currentWeapon = machineGun;
+			iconGlow->pos = glm::vec3(-0.2f, -0.85f, 4);
 		}
 		if (glfwGetKey(gWindow, '2'))
 		{
 			currentWeapon = shotgun;
+			iconGlow->pos = glm::vec3(0.0f, -0.85f, 4);
 		}
 		if (glfwGetKey(gWindow, '3'))
 		{
 			currentWeapon = bfg;
+			iconGlow->pos = glm::vec3(0.2f, -0.85f, 4);
 		}
 
 
@@ -653,8 +701,32 @@ static void Update(float secondsElapsed) {
 			{
 				reloadTimer = 0.0f;
 				ammo = 10;
+				noammoInterp = 0.0f;
 			}
 		}
+
+		if (ammo == 0)
+		{
+			if (noammoInterpIsIncreasing)
+			{
+				noammoInterp += secondsElapsed;
+				if (noammoInterp >= 1.0f)
+				{
+					noammoInterp = 1.0f;
+					noammoInterpIsIncreasing = !noammoInterpIsIncreasing;
+				}
+			}
+			else if (!noammoInterpIsIncreasing)
+			{
+				noammoInterp -= secondsElapsed;
+				if (noammoInterp <= 0.0f)
+				{
+					noammoInterp = 0.0f;
+					noammoInterpIsIncreasing = !noammoInterpIsIncreasing;
+				}
+			}
+		}
+
 		std::cout << SManager->IsPlaying("Player", "ShieldWarning");
 		dshield += secondsElapsed;
 		hitTimer += secondsElapsed;
@@ -927,6 +999,10 @@ void AppMain() {
 	HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
 	HPFront = new twodOverlay("HPBarMeasure2.png", 0, 0.84, 35);
 	startscreen = new twodOverlay("pressStart.png", 0, 0, 10);
+	machineIcon = new twodOverlay("Machine Gun Icon.png", -0.2f, -0.85f, 4);
+	shotgunIcon = new twodOverlay("Shotgun Icon.png", 0, -0.85, 4);
+	bfgIcon = new twodOverlay("Slug Shell Icon.png", 0.2f, -0.85f, 4);
+	iconGlow = new twodOverlay("Under Glow Icon.png", -0.2f, -0.85f, 4);
 	skull->updatePos(-0.85f, -0.75f, 4);
 	skull->cycle = true;
 

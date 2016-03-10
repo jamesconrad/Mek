@@ -72,7 +72,7 @@ void main()
 	//if (texture2D(shadowMap, fpls.xy).r < fpls.z)
 	//	colour.xyz = colour.xyz * 0.25;
 
-	depth = vec4(vec3(gl_FragCoord.z), 1.0);
+	depth = vec4(vec3(0), 1.0);
 	normals = vec4(vec3(n), 1.0);
 	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0);
 }
