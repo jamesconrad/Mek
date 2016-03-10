@@ -56,18 +56,23 @@ twodOverlay* HPback;
 game_state gameState = MENU;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
+glm::vec3 white = glm::vec3(1.0, 1.0, 1.0);
+glm::vec3 red = glm::vec3(1.0f, 0, 0);
 glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
 unsigned int ammo = 11;
+float ammoInterp = 0.0f;
 float reloadTimer = 0.0f;
 bool zoomingIn = false;
 float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 #include "ShieldVariables.h"
 #include "WeaponVariables.h"
-
 std::vector<OwnerList> soundcopy;
 float playTime = 0;
+float openingMessageTimer = 3.5f;
+float openningMessageInterp = 0.0f;
+bool openningMessageInterpIsIncreasing = false;
 NavMesh testNaveMesh;
 bool dShield = false;
 SoundManager* SManager;
@@ -437,11 +442,20 @@ static void Render() {
 		TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
 		char amBuff[8];
 		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
-		TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, fontColour);
+		if (ammo > 0)
+			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(glm::normalize(fontColour), red, ammoInterp));
+		else if (ammo == 0)
+			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, white, ammoInterp));
 		ShieldBack->cutoffPercent(shieldHealth / maxShieldHealth);
 	    ShieldBack->render();
 		HPback->cutoffPercent(model->health / 100.f);
 	    HPback->render();
+
+		if (openingMessageTimer >= 0.0f)
+		{
+			char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
+			TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
+		}
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -454,6 +468,28 @@ static void Update(float secondsElapsed) {
 	SManager->Update();
 	SoundSystem->Update();
 	runTime += secondsElapsed;
+
+	
+	if (openningMessageInterpIsIncreasing)
+	{
+		openningMessageInterp += secondsElapsed;
+		if (openningMessageInterp >= 1.0f)
+		{
+			openningMessageInterp = 1.0f;
+			openningMessageInterpIsIncreasing = false;
+		}
+	}
+	else if (!openningMessageInterpIsIncreasing)
+	{
+		openningMessageInterp -= secondsElapsed;
+		if (openningMessageInterp <= 0.0f)
+		{
+			openningMessageInterp = 0.0f;
+			openningMessageInterpIsIncreasing = true;
+		}
+	}
+	if (openingMessageTimer >= 0.0f)
+		openingMessageTimer -= secondsElapsed;
 
 	glm::vec3 lInput;
 	glm::vec2 rInput;
