@@ -788,7 +788,7 @@ static void Update(float secondsElapsed) {
 		{
 			
 			targets[i]->update(secondsElapsed / 5, testNaveMesh);
-			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) + 0.4; //this moves the targets to the correct position above the ground.
+			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) - 0.05; //this moves the targets to the correct position above the ground.
 
 			if (targets[i]->hasSpottedPlayer == false && targets[i]->alive)
 			{
