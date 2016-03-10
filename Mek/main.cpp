@@ -51,7 +51,9 @@ twodOverlay* crosshair;
 twodOverlay* startscreen;
 twodOverlayAnim* skull;
 twodOverlay* ShieldBack;
+twodOverlay* ShieldFront;
 twodOverlay* HPback;
+twodOverlay* HPFront;
 //todo: revert back to menu
 game_state gameState = MENU;
 Interpolation camInterp;
@@ -440,22 +442,23 @@ static void Render() {
 		char scbuff[64];
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
 		TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
+		if (openingMessageTimer >= 0.0f)
+		{
+			char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
+			TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
+		}
 		char amBuff[8];
 		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
 		if (ammo > 0)
 			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(glm::normalize(fontColour), red, ammoInterp));
 		else if (ammo == 0)
 			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, white, ammoInterp));
-		ShieldBack->cutoffPercent(shieldHealth / maxShieldHealth);
-	    ShieldBack->render();
-		HPback->cutoffPercent(model->health / 100.f);
-	    HPback->render();
-
-		if (openingMessageTimer >= 0.0f)
-		{
-			char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
-			TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
-		}
+		ShieldBack->render();
+		ShieldFront->cutoffPercent(shieldHealth / maxShieldHealth);
+	    ShieldFront->render();
+		HPback->render();
+		HPFront->cutoffPercent(model->health / 100.f);
+	    HPFront->render();
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -954,8 +957,10 @@ void AppMain() {
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
 	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
-	ShieldBack = new twodOverlay("ShieldBarBack.png", 0, 0.85, 35);
+	ShieldBack = new twodOverlay("ShieldBarBackV3.png", 0, 0.85, 35);
+	ShieldFront = new twodOverlay("ShieldBarMeasure2.png", 0, 0.85, 35);
 	HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
+	HPFront = new twodOverlay("HPBarMeasure2.png", 0, 0.84, 35);
 	startscreen = new twodOverlay("pressStart.png", 0, 0, 10);
 	skull->updatePos(-0.85f, -0.75f, 4);
 	skull->cycle = true;
