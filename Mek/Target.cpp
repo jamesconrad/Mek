@@ -23,7 +23,7 @@ Target::Target(char* fp, float t, OwnerList* _oList)
 	
 	oList = _oList;
 	oList->PlayAndPauseAll();
-	movingsound = (oList->FindSound("Moving"))->Play();
+	movingsound = (oList->FindSound("Moving2"))->Play();
 	ObjectManager::instance().addObject(go);
 
 	go->dir = glm::vec3(1.0f, 0.0f, 0.0f);
