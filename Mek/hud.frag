@@ -12,5 +12,8 @@ void main()
 	if (texCoord.x > cutoff)
 		fragcolour = vec4(0);
 	else
+	{
 		fragcolour = texture(tex, texCoord.xy);
+		fragcolour *= 0.9;
+	}
 }

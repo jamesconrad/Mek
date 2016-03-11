@@ -61,6 +61,7 @@
     <ClInclude Include="Render.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Interpolation.h" />
+    <ClInclude Include="ShieldVariables.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Target.h" />

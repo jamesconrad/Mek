@@ -38,7 +38,8 @@
 #include "RayVsOBB.h"
 
 enum game_state { GAME, MENU };
-
+float hitTimer = 0.0;
+float dshield = 0.0;
 //Bad Inits need to fix at a later time
 //Pls no kill future me.  I sorry
 float runTime = 0;
@@ -50,19 +51,38 @@ twodOverlay* crosshair;
 twodOverlay* startscreen;
 twodOverlayAnim* skull;
 twodOverlay* ShieldBack;
+twodOverlay* ShieldFront;
 twodOverlay* HPback;
+twodOverlay* HPFront;
+twodOverlay* machineIcon;
+twodOverlay* shotgunIcon;
+twodOverlay* bfgIcon;
+twodOverlay* iconGlow;
 //todo: revert back to menu
 game_state gameState = MENU;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
+glm::vec3 white = glm::vec3(1.0, 1.0, 1.0);
+glm::vec3 red = glm::vec3(1.0f, 0, 0);
 glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
 unsigned int ammo = 11;
+float ammoInterp = 0.0f;
+float noammoInterp = 0.0f;
+bool noammoInterpIsIncreasing = false;
 float reloadTimer = 0.0f;
+bool zoomingIn = false;
+float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
+#include "ShieldVariables.h"
+#include "WeaponVariables.h"
+std::vector<OwnerList> soundcopy;
 float playTime = 0;
+float openingMessageTimer = 3.5f;
+float openningMessageInterp = 0.0f;
+bool openningMessageInterpIsIncreasing = false;
 NavMesh testNaveMesh;
-
+bool dShield = false;
 SoundManager* SManager;
 FSystem* SoundSystem;
 //Model* testmodel;
@@ -85,7 +105,8 @@ void initFSystem(){
 	//FSound* laserSound = new FSound(SoundSystem, "../Debug/media/drumloop.wav", SOUND_TYPE_3D_LOOP, ROLLOFF_LINEARSQUARE, 0.5, 20);
 	//laserSound->Play();
 	//laserSound->soundPos = FMOD_VECTOR{ 0, -28, 0 };
-	
+	SManager->printOList(); 
+	SManager->FindAndPlay("Player", "ShieldWarning");
 };
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
@@ -149,10 +170,12 @@ void wonGame()
 	std::reverse(scoreTable.begin(), scoreTable.end());
 	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
+
+	shieldHealth = 100.f; //Just work with me.
 }
 void startGame()
 {
-	//SManager->FindAndPlay("Background", "one");
+	SManager->FindAndPlay("Background", "one");
 	gameState = GAME;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
@@ -160,8 +183,16 @@ void startGame()
 	model->health = 100.f;
 	score = 0;
 	playTime = 0;
-	ammo = 10;
+	ammo = 11;
 	reloadTimer = 0.0f;
+	maxShieldHealth = 100.f;
+	shieldRechargeTimer = 0.f;
+	shieldMaxTimer = 3.5f;
+	shieldRechargeAmount = 30.f;
+
+	playerIsHit = false;
+	hitInvulnTimer = 0.0f;
+	maxInvulnTime = 0.5f;
 	targetsKilled = 0;
 	for (int i = 0, s = targets.size(); i < s; i++)
 	{
@@ -182,8 +213,10 @@ void LoadTargets()
 	float randomX, randomY;
 	//load in targets
 	for (int i = 0; i < 1; i++)
-	{
-		Target* tar = new Target("models/Dummy.dae", 0.5, SManager->GetOwnerList("Target"));
+	{	
+		//OwnerList temp = *SManager->GetOwnerList("Target");
+		//soundcopy.push_back(temp);
+		Target* tar = new Target("models/Mek.fbx", 0.5,SManager->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -415,11 +448,27 @@ static void Render() {
 		char scbuff[64];
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
 		TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
+		if (openingMessageTimer >= 0.0f)
+		{
+			char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
+			TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
+		}
 		char amBuff[8];
 		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
-		TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, fontColour);
-	    ShieldBack->render();
-	    HPback->render();
+		if (ammo > 0)
+			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, glm::normalize(fontColour), ammo / 10.f));
+		else if (ammo == 0)
+			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, white, noammoInterp));
+		ShieldBack->render();
+		ShieldFront->cutoffPercent(shieldHealth / maxShieldHealth);
+	    ShieldFront->render();
+		HPback->render();
+		HPFront->cutoffPercent(model->health / 100.f);
+	    HPFront->render();
+		machineIcon->render();
+		shotgunIcon->render();
+		bfgIcon->render();
+		iconGlow->render();
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -430,7 +479,30 @@ float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
 	SManager->Update();
+	SoundSystem->Update();
 	runTime += secondsElapsed;
+
+	
+	if (openningMessageInterpIsIncreasing)
+	{
+		openningMessageInterp += secondsElapsed;
+		if (openningMessageInterp >= 1.0f)
+		{
+			openningMessageInterp = 1.0f;
+			openningMessageInterpIsIncreasing = false;
+		}
+	}
+	else if (!openningMessageInterpIsIncreasing)
+	{
+		openningMessageInterp -= secondsElapsed;
+		if (openningMessageInterp <= 0.0f)
+		{
+			openningMessageInterp = 0.0f;
+			openningMessageInterpIsIncreasing = true;
+		}
+	}
+	if (openingMessageTimer >= 0.0f)
+		openingMessageTimer -= secondsElapsed;
 
 	glm::vec3 lInput;
 	glm::vec2 rInput;
@@ -446,7 +518,7 @@ static void Update(float secondsElapsed) {
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
 
-	SManager->UpdateSysO(cam->position(), cam->forward(), cam->up(), glm::vec3(0, 0, 0));
+	SManager->UpdateSysO(cam->position(), -cam->forward(), cam->up(), glm::vec3(0, 0, 0));
 
 	for (int i = 0; i < 9; i++)
 	{
@@ -455,6 +527,8 @@ static void Update(float secondsElapsed) {
 		else
 			numpadPress[i] = false;
 	}
+
+	
 	//system("CLS");
 	//cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
 	//cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
@@ -484,11 +558,56 @@ static void Update(float secondsElapsed) {
 			shoot = true;
 
 		}
+		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_LEFT))
+		{
+			shoot = true;
+		}
 		if (glfwGetKey(gWindow, 'R') && ammo < 10 && reloadTimer == 0.0f)
 			reloadTimer = 0.0001f;
 
+		if (glfwGetKey(gWindow, '1'))
+		{
+			currentWeapon = machineGun;
+			iconGlow->pos = glm::vec3(-0.2f, -0.85f, 4);
+		}
+		if (glfwGetKey(gWindow, '2'))
+		{
+			currentWeapon = shotgun;
+			iconGlow->pos = glm::vec3(0.0f, -0.85f, 4);
+		}
+		if (glfwGetKey(gWindow, '3'))
+		{
+			currentWeapon = bfg;
+			iconGlow->pos = glm::vec3(0.2f, -0.85f, 4);
+		}
+
+
+
 		//rotate camera based on mouse movement
-		const float mouseSensitivity = 0.05f;
+		float mouseSensitivity = 0.05f;
+		zoomingIn = false;
+		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_RIGHT))
+		{
+			zoomingIn = true;
+		}
+		if (zoomingIn)
+		{
+			zoomingTimer += secondsElapsed * 7;
+			if (zoomingTimer > 1.0f)
+				zoomingTimer = 1.0f;
+			currentFOV = lerp(maxFOV, minFOV, zoomingTimer);
+			Camera::getInstance().setFieldOfView(currentFOV);
+			mouseSensitivity = 0.02f;
+		}
+		else
+		{
+			zoomingTimer -= secondsElapsed * 7;
+			if (zoomingTimer < 0.0f)
+				zoomingTimer = 0.0f;
+			currentFOV = lerp(maxFOV, minFOV, zoomingTimer);
+			Camera::getInstance().setFieldOfView(currentFOV);
+			mouseSensitivity = 0.05f;
+		}
 		double mouseX, mouseY;
 		glfwGetCursorPos(gWindow, &mouseX, &mouseY);
 		//Camera::getInstance().offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
@@ -525,10 +644,54 @@ static void Update(float secondsElapsed) {
 		{
 			FSound* sounds = SManager->FindSound("Player","Projectile");
 			//sounds->Play();
-			Projectile* pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f), randomClampedFloat(-0.02f, 0.02f))), 0.5, 25, 10, SManager->FindSound("Player", "Projectile"));
-			ObjectManager::instance().pMap.push_back(pr);
-			ammo--;
-			shotcd = 0;
+			Projectile* pr;
+
+			if (currentWeapon == machineGun)
+			{
+				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 0.5, 25, 10, SManager->FindSound("Player", "Projectile"));
+				ObjectManager::instance().pMap.push_back(pr);
+				ammo--;
+			}
+			else if (currentWeapon == shotgun)
+			{
+				if (ammo >= shotgun)
+				{
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo--;
+				}
+			}
+			else if (currentWeapon == bfg)
+			{
+				if (ammo >= bfg)
+				{
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 0.3, 100, 10, SManager->FindSound("Player", "Projectile"));
+					pr->go->scale = glm::vec3(1.5f);
+					ObjectManager::instance().pMap.push_back(pr);
+					ammo -= bfg;
+				}
+			}
+
+
+
+				shotcd = 0;
+			
 		}
 
 		if (reloadTimer > 0.0f)
@@ -538,9 +701,73 @@ static void Update(float secondsElapsed) {
 			{
 				reloadTimer = 0.0f;
 				ammo = 10;
+				noammoInterp = 0.0f;
 			}
 		}
 
+		if (ammo == 0)
+		{
+			if (noammoInterpIsIncreasing)
+			{
+				noammoInterp += secondsElapsed;
+				if (noammoInterp >= 1.0f)
+				{
+					noammoInterp = 1.0f;
+					noammoInterpIsIncreasing = !noammoInterpIsIncreasing;
+				}
+			}
+			else if (!noammoInterpIsIncreasing)
+			{
+				noammoInterp -= secondsElapsed;
+				if (noammoInterp <= 0.0f)
+				{
+					noammoInterp = 0.0f;
+					noammoInterpIsIncreasing = !noammoInterpIsIncreasing;
+				}
+			}
+		}
+
+		std::cout << SManager->IsPlaying("Player", "ShieldWarning");
+		dshield += secondsElapsed;
+		hitTimer += secondsElapsed;
+		if (playerIsHit){
+			if (hitTimer > 0.5 && shieldHealth>1){
+				hitTimer = 0;
+				SManager->FindAndPlay("Player", "ShieldHit");
+				dShield = false;
+			}
+			if (hitTimer > 0.5 && shieldHealth < 0){
+				dShield = true;
+				SManager->FindAndPlay("Player", "NoShield");
+			}
+			if (dShield = true && dshield >5){
+				SManager->FindAndPlay("Player", "ShieldWarning");
+				dShield = false;
+				dshield = 0;
+			}
+			
+		}
+		if (hitInvulnTimer >= 0.0f)
+		{
+			hitInvulnTimer -= secondsElapsed;
+			if (hitInvulnTimer < 0.0f)
+			{
+				playerIsHit = false;
+			}
+		}
+
+		if (shieldHealth < maxShieldHealth)
+		{
+			shieldRechargeTimer -= secondsElapsed;
+			if (shieldRechargeTimer <= 0.0f)
+			{
+				shieldHealth += shieldRechargeAmount * secondsElapsed;
+
+				if (shieldHealth > maxShieldHealth)
+					shieldHealth = maxShieldHealth;
+			}
+		}
+		
 
 		CollisionManager::instance().checkAll();
 		
@@ -561,7 +788,7 @@ static void Update(float secondsElapsed) {
 		{
 			
 			targets[i]->update(secondsElapsed / 5, testNaveMesh);
-			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) + 0.4; //this moves the targets to the correct position above the ground.
+			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) - 0.05; //this moves the targets to the correct position above the ground.
 
 			if (targets[i]->hasSpottedPlayer == false && targets[i]->alive)
 			{
@@ -590,7 +817,7 @@ static void Update(float secondsElapsed) {
 			{
 				targets[i]->fireTimer = 0.f;
 				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->FindSound("Player", "Projectile"));
-				targets[i]->weaponProjectile->go->scale = glm::vec3(1.2f);
+				targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
 				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
 				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
@@ -763,13 +990,19 @@ void AppMain() {
     Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
     Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
-	Camera::getInstance().setFieldOfView(50);
+	Camera::getInstance().setFieldOfView(maxFOV);
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
 	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
-	ShieldBack = new twodOverlay("ShieldBarBack.png", 0, 0.85, 35);
+	ShieldBack = new twodOverlay("ShieldBarBackV3.png", 0, 0.85, 35);
+	ShieldFront = new twodOverlay("ShieldBarMeasure2.png", 0, 0.85, 35);
 	HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
+	HPFront = new twodOverlay("HPBarMeasure2.png", 0, 0.84, 35);
 	startscreen = new twodOverlay("pressStart.png", 0, 0, 10);
+	machineIcon = new twodOverlay("Machine Gun Icon.png", -0.2f, -0.85f, 4);
+	shotgunIcon = new twodOverlay("Shotgun Icon.png", 0, -0.85, 4);
+	bfgIcon = new twodOverlay("Slug Shell Icon.png", 0.2f, -0.85f, 4);
+	iconGlow = new twodOverlay("Under Glow Icon.png", -0.2f, -0.85f, 4);
 	skull->updatePos(-0.85f, -0.75f, 4);
 	skull->cycle = true;
 
@@ -821,7 +1054,7 @@ void AppMain() {
 				gObject->SetName("Spawn Container 1");
 				cModel->loadModel("models/Tree 1.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-10.526, 0, -176.58);
 				gObject->rot = glm::vec3(0, -34.f, 0);
 			}
@@ -846,15 +1079,15 @@ void AppMain() {
 				gObject->SetName("Spawn Container 2");
 				cModel->loadModel("models/Tree 2.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-69.65f, 0, 108.334);
 			}
 			else if (i == 4)
 			{
 				gObject->SetName("Middle Plus");
-				cModel->loadModel("models/Shipping Container.dae");
+				cModel->loadModel("models/Shiping Container.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, -73);
 			}
 			else if (i == 5)
@@ -862,7 +1095,7 @@ void AppMain() {
 				gObject->SetName("North Wall");
 				cModel->loadModel("models/Container_Wal_LPl.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(100, 0, 165);
 			}
 			else if (i == 6)
@@ -870,7 +1103,7 @@ void AppMain() {
 				gObject->SetName("Dumbster");//Crane
 				cModel->loadModel("models/Garbage Bin.dae");
 				gObject->pos = glm::vec3(59.751, 0, -76.667);
-				gObject->scale = glm::vec3(0.4, 0.4, 0.4);
+				gObject->scale = glm::vec3(1);
 				gObject->rot = glm::vec3(0, 130.6, 0);
 			}
 			else if (i == 7)
@@ -878,23 +1111,23 @@ void AppMain() {
 				gObject->SetName("Tall Rock");
 				cModel->loadModel("models/Tall Rock.dae");
 
-				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-92.424f, 0, -106.131);
 			}
 			else if (i == 8)
 			{
 				gObject->SetName("Middle Plus");
-				cModel->loadModel("models/Container.dae");
+				cModel->loadModel("models/Shiping Container.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-5, 0, -20);
 			}
 			else if (i == 9)
 			{
 				gObject->SetName("Container 2");
-				cModel->loadModel("models/Shipping Container.dae");
+				cModel->loadModel("models/Shiping Container.dae");
 
-				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, 73);
 				gObject->rot = glm::vec3(0, 65.44f , 0);
 			}
@@ -925,7 +1158,7 @@ void AppMain() {
 			else if (i == 13)
 			{
 				gObject->SetName("Container 2");
-				cModel->loadModel("models/Shipping Container.dae");
+				cModel->loadModel("models/Shiping Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(-55, 0, -47);
@@ -933,7 +1166,7 @@ void AppMain() {
 			else if (i == 14)
 			{
 				gObject->SetName("Container 90");
-				cModel->loadModel("models/Shipping Container.dae");
+				cModel->loadModel("models/Shiping Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(-94.87, 0, -125.5);
@@ -944,7 +1177,7 @@ void AppMain() {
 				gObject->SetName("Small Rock 1");
 				cModel->loadModel("models/Rock 1 Round.dae");
 
-				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-94.393, 0, -103.22);
 			}
 			else if (i == 16)
@@ -952,7 +1185,7 @@ void AppMain() {
 				gObject->SetName("Small Rock 1");
 				cModel->loadModel("models/Rock 1 Round.dae");
 
-				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-3.347f, 0, -180.318f);
 			}
 			else if (i == 17)
@@ -960,15 +1193,15 @@ void AppMain() {
 				gObject->SetName("Small Rock 2");
 				cModel->loadModel("models/Rock 2 Round.dae");
 
-				gObject->scale = glm::vec3(0.75, 0.75, 0.75);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-5.196f, 0, -172.384f);
 			}
 			else if (i == 18)
 			{
 				gObject->SetName("Middle Plus North");
-				cModel->loadModel("models/Shipping Container.dae");
+				cModel->loadModel("models/Shiping Container.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-110, 0, -149);
 				gObject->rot = glm::vec3(0, -48.5f, 0);
 			}
@@ -977,7 +1210,7 @@ void AppMain() {
 				gObject->SetName("Fountain");
 				cModel->loadModel("models/Fountain.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(0, 0, 0);
 			}
 			else if (i == 20)
@@ -985,7 +1218,7 @@ void AppMain() {
 				gObject->SetName("Crane");
 				cModel->loadModel("models/Crane.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
 			}
 			else if (i == 21)
@@ -993,7 +1226,7 @@ void AppMain() {
 				gObject->SetName("Destroyed House");
 				cModel->loadModel("models/Destroyed Building.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.7, 0.7);
+				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-35, 0, -167.582f);
 				gObject->rot = glm::vec3(0, -90.f, 0);
 			}
@@ -1019,8 +1252,8 @@ void AppMain() {
 	//testmodel = new Model();
 	//testmodel->loadModel("models/Watertower.dae");
 
-	spotLightColour = glm::normalize(spotLightColour);
-	for (int i = 0; i < 6; i++)
+	spotLightColour = (glm::vec3(0.25, 0.25, 0.25));
+	for (int i = 0; i < 2; i++)
 	{
 		LightComponent* light;
 		if (i == 0)

@@ -47,6 +47,7 @@ void Model::BoneWeight::add(unsigned int b, float w)
 
 void Model::loadModel(char* fp)
 {
+	_fp = fp;
 	std::string debfp = "../Debug/";
 	debfp.append(fp);
 	fp = (char*)debfp.c_str();
@@ -111,6 +112,7 @@ void Model::loadScene(aiScene* scene)
 			texcoord.push_back(mesh->HasTextureCoords(0) ? 
 			/*true*/	glm::vec2(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y) : 
 			/*false*/	glm::vec2(0,0));
+			//printf("%f, %f\n", texcoord.back().x, texcoord.back().y);
 
 			for (unsigned int k = 0; k < mesh->mNumBones; k++)
 			{ //For each bone
@@ -151,7 +153,17 @@ void Model::loadScene(aiScene* scene)
 				aiString fp;
 				if (mat->GetTexture((aiTextureType)type, 0, &fp, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
 				{
-					if (_render->createTexture((char*)fp.C_Str(), "gColorMap", (TextureFlag)type));//todo: fix
+					//if (_render->createTexture((char*)fp.C_Str(), "gColorMap", (TextureFlag)type))//todo: fix
+					//{
+					//	textured = true;
+					//	break;
+					//}
+					std::string tmpfp(_fp);
+					tmpfp = tmpfp.substr(7, tmpfp.size() - 10);
+					tmpfp += "png";
+					std::string filepath("Textures/");
+					filepath += tmpfp;
+					if (_render->createTexture((char*)filepath.c_str(), "gColorMap", (TextureFlag)type))
 					{
 						textured = true;
 						break;
@@ -173,7 +185,7 @@ void Model::loadScene(aiScene* scene)
 	glBindVertexArray(vao);
 	glGenBuffers(2, vbo);
 	//Indices first as they are the most straight forward
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[0]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 	
 	//Now to interleave the other data into one vbo
@@ -215,7 +227,17 @@ void Model::loadScene(aiScene* scene)
 
 	int vsize = sizeof(VertexData);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	int fsize = sizeof(float);
+
+	/*
+	layout (location = 0) in vec3 Position;
+layout (location = 1) in vec2 TexCoord;
+layout (location = 2) in vec3 Normal;
+layout (location = 3) in ivec4 BoneIDs;
+layout (location = 4) in vec4 Weights;
+	*/
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, vsize * vert.size(), vert.data(), GL_STATIC_DRAW);
 	
 	//vertices
@@ -223,16 +245,16 @@ void Model::loadScene(aiScene* scene)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vsize, 0);
 	//normals
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, vsize, (void*)12);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, vsize, (void*)(3*fsize));
 	//uvs
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vsize, (void*)24);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, vsize, (void*)(6*fsize));
 	//weights
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, vsize, (void*)32);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, vsize, (void*)(8*fsize));
 	//boneids
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 4, GL_UNSIGNED_INT, GL_FALSE, vsize, (void*)48);
+	glVertexAttribPointer(4, 4, GL_UNSIGNED_INT, GL_FALSE, vsize, (void*)(12*fsize));
 
 	//Pass the preset data to render
 	_render->forceOverride(vao, vbo, 2, NULL, true, numIndices, numVertices);
@@ -425,11 +447,23 @@ aiNodeAnim* Model::findAnimNode(aiAnimation* anim, std::string nodename)
 	}
 }
 
+glm::mat4 rotationMatrix(glm::vec3 &dir, glm::vec3 &baseDir)
+{
+	glm::vec3 direction = glm::normalize(glm::vec3(baseDir - dir));
+	glm::vec3 rotationZ = direction;
+	glm::vec3 rotationX = glm::normalize(glm::cross(glm::vec3(0, 1, 0), rotationZ));
+	glm::vec3 rotationY = glm::normalize(glm::cross(rotationZ, rotationX));
+	glm::mat3 rotation(rotationX.x, rotationY.x, rotationZ.x, rotationX.y, rotationY.y, rotationZ.y, rotationX.z, rotationY.z, rotationZ.z);
+	return glm::mat4(rotation);
+}
+
 void Model::render()
 {
 	glm::mat4 W;// = _transform;
-	W = glm::translate(W, _owner->pos);
 	//W = glm::rotate(W, _owner->rot);
+	W = glm::translate(W, _owner->pos);
+
+	W *= rotationMatrix(_owner->dir, glm::vec3(0, 0, 1));
 	W = glm::scale(W, 0.1f * _owner->scale);
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
@@ -452,14 +486,14 @@ void Model::render()
 		Program::getInstance().updateLighting("skinning");
 	}
 
-	int nt = _render->numTextures();
+	int nt = _render->numTextures() + 1;
 	glActiveTexture(GL_TEXTURE0 + nt);
 	glBindTexture(GL_TEXTURE_2D, shadowMapTexID);
 	Program::getInstance().setUniform("shadowMap", nt);
 	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
 
 	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
+	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
 	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
 	glm::mat4 depthMVP = depthProj * depthView;
 	glm::mat4 biasMatrix(
@@ -490,7 +524,7 @@ void Model::renderShadowPass()
 	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
 
 	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-128, 128, -128, 128, -32, 32);
+	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
 	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
 
 	glm::mat4 depthModel;

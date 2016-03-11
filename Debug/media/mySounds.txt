@@ -1,9 +1,10 @@
 MechTheme2.wav Background one SOUND_TYPE_2D_LOOP
 drumloop.wav Background two SOUND_TYPE_2D_LOOP
-laser6.wav Player Projectile SOUND_TYPE_3D ROLLOFF_LINEAR 0.5 100.0
-baller.mp3 
-drumloop.wav 
-jaguar.wav 
-rwalk.wav Target Moving SOUND_TYPE_3D_LOOP ROLLOFF_LINEAR 0.5 3
+rwalk.wav Target Moving SOUND_TYPE_3D_LOOP ROLLOFF_LINEAR 0.5 10
 swish.wav Target Hit SOUND_TYPE_3D ROLLFF_LINEAR 0.5 100
-wave.mp3 Target Moving2 SOUND_TYPE_3D_LOOP ROLLOFF_LINEARSQUARE 0.5 3
+MovementMech.wav Target Moving2 SOUND_TYPE_3D_LOOP ROLLOFF_LINEARSQUARE 0.5 3
+shielddepleted.wav Player ShieldWarning SOUND_TYPE_2D
+mechHitShield.wav Player ShieldHit SOUND_TYPE_2D
+mechHitNoShield2.wav Player NoShield SOUND_TYPE_2D
+laser6.wav Player Projectile SOUND_TYPE_3D ROLLOFF_LINEAR 0.5 100.0
+mechHitNoShield2.wav Player NoShield SOUND_TYPE_2D
