@@ -7,6 +7,7 @@ layout(location = 2) out vec4 Normal;
 layout(location = 3) out vec4 LightObscurers;
 
 uniform samplerCube skybox;
+uniform samplerCube obsbox;
 
 void main()
 {
@@ -14,7 +15,7 @@ void main()
 
 	Depth = colour;
 	Normal = colour;
-	LightObscurers = vec4(0.0);
+	LightObscurers = texture(obsbox, uvw);
 	//These two are the correct ones
 	//Depth = vec4(0, 0, 0, 1.0);
 	//Normal = vec4(0, 0, 0, 1.0);

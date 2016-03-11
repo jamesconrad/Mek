@@ -14,6 +14,7 @@ out vec4 FragPosLightSpace;
 
 out vec4 Debug0;
 out ivec4 Debug1;
+out float depth;
 
 const int MAX_BONES = 100;
 

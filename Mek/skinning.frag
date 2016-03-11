@@ -204,7 +204,7 @@ vec3 getGoochColour(VSOutput In, vec3 coolColour, vec3 warmColour, PointLight Li
 	return kfinal;
 }
 
-
+in float vertDepth;
 void main()
 {
 
@@ -254,9 +254,9 @@ void main()
 	}
 	RimHighlights += clamp(dot(In.Normal,WorldUp), 0.0, 1.0) * RimFresnel * ConstantAmbient; /** (ConstantAmbient * normalize(gEyeWorldPos - In.WorldPos));*/
 	
-	//float ShadowCoeff = 1;
-	//if (texture2D(shadowMap, FragPosLightSpace.xy).r < FragPosLightSpace.z)
-	//	ShadowCoeff = 0.25;
+	float ShadowCoeff = 1;
+	if (texture2D(shadowMap, FragPosLightSpace.xy).r < FragPosLightSpace.z)
+		ShadowCoeff = 0.25;
 	FragColor = vec4((((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights)) /* ShadowCoeff*/, 1.0);
 	Depth = vec4(vec3(gl_FragCoord.z), 1.0);
 	Normal = vec4(vec3(In.Normal), 1.0);
