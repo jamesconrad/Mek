@@ -19,6 +19,8 @@ in float h;
 
 in vec4 fpls;
 
+in float vertDepth;
+
 void main()
 {
 	vec2 uv;

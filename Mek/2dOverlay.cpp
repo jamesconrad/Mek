@@ -49,6 +49,7 @@ void twodOverlay::render()
 	
 	Program::getInstance().setUniform("transformationdata", pos);
 	Program::getInstance().setUniform("cutoff", cutoff);
+	Program::getInstance().setUniform("projMatrix", Camera::getInstance().projection());
 	//Program::getInstance().setUniform("hud", "proj", glm::ortho(0.f, 1920.f, 1080.f, 0.f) * Camera::getInstance().view());
 
 	glActiveTexture(GL_TEXTURE0);

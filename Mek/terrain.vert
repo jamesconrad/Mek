@@ -18,6 +18,8 @@ uniform mat4 identity = mat4(1,0,0,0,
 uniform float _min;
 uniform float _max;
 
+out float vertDepth;
+
 void main()
 {
 	gl_Position = gWVP * vec4(Position , 1);
@@ -28,4 +30,6 @@ void main()
 	p = Position;
 	h = (Position.y - _min) / (_max - _min);
 	n = Normal;
+
+	vertDepth = gl_Position.z;
 }

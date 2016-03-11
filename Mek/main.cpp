@@ -513,6 +513,9 @@ static void Update(float secondsElapsed) {
 	fmy.y = 0;
 	bool shoot = false;
 
+	std::cout << glm::angle(f, glm::vec3(-1, 0, 0)) << std::endl;
+	std::cout << glm::dot(f, glm::vec3(0, 0, -1)) << std::endl;
+
 	FMOD_VECTOR _pos, _for, _up;
 	_pos = { cam->position().x, cam->position().y, cam->position().z };
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
@@ -993,7 +996,7 @@ void AppMain() {
 	Camera::getInstance().setFieldOfView(maxFOV);
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
-	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
+	skull = new twodOverlayAnim("killSkull.png", 5, 0.2);
 	ShieldBack = new twodOverlay("ShieldBarBackV3.png", 0, 0.85, 35);
 	ShieldFront = new twodOverlay("ShieldBarMeasure2.png", 0, 0.85, 35);
 	HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
