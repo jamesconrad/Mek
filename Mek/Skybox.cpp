@@ -46,7 +46,7 @@ GLfloat cubeVertices[] = {
 	1.0f, -1.0f, 1.0f
 };
 
-Skybox::Skybox(char* fp[6])
+Skybox::Skybox(char* fp[6], char* op[6])
 {
 	Program::getInstance().createShader("skybox", GL_VERTEX_SHADER, "shaders/skybox.vert");
 	Program::getInstance().createShader("skybox", GL_FRAGMENT_SHADER, "shaders/skybox.frag");
@@ -75,6 +75,18 @@ Skybox::Skybox(char* fp[6])
 	_bmp[4].bitmapFromFile(fp[4]);
 	_bmp[5].bitmapFromFile(fp[5]);
 
+	
+	_obscureBMP[0].bitmapFromFile(op[0]);
+	_obscureBMP[1].bitmapFromFile(op[1]);
+	_obscureBMP[2].bitmapFromFile(op[2]);
+	_obscureBMP[2].rotate90CounterClockwise();
+	_obscureBMP[3].bitmapFromFile(op[3]);
+	_obscureBMP[3].rotate90CounterClockwise();
+	_obscureBMP[3].rotate90CounterClockwise();
+	_obscureBMP[3].rotate90CounterClockwise();
+	_obscureBMP[4].bitmapFromFile(op[4]);
+	_obscureBMP[5].bitmapFromFile(op[5]);
+
 	glGenTextures(1, &_cubeMapID);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _cubeMapID);
@@ -82,6 +94,21 @@ Skybox::Skybox(char* fp[6])
 	for (int i = 0; i < 6; i++)
 	{
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, _bmp[i].width(), _bmp[i].height(), 0, GL_RGB, GL_UNSIGNED_BYTE, _bmp[i].pixelBuffer());
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	glGenTextures(1, &_obscureMapID);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, _obscureMapID);
+
+	for (int i = 0; i < 6; i++)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, _obscureBMP[i].width(), _obscureBMP[i].height(), 0, GL_RGB, GL_UNSIGNED_BYTE, _obscureBMP[i].pixelBuffer());
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -112,7 +139,12 @@ void Skybox::render(bool ObscurityMap)
 	glDepthMask(GL_FALSE);
 	//glDisable(GL_DEPTH_TEST);
 
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _cubeMapID);
+	Program::getInstance().setUniform("skybox", 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, _obscureMapID);
+	Program::getInstance().setUniform("obsbox", 1);
 	//glBindBuffer(GL_ARRAY_BUFFER, _vbo[i]);
 	glDrawArrays(GL_TRIANGLES, 0, 108);
 	glBindVertexArray(0);

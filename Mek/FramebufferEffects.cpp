@@ -161,7 +161,7 @@ void FramebufferEffects::Toon(bool doCraziness)
 	_fb->RenderQuad();
 }									  
 
-void FramebufferEffects::GodRays(glm::vec3 &sunLocation)
+void FramebufferEffects::GodRays(glm::vec3 &sunLocation, glm::vec3 &playerLocation, glm::vec3 &cameraForward)
 {
 	_wb[2]->Bind();
 	Program::getInstance().bind("godrays");
@@ -172,6 +172,9 @@ void FramebufferEffects::GodRays(glm::vec3 &sunLocation)
 	lightPosInScreenSpace.y /= _fb->Height();
 	//glm::vec4 lightPosInScreenSpace = glm::vec4(sunLocation + glm::vec3(-1500, 500, 2300), 1.0f);
 	Program::getInstance().setUniform("lightPositionOnScreen", lightPosInScreenSpace);
+	Program::getInstance().setUniform("lightPositionInWorld", sunLocation + glm::vec3(-1500, 500, 2300));
+	Program::getInstance().setUniform("playerPositionInWorld", playerLocation);
+	Program::getInstance().setUniform("cameraForwardVector", cameraForward);
 	_wb[2]->RenderQuad();
 
 	glm::mat4 thing = Camera::getInstance().projection() * Camera::getInstance().view();

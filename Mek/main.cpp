@@ -341,9 +341,9 @@ static void DrawSceneShadowPass()
 
 static void DrawScene(int shadowMapTexID)
 {
-	skyObs->render(true);
+	
 	sky->render(false);
-
+//	skyObs->render(true);
 	ground->Render(shadowMapTexID);
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
@@ -403,7 +403,7 @@ static void Render() {
 	if (gameState == GAME)
 	{
 		framebuffeffects->Toon(false);
-		framebuffeffects->GodRays(glm::vec3(-8.f, 9.f, 10.f));
+		framebuffeffects->GodRays(glm::vec3(-8.f, 9.f, 10.f), model->pos, Camera::getInstance().forward());
 	}
 	else if (gameState == MENU)
 	{
@@ -512,6 +512,9 @@ static void Update(float secondsElapsed) {
 	glm::vec3 fmy = cam->forward();
 	fmy.y = 0;
 	bool shoot = false;
+
+	std::cout << glm::angle(f, glm::vec3(-1, 0, 0)) << std::endl;
+	std::cout << glm::dot(f, glm::vec3(0, 0, -1)) << std::endl;
 
 	FMOD_VECTOR _pos, _for, _up;
 	_pos = { cam->position().x, cam->position().y, cam->position().z };
@@ -993,7 +996,7 @@ void AppMain() {
 	Camera::getInstance().setFieldOfView(maxFOV);
 
 	crosshair = new twodOverlay("crosshair.png", 0, 0, 1);
-	skull = new twodOverlayAnim("killSkull.png", 5, 0.5);
+	skull = new twodOverlayAnim("killSkull.png", 5, 0.2);
 	ShieldBack = new twodOverlay("ShieldBarBackV3.png", 0, 0.85, 35);
 	ShieldFront = new twodOverlay("ShieldBarMeasure2.png", 0, 0.85, 35);
 	HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
@@ -1010,9 +1013,10 @@ void AppMain() {
 	ground->LoadHeightMap("testhm.png", 1, 5, 0.8);
 	ground->InitRender();
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
-	sky = new Skybox(sb);
-	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O2.png", "fr-O.png" };
-	skyObs = new Skybox(Osb);
+	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O.png", "fr-O.png" };
+	sky = new Skybox(sb, Osb);
+	
+	//skyObs = new Skybox(Osb);
 	//MODEL INITS
 
 	prepProjectiles();

@@ -447,14 +447,16 @@ aiNodeAnim* Model::findAnimNode(aiAnimation* anim, std::string nodename)
 	}
 }
 
-glm::mat4 rotationMatrix(glm::vec3 &dir, glm::vec3 &baseDir)
+glm::mat4 rotationMatrix(glm::vec3 &dir, glm::vec3 &baseDir, glm::vec3 &right)
 {
-	glm::vec3 direction = glm::normalize(glm::vec3(baseDir - dir));
-	glm::vec3 rotationZ = direction;
-	glm::vec3 rotationX = glm::normalize(glm::cross(glm::vec3(0, 1, 0), rotationZ));
-	glm::vec3 rotationY = glm::normalize(glm::cross(rotationZ, rotationX));
-	glm::mat3 rotation(rotationX.x, rotationY.x, rotationZ.x, rotationX.y, rotationY.y, rotationZ.y, rotationX.z, rotationY.z, rotationZ.z);
-	return glm::mat4(rotation);
+	float angle = glm::angle(dir, baseDir);
+	float rightAngle = glm::dot(dir, right);
+	glm::mat4 rotation;
+	if (rightAngle >= 0)
+		rotation = glm::mat4(glm::rotate(angle, glm::vec3(0, 1, 0)));
+	else
+		rotation = glm::mat4(glm::rotate(angle * -1.f, glm::vec3(0, 1, 0)));
+	return rotation;
 }
 
 void Model::render()
@@ -463,7 +465,7 @@ void Model::render()
 	//W = glm::rotate(W, _owner->rot);
 	W = glm::translate(W, _owner->pos);
 
-	W *= rotationMatrix(_owner->dir, glm::vec3(0, 0, 1));
+	W *= rotationMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
 	W = glm::scale(W, 0.1f * _owner->scale);
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();

@@ -8,7 +8,7 @@ class Skybox
 {
 public:
 	//easy way of use is Skybox({"Right", "Left", "Top", "Bottom", "Back", "Front"});
-	Skybox(char* fp[6]);
+	Skybox(char* fp[6], char* op[6]);
 
 	void render(bool ObsucityMap);
 

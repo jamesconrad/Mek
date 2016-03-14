@@ -15,6 +15,7 @@
 #include "include\GL\glfw3.h"
 #include "include\GL\glew.h"
 #include "lib\glm\glm.hpp"
+#include "lib\glm\gtx\vector_angle.hpp"
 #include "lib\glm\gtx\quaternion.hpp"
 #include "lib\glm\gtc\matrix_transform.hpp"
 

@@ -19,6 +19,8 @@ in float h;
 
 in vec4 fpls;
 
+in float vertDepth;
+
 void main()
 {
 	vec2 uv;
@@ -69,8 +71,8 @@ void main()
 	//	if (p.z > u.z && p.z < d.z)
 	//		colour.r = 1;
 	
-	//if (texture2D(shadowMap, fpls.xy).r < fpls.z)
-	//	colour.xyz = colour.xyz * 0.25;
+	if (texture2D(shadowMap, fpls.xy).r < fpls.z)
+		colour.xyz = colour.xyz * 0.25;
 
 	depth = vec4(vec3(0), 1.0);
 	normals = vec4(vec3(n), 1.0);

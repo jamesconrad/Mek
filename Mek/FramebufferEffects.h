@@ -21,7 +21,7 @@ public:
 	void Bloom(unsigned int numGaussPasses);
 	void FXAA();
 	void Toon(bool doCraziness);
-	void GodRays(glm::vec3 &sunLocation);
+	void GodRays(glm::vec3 &sunLocation, glm::vec3 &playerLocation, glm::vec3 &cameraForward);
 
 	void PrepShadowMap();
 	int FinShadowMap();

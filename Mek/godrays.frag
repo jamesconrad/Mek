@@ -9,6 +9,10 @@ uniform sampler2D rgbTexture;
 //uniform vec2 depthRange = vec2(0.1, 1024.0);
 uniform vec4 lightPositionOnScreen = vec4(0.3, 0.7, 0.0, 0.0);
 
+uniform vec3 lightPositionInWorld;
+uniform vec3 playerPositionInWorld;
+uniform vec3 cameraForwardVector;
+
 float exposure = 0.006;
 float decay = 1.0;
 float density = 1.7;
@@ -43,6 +47,8 @@ void main()
 	dTexCoord *= 1.0 / float(numSamples) * density;
 	vec3 texSample = vec3(0.0, 0.0, 0.0);
 	float illuminationDecay = 1.0;
+
+	float pToLDotF = dot(normalize(lightPositionInWorld - playerPositionInWorld), cameraForwardVector);
 
 
 
@@ -663,6 +669,7 @@ void main()
 
 
 	colour.rgb *= exposure;
-	colour.rgb = colour.rgb + texture2D(rgbTexture, uv.xy).rgb; 
+	pToLDotF = max(pToLDotF, 0);
+	colour.rgb = colour.rgb * pToLDotF + texture2D(rgbTexture, uv.xy).rgb; 
 	colour.a = 1.0;
 }
