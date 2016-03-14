@@ -4,15 +4,18 @@
 #include "ComponentCollision.h"
 #include "SoundManager.h"
 
+extern float timeFactor;
+extern bool isUsingBulletTime;
+
 class Projectile
 {
 public:
 	
 	Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,FSound*);
 	
-	void update(float &dtime)
+	void update(float &dtime, bool _isUsingBulletTime = false)
 	{
-		pos += dir * (vel);
+		pos += dir * (_isUsingBulletTime ? (vel * dtime) * timeFactor : (vel * dtime));
 		go->pos = pos;
 		FMOD_VECTOR sp = { pos.x, pos.y, pos.z };
 		FMOD_VECTOR sv = { 0.0, 0.0, 0.0 };

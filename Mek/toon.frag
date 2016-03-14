@@ -71,7 +71,7 @@ void main()
 	vec3 rgbColour = texture2D(rgbTexture, uv.xy).rgb;
 	
 	//This is a temporary and incorrect assignment of fragColour
-	FragColour.rgb = vec3(magnitude);
+	//FragColour.rgb = vec3(magnitude);
 
 	//This line is the correct assignment of fragColour
 	FragColour.rgb = sobelCorrection * (rgbColour * vec3(magnitude)) + (magnitudeFix * vec3(magnitude));
