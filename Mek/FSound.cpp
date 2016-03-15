@@ -336,10 +336,15 @@ void FSound::printSound(){
 	printPos();
 }
 void FSound::GetSpectrum(){
+	float volume = 0;
+	//ChannelPtr->getVolume(&volume);
+	if (soundType==SOUND_TYPE_3D || soundType==SOUND_TYPE_3D_LOOP){
+		volume = distToSys / max;
+	}
 	this->ChannelPtr->getSpectrum(spectrum, 128, 0, FMOD_DSP_FFT_WINDOW_RECT);
 	for (int i = 0; i<100; i++)
 	{	//console only supportrs 100 characters
-		int freq = int(spectrum[i] * 100.0f);
+		int freq = int(spectrum[i] * 100.0f*(1-volume));
 		for (int y = 0; y < freq; y++)
 		{	
 			if (owner == std::string("Player")){
