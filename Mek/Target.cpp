@@ -22,8 +22,9 @@ Target::Target(char* fp, float t, OwnerList* _oList)
 	go->AddComponent(PHYSICS, c);
 	
 	oList = _oList;
-	oList->PlayAndPauseAll();
-	movingsound = (oList->FindSound("Moving2"))->Play();
+	//oList->PlayAndPauseAll();
+	movingsound = (oList->FindSound("Moving"))->Play();
+	oList->FindSound("Moving")->Pause();
 	ObjectManager::instance().addObject(go);
 
 	go->dir = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -60,8 +61,8 @@ void Target::update(float dTime, NavMesh &mesh)
 		glm::vec3 temp = glm::vec3(ceil(npos.x), ceil(npos.y), ceil(npos.z));
 		glm::vec3 temp2 = glm::vec3(ceil(pPos.x), ceil(pPos.y), ceil(pPos.z));
 
-		//std::cout << "SPos: " << oList->FindSound("Moving2")->soundPos.x << " " << oList->FindSound("Moving2")->soundPos.y << " " << oList->FindSound("Moving2")->soundPos.z << std::endl;
-		//std::cout << "TPos: " << temp.x << " " << temp.y << " " << temp.z << std::endl;
+		//std::cout << "go->pos: " << go->pos.x << " " << go->pos.y << " " << go->pos.z << std::endl;
+		oList->UpdateOwnerSoundPos(&go->pos);
 		if (pPos != npos){
 		movingsound->setPaused(false);
 		}

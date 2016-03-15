@@ -6,7 +6,7 @@
 #include "lib\glm\gtc\matrix_transform.hpp"
 #include "lib\glm\gtx\rotate_vector.hpp"
 #include "include\IL\ilut.h"
-#include "SoundManager.h"
+#include "FSoundManager.h"
 
 // standard C++ libraries
 #include <cassert>
@@ -92,7 +92,9 @@ float openningMessageInterp = 0.0f;
 bool openningMessageInterpIsIncreasing = false;
 NavMesh testNaveMesh;
 bool dShield = false;
-SoundManager* SManager;
+bool BackPaused=false;
+ConsoleMagic cm;
+FSoundManager* SManager;
 FSystem* SoundSystem;
 //Model* testmodel;
 
@@ -107,15 +109,19 @@ Terrain* ground;
 Skybox* sky;
 Skybox* skyObs;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
+void FreqBand(){
+	 //Create an instance of the ConsoleMagic class
+	cm.Init(100, 50);//Resize the console window to 100 by 50 characters
+	cm.SetTitle("Frequency Bands");
 
+
+
+}
 void initFSystem(){
 	SoundSystem = new FSystem;
-	SManager = new SoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
-	//FSound* laserSound = new FSound(SoundSystem, "../Debug/media/drumloop.wav", SOUND_TYPE_3D_LOOP, ROLLOFF_LINEARSQUARE, 0.5, 20);
-	//laserSound->Play();
-	//laserSound->soundPos = FMOD_VECTOR{ 0, -28, 0 };
-	SManager->printOList(); 
-	SManager->FindAndPlay("Player", "ShieldWarning");
+	SoundSystem->cm = &cm;
+	SManager = new FSoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
+
 };
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
@@ -511,6 +517,11 @@ static void Render() {
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
+	
+	//SManager->FindSound("Background", "one")->ChannelPtr->setPaused(true);
+	cm.Clear(char(254), 0, 0);
+	//SManager->FindSound("Background", "one")->GetSpectrum();
+	cm.Update();
 	SManager->Update();
 	SoundSystem->Update();
 	runTime += secondsElapsed;
@@ -540,6 +551,7 @@ static void Update(float secondsElapsed) {
 	glm::vec3 lInput;
 	glm::vec2 rInput;
 	Camera* cam = &Camera::getInstance();
+
 	glm::vec3 f = cam->forward();
 	glm::vec3 r = cam->right();
 	glm::vec3 fmy = cam->forward();
@@ -632,6 +644,17 @@ static void Update(float secondsElapsed) {
 		{
 			currentWeapon = bfg;
 			iconGlow->pos = glm::vec3(0.2f, -0.85f, 4);
+		}
+		if (glfwGetKey(gWindow, 'P'))
+		{
+			if (BackPaused){
+				SManager->FindAndUnpause("Background", "one");
+				BackPaused = false;
+			}
+			else{
+				SManager->FindAndPause("Background", "one");
+				BackPaused = true;
+			}
 		}
 
 		isUsingBulletTime = false;
@@ -807,7 +830,6 @@ static void Update(float secondsElapsed) {
 			}
 		}
 
-		std::cout << SManager->IsPlaying("Player", "ShieldWarning");
 		dshield += secondsElapsed;
 		hitTimer += secondsElapsed;
 		if (playerIsHit){
@@ -984,6 +1006,7 @@ void OnError(int errorCode, const char* msg) {
 }
 // the program starts here
 void AppMain() {
+	FreqBand();
 	initFSystem();
 	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/FirstLevelNavMesh-scaled.obj");
 	srand(time(NULL));
