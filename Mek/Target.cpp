@@ -24,7 +24,7 @@ Target::Target(char* fp, float t, OwnerList* _oList)
 	oList = _oList;
 	//oList->PlayAndPauseAll();
 	movingsound = (oList->FindSound("Moving"))->Play();
-	oList->FindSound("Moving")->Pause();
+	//oList->FindSound("Moving")->Pause();
 	ObjectManager::instance().addObject(go);
 
 	go->dir = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -37,10 +37,7 @@ Target::Target(char* fp, float t, OwnerList* _oList)
 void Target::update(float dTime, NavMesh &mesh)
 {
 	//oList->UpdateOwnerSoundPos(go->pos);
-	glm::vec3 pPos = go->pos;
-	FMOD_VECTOR fpos = { pPos.x, pPos.y, pPos.z };
-	FMOD_VECTOR vel = { 0, 0, 0 };
-	movingsound->set3DAttributes(&fpos, &vel);
+
 	if (!hit && go->health <= 0) //go->scale == glm::vec3(0, 0, 0))
 	{
 		hit = true;
@@ -57,17 +54,23 @@ void Target::update(float dTime, NavMesh &mesh)
 		go->dir = go->pos;// glm::normalize(interp.pos - go->dir);
 		followPath(dTime, mesh, hasSpottedPlayer);
 		go->dir = glm::normalize(go->pos - go->dir);
+
+		glm::vec3 pPos = go->pos;
+		FMOD_VECTOR fpos{ pPos.x, pPos.y, pPos.z };
+		FMOD_VECTOR vel{ 0, 0, 0 };
+		movingsound->set3DAttributes(&fpos, &vel);
 		glm::vec3 npos = go->pos;
-		glm::vec3 temp = glm::vec3(ceil(npos.x), ceil(npos.y), ceil(npos.z));
-		glm::vec3 temp2 = glm::vec3(ceil(pPos.x), ceil(pPos.y), ceil(pPos.z));
+		glm::vec3 temp = glm::vec3((npos.x), (npos.y), (npos.z));
+		glm::vec3 temp2 = glm::vec3((pPos.x), (pPos.y), (pPos.z));
 
 		//std::cout << "go->pos: " << go->pos.x << " " << go->pos.y << " " << go->pos.z << std::endl;
 		oList->UpdateOwnerSoundPos(&go->pos);
-		if (pPos != npos){
 		movingsound->setPaused(false);
+		if ((oList->FindSound("Moving")->distToSys) > (oList->FindSound("Moving"))->max){
+			oList->FindSound("Moving")->ChannelPtr->setPaused(true);
 		}
 		else{
-			movingsound->setPaused(true);
+			oList->FindSound("Moving")->ChannelPtr->setPaused(false);
 		}
 	}
 	
