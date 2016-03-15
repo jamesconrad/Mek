@@ -84,8 +84,9 @@ public:
 	int currentNodeIterator = 0;
 
 	float maxVelocity = 10.0f;
-	float pointRadius = 3.0f;
-	float steeringCorrectionFactor = 8.0f;
+	float currentMaxVelocity = 10.0f;
+	float pointRadius = 1.f;
+	float steeringCorrectionFactor = 5.0f;
 	glm::vec3 currentVelocity = { 1.f, 0.f, 0.f };
 	glm::vec3 desiredVelocity;
 	glm::vec3 steering;
@@ -96,6 +97,9 @@ public:
 
 	Projectile 
 		*weaponProjectile;
+	glm::vec3 leftGunBarrel = glm::vec3(-0.4f, 0.926f, -0.4f);
+	glm::vec3 rightGunBarrel = glm::vec3(-0.4f, 0.926f, 0.4f);
+	bool firingfromRightBarrel;
 	float fireTimer = 0.f;
 	float fireTimeTolerance = 2.0f;
 	FSound *laserSound;

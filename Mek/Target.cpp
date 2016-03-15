@@ -230,9 +230,9 @@ void Target::followPath(float &dT, NavMesh &mesh, bool &doCombat)
 	currentTargetNode = interp.points[currentNodeIterator];
 	
 
-	desiredVelocity = glm::normalize(currentTargetNode - glm::vec3(go->pos.x, 0.496205002, go->pos.z)) * maxVelocity;
+	desiredVelocity = glm::normalize(currentTargetNode - glm::vec3(go->pos.x, 0.496205002, go->pos.z)) * currentMaxVelocity;
 	steering = desiredVelocity - currentVelocity;
-	currentVelocity = glm::normalize(currentVelocity + steering / steeringCorrectionFactor) * maxVelocity + go->force;
+	currentVelocity = glm::normalize(currentVelocity + steering / steeringCorrectionFactor) * currentMaxVelocity + go->force;
 	go->force = go->force / 1.2f;
 
 	go->pos = go->pos + currentVelocity * dT;

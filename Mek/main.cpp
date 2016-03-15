@@ -67,11 +67,20 @@ glm::vec3 red = glm::vec3(1.0f, 0, 0);
 glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
-unsigned int ammo = 11;
+unsigned int ammo = 10;
 float ammoInterp = 0.0f;
 float noammoInterp = 0.0f;
 bool noammoInterpIsIncreasing = false;
 float reloadTimer = 0.0f;
+float timeFactor = 0.05f;
+float maxBulletTimeCooldown = 2.0f;
+float bulletTimeCooldown = maxBulletTimeCooldown;
+bool bulletTimeHitZero = false;
+bool isUsingBulletTime = false;
+float maxDashingCooldown = 0.3f;
+float dashingCooldown = maxDashingCooldown;
+bool dashingHitZero = false;
+bool IsDashing = false;
 bool zoomingIn = false;
 float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 #include "ShieldVariables.h"
@@ -212,7 +221,7 @@ void LoadTargets()
 	targets.reserve(100);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 6; i++)
 	{	
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
@@ -234,6 +243,10 @@ void LoadTargets()
 			tar->generatePath(testNaveMesh);
 			//tar->laserSound = laserSound; //Seriously need get sounds to the other classes in a better way than this.
 			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+			if (tar->fireTimeTolerance < 3.f)
+				tar->firingfromRightBarrel = true;
+			else
+				tar->firingfromRightBarrel = false;
 		}
 		if (i == 1)
 		{
@@ -250,6 +263,10 @@ void LoadTargets()
 			tar->generatePath(testNaveMesh);
 			//tar->laserSound = laserSound;
 			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+			if (tar->fireTimeTolerance < 3.f)
+				tar->firingfromRightBarrel = true;
+			else
+				tar->firingfromRightBarrel = false;
 		}
 		if (i == 2)
 		{
@@ -266,6 +283,10 @@ void LoadTargets()
 			tar->generatePath(testNaveMesh);
 			//tar->laserSound = laserSound;
 			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+			if (tar->fireTimeTolerance < 3.f)
+				tar->firingfromRightBarrel = true;
+			else
+				tar->firingfromRightBarrel = false;
 		}
 		if (i == 3)
 		{
@@ -279,6 +300,10 @@ void LoadTargets()
 			tar->generatePath(testNaveMesh);
 			//tar->laserSound = laserSound;
 			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+			if (tar->fireTimeTolerance < 3.f)
+				tar->firingfromRightBarrel = true;
+			else
+				tar->firingfromRightBarrel = false;
 		}
 		if (i == 4)
 		{
@@ -292,6 +317,10 @@ void LoadTargets()
 			tar->generatePath(testNaveMesh);
 			//tar->laserSound = laserSound;
 			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+			if (tar->fireTimeTolerance < 3.f)
+				tar->firingfromRightBarrel = true;
+			else
+				tar->firingfromRightBarrel = false;
 		}
 		if (i == 5)
 		{
@@ -306,6 +335,10 @@ void LoadTargets()
 			tar->generatePath(testNaveMesh);
 			//tar->laserSound = laserSound;
 			tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+			if (tar->fireTimeTolerance < 3.f)
+				tar->firingfromRightBarrel = true;
+			else
+				tar->firingfromRightBarrel = false;
 		}
 
 
@@ -513,9 +546,6 @@ static void Update(float secondsElapsed) {
 	fmy.y = 0;
 	bool shoot = false;
 
-	std::cout << glm::angle(f, glm::vec3(-1, 0, 0)) << std::endl;
-	std::cout << glm::dot(f, glm::vec3(0, 0, -1)) << std::endl;
-
 	FMOD_VECTOR _pos, _for, _up;
 	_pos = { cam->position().x, cam->position().y, cam->position().z };
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
@@ -556,11 +586,31 @@ static void Update(float secondsElapsed) {
 		else if (glfwGetKey(gWindow, 'D'))
 			lInput.x = 1;
 
-		if (glfwGetKey(gWindow, ' '))
+		IsDashing = false;
+		if (glfwGetKey(gWindow, ' ') && dashingHitZero == false)
 		{
-			shoot = true;
-
+			IsDashing = true;
 		}
+		if (!IsDashing)
+		{
+			dashingCooldown += secondsElapsed / 5;
+			if (dashingCooldown > maxDashingCooldown)
+			{
+				dashingCooldown = maxDashingCooldown;
+				dashingHitZero = false;
+			}
+		}
+		if (IsDashing && dashingCooldown >= 0.0f)
+		{
+			dashingCooldown -= secondsElapsed;
+		}
+		if (dashingCooldown < 0.0f)
+		{
+			IsDashing = false;
+			dashingHitZero = true;
+		}
+		//std::cout << dashingCooldown << std::endl;
+
 		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_LEFT))
 		{
 			shoot = true;
@@ -583,6 +633,33 @@ static void Update(float secondsElapsed) {
 			currentWeapon = bfg;
 			iconGlow->pos = glm::vec3(0.2f, -0.85f, 4);
 		}
+
+		isUsingBulletTime = false;
+		if (glfwGetKey(gWindow, GLFW_KEY_LEFT_SHIFT) && bulletTimeHitZero == false)
+		{
+			isUsingBulletTime = true;
+		}
+
+		if (isUsingBulletTime)
+		{
+			bulletTimeCooldown -= secondsElapsed;
+			if (bulletTimeCooldown <= 0.0f)
+			{
+				bulletTimeCooldown = 0.0f;
+				bulletTimeHitZero = true;
+			}
+		}
+		else if (!isUsingBulletTime)
+		{
+			bulletTimeCooldown += secondsElapsed / 5;
+			if (bulletTimeCooldown > maxBulletTimeCooldown)
+			{
+				bulletTimeCooldown = maxBulletTimeCooldown;
+				bulletTimeHitZero = false;
+			}
+		}
+		//std::cout << bulletTimeCooldown << std::endl;
+		
 
 
 
@@ -624,11 +701,11 @@ static void Update(float secondsElapsed) {
 	{
 		
 		//Begin Camera code
-		model->pos += fmy * (c->getOwner()->vel * lInput.z) + model->force;
+		model->pos += fmy * (((c->getOwner()->vel + (IsDashing ? 0.2f : 0.0f)) * (isUsingBulletTime ? timeFactor + 0.3f : 1.0f)) * lInput.z) + model->force;
 		model->force = model->force / 1.2f;
 		if (glm::length(model->force) < 0.1f)
 			model->force = glm::vec3(0);
-		model->pos += cam->right() * (c->getOwner()->vel * lInput.x);
+		model->pos += cam->right() * (((c->getOwner()->vel + (IsDashing ? 0.2f : 0.0f)) * (isUsingBulletTime ? timeFactor + 0.3f : 1.0f)) * lInput.x);
 
 		cam->offsetPosition(model->pos - cam->position());
 
@@ -638,9 +715,9 @@ static void Update(float secondsElapsed) {
 		//End Camera code
 
 		for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
-			ObjectManager::instance().pMap[i]->update(secondsElapsed);
+			ObjectManager::instance().pMap[i]->update(secondsElapsed, isUsingBulletTime);
 		for (unsigned int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
-			ObjectManager::instance().enemyPMap[i]->update(secondsElapsed);
+			ObjectManager::instance().enemyPMap[i]->update(secondsElapsed, isUsingBulletTime);
 
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD && ammo > 0 && reloadTimer == 0.0f)
@@ -651,7 +728,7 @@ static void Update(float secondsElapsed) {
 
 			if (currentWeapon == machineGun)
 			{
-				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 0.5, 25, 10, SManager->FindSound("Player", "Projectile"));
+				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 25, 10, SManager->FindSound("Player", "Projectile"));
 				ObjectManager::instance().pMap.push_back(pr);
 				ammo--;
 			}
@@ -659,23 +736,23 @@ static void Update(float secondsElapsed) {
 			{
 				if (ammo >= shotgun)
 				{
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 0.5, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 				}
@@ -684,7 +761,7 @@ static void Update(float secondsElapsed) {
 			{
 				if (ammo >= bfg)
 				{
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 0.3, 100, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 100, 10, SManager->FindSound("Player", "Projectile"));
 					pr->go->scale = glm::vec3(1.5f);
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo -= bfg;
@@ -789,7 +866,11 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
-			
+			targets[i]->currentMaxVelocity = targets[i]->maxVelocity;
+			if (isUsingBulletTime)
+			{
+				targets[i]->currentMaxVelocity = targets[i]->maxVelocity * timeFactor;
+			}
 			targets[i]->update(secondsElapsed / 5, testNaveMesh);
 			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) - 0.05; //this moves the targets to the correct position above the ground.
 
@@ -815,11 +896,15 @@ static void Update(float secondsElapsed) {
 				targetsKilled++;
 			}
 			
-			targets[i]->fireTimer += secondsElapsed;
+			targets[i]->fireTimer += secondsElapsed * timeFactor;
 			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
 			{
 				targets[i]->fireTimer = 0.f;
-				targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 0.1, 10, 7, SManager->FindSound("Player", "Projectile"));
+				if (targets[i]->firingfromRightBarrel)
+					targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
+				else
+					targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
+				targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
 				targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
 				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
@@ -900,7 +985,7 @@ void OnError(int errorCode, const char* msg) {
 // the program starts here
 void AppMain() {
 	initFSystem();
-	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/TestLevelNavMesh-scaled.obj");
+	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/FirstLevelNavMesh-scaled.obj");
 	srand(time(NULL));
     // initialise GLFW
     glfwSetErrorCallback(OnError);
