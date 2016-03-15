@@ -53,7 +53,7 @@ void Model::loadModel(char* fp)
 	fp = (char*)debfp.c_str();
 
 	_importer.GetIOHandler();
-	_scene = (aiScene*)_importer.ReadFile(fp, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
+	_scene = (aiScene*)_importer.ReadFile(fp, aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 
 	if (!_scene)
 		printf("Error parsing %s : %s\n", fp, _importer.GetErrorString());
