@@ -29,6 +29,18 @@ ComponentCollision::ComponentCollision()
 	type = STATIC;
 }
 
+glm::mat4 rotMatrix(glm::vec3 &dir, glm::vec3 &baseDir, glm::vec3 &right)
+{
+	float angle = glm::angle(dir, baseDir);
+	float rightAngle = glm::dot(dir, right);
+	glm::mat4 rotation;
+	if (rightAngle >= 0)
+		rotation = glm::mat4(glm::rotate(angle, glm::vec3(0, 1, 0)));
+	else
+		rotation = glm::mat4(glm::rotate(angle * -1.f, glm::vec3(0, 1, 0)));
+	return rotation;
+}
+
 void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 {
 	if (bones)
@@ -53,6 +65,8 @@ void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 			glm::mat4 h = glm::translate(glm::mat4(), _owner->pos);
 			h = glm::scale(glm::mat4(), glm::vec3(0.1, 0.1, 0.1));
 			h = glm::scale(glm::mat4(), _owner->scale);
+			h *= rotMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
+
 			_cMesh[i]->fmin = (_cMesh[i]->min * 0.1f) + _owner->pos;// *_owner->scale;
 			_cMesh[i]->fmax = (_cMesh[i]->max * 0.1f) + _owner->pos;// *_owner->scale;
 			_cMesh[i]->fuN = _cMesh[i]->uN;
@@ -129,7 +143,8 @@ void ComponentCollision::setCollisionMask(const aiScene* m)
 		else
 		{
 			BoneBox* bb = new BoneBox;
-			bb->name = "Boneless Object";
+			bb->name = "Boneless Mesh ";
+			bb->name += (char)('0' + i);
 			bb->boneNum = -1;
 			for (int vertexIndex = 0; vertexIndex < m->mMeshes[i]->mNumVertices; vertexIndex++)
 			{
@@ -440,9 +455,7 @@ bool ComponentCollision::checkVs(ComponentCollision* c)
 					if (strcmp(c->_owner->GetName(), "PlayerProjectile") == 0)
 						ObjectManager::instance().pMap[c->_owner->handle]->alive = false;
 					else if (strcmp(c->_owner->GetName(), "EnemyProjectile") == 0)
-					{
-						c->_owner->health = 0.0f;
-					}
+						ObjectManager::instance().enemyPMap[c->_owner->handle]->alive = false;
 				}
 				printf("NOTICE: %s.%s and %s.%s\n", _owner->GetName(), _cMesh[i]->name.c_str(), c->_owner->GetName(), c->_cMesh[j]->name.c_str());
 				return true;
@@ -484,7 +497,7 @@ void CollisionManager::checkAll()
 		}   
 	}
 	
-	//STAGE 2 ALL VS PROJECTILES
+	//STAGE 2.1 ALL VS PROJECTILES
 
 	for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
@@ -502,6 +515,27 @@ void CollisionManager::checkAll()
 				if (thatCC->type == STATIC)
 					thatCC->checkVs(ObjectManager::instance().pMap[i]->cc);
 				
+			}
+		}
+	}
+
+	//STAGE 2.2 ALL VS ENEMEY PROJECTILES
+	for (int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+	{
+		ObjectManager::instance().enemyPMap[i]->cc->updateFrame(NULL, false);
+
+		for (int j = 0, ss = ObjectManager::instance().colMap.size(); j < ss; j++)
+		{
+			if (j != i)
+			{
+				GameObject* thatGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[j]]);
+				ComponentCollision* thatCC = static_cast<ComponentCollision*>(thatGO->GetComponent(PHYSICS));
+
+				thatCC->updateFrame(thatGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thatCC->_cMesh[0]->boneNum == -1 ? false : true));
+
+				if (thatCC->type == STATIC)
+					thatCC->checkVs(ObjectManager::instance().enemyPMap[i]->cc);
+
 			}
 		}
 	}
@@ -541,14 +575,15 @@ void ComponentCollision::createHitboxRender()
 {
 	unsigned int s = _cMesh.size();
 
-	glGenVertexArrays(1, &_vao);
-	glBindVertexArray(_vao);
+	_vao = new GLuint[s];
+	glGenVertexArrays(s, _vao);
 
 	_vbo = new GLuint[s];
-	glGenBuffers(s, _vbo);
 
 	for (int i = 0; i < s; i++)
 	{
+		glBindVertexArray(_vao[i]);
+		glGenBuffers(1, &_vbo[i]);
 		gHitbox hb;
 		float sx = 0.1f;// * _owner->scale.x;
 		float sy = 0.1f;// * _owner->scale.y;
@@ -610,10 +645,10 @@ void ComponentCollision::renderHitbox()
 	{
 		//update shader vars
 		Program::getInstance().use("hitbox");
-		glBindVertexArray(_vao);
 		for (int i = 0, s = gHitboxes.size(); i < s; i++)
 		{
-			glm::mat4 m = glm::translate(glm::mat4(), _owner->pos) * glm::scale(glm::mat4(), _owner->scale);
+			glBindVertexArray(_vao[i]);
+			glm::mat4 m = glm::translate(glm::mat4(), _owner->pos) * glm::scale(glm::mat4(), _owner->scale) * rotMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));;
 			Program::getInstance().setUniform("model", m);
 			Program::getInstance().setUniform("camera", Camera::getInstance().matrix());
 			Program::getInstance().setUniform("colour", glm::normalize(_owner->pos));

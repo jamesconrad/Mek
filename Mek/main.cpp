@@ -455,7 +455,7 @@ static void DrawScene(int shadowMapTexID)
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			//cc->renderHitbox();
+			cc->renderHitbox();
 		}
 	}
 
@@ -476,7 +476,7 @@ static void DrawScene(int shadowMapTexID)
 		if (targets[i]->alive)
 		{
 			targets[i]->cg->render();
-			//targets[i]->cc->renderHitbox();
+			targets[i]->cc->renderHitbox();
 		}
 	}
 	//gCol->renderHitbox();
@@ -1457,8 +1457,8 @@ void AppMain() {
 			}
 			else if (i == 20)
 			{
-				gObject->SetName("Crane");
-				cModel->loadModel("models/Crane.dae");
+				gObject->SetName("Wall");
+				cModel->loadModel("models/wallz.dae");
 
 				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
