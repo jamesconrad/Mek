@@ -45,6 +45,7 @@ public:
 	SOUND_TYPE soundType;
 	ROLLOFF_TYPE rollOff;
 	bool isPlaying;//gets checked everyupdate ..isSound playing?
+	bool fastForward;
 	const char* fsname;	//full file path to the file
 	std::string sname; //Short file name sound.wav
 	std::string attribute; //attribute of sound or tag
@@ -73,6 +74,8 @@ public:
 	inline void printPos(){ std::cout << sname << soundPos.x << " " << soundPos.y << " " << soundPos.z << std::endl; }
 	void printSound();
 	void GetSpectrum();
+
+
 };
 
 

@@ -515,7 +515,7 @@ void FSoundManager::Convolution(char* _file, int _filterWidth, int _amp){
 	result = FSystemPtr->SystemPtr->playSound(FMOD_CHANNEL_FREE, SoundPtr, false, &ChannelPtr);
 	ERRCHECK(result);
 }
-void FSoundManager::Robot(char* _file, int _pitch, int _distortion, int _amp){
+void FSoundManager::Robot(FSound* s,char* _file, int _pitch, int _distortion, int _amp){
 	FMOD::Sound* SoundPtr;
 	FMOD::Channel* ChannelPtr;
 	int  channels;
@@ -551,11 +551,11 @@ void FSoundManager::Robot(char* _file, int _pitch, int _distortion, int _amp){
 	}
 
 	CreateSoundFromData(FSystemPtr->SystemPtr, &SoundPtr, channels, 44000, true, &newData);
-
-	result = FSystemPtr->SystemPtr->playSound(FMOD_CHANNEL_FREE, SoundPtr, false, &ChannelPtr);
-	ERRCHECK(result);
+	s->SoundPtr = SoundPtr;
+	//result = FSystemPtr->SystemPtr->playSound(FMOD_CHANNEL_FREE, SoundPtr, false, &ChannelPtr);
+	//ERRCHECK(result);
 }
-void FSoundManager::Fishman(char* _file, float _volume, float _amount){
+void FSoundManager::Fishman(FSound* s,char* _file, float _volume, float _amount){
 	FMOD::Sound* SoundPtr;
 	FMOD::Channel* ChannelPtr;
 	int  channels;
@@ -585,11 +585,11 @@ void FSoundManager::Fishman(char* _file, float _volume, float _amount){
 	}
 
 	CreateSoundFromData(FSystemPtr->SystemPtr, &SoundPtr, channels, 44000, true, &newData);
-
-	result = FSystemPtr->SystemPtr->playSound(FMOD_CHANNEL_FREE, SoundPtr, false, &ChannelPtr);
-	ERRCHECK(result);
+	s->SoundPtr = SoundPtr;
+	//result = FSystemPtr->SystemPtr->playSound(FMOD_CHANNEL_FREE, SoundPtr, false, &ChannelPtr);
+	//ERRCHECK(result);
 }
-void FSoundManager::BadConnection(char* _file, float _levels){
+void FSoundManager::BadConnection(char* _file, float _levels, float _radioStatic){
 	FMOD::Sound* SoundPtr;
 	FMOD::Channel* ChannelPtr;
 	int  channels;
@@ -604,9 +604,9 @@ void FSoundManager::BadConnection(char* _file, float _levels){
 	std::vector<signed short> newData;
 	newData.resize(rawData.size(), 0);
 
-	float levels = _levels;
+	float levels = 20.0f;
 	float tempLevel;
-	float radioStatic = 1000.0f;
+	float radioStatic = 500;
 	for (unsigned int s = 0; s<rawData.size(); s++)
 	{
 		tempLevel = (float(rand() % 1000) / 999.0f)*levels;
@@ -693,4 +693,14 @@ bool FSoundManager::CreateSoundFromData(FMOD::System* system, FMOD::Sound **soun
 	ERRCHECK(result);
 
 	return true;
+}
+void FSoundManager::FastForwardAll(){
+	for (int c = 0; c < oList.size(); c++){
+		oList[c]->FastForwardAll();
+	}
+}
+void FSoundManager::ResetFastForwardAll(){
+	for (int c = 0; c < oList.size(); c++){
+		oList[c]->ResetFastForwardAll();
+	}
 }

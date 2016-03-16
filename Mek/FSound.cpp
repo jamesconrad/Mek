@@ -22,6 +22,7 @@ FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType){
 	soundPos = { 0.0, 0.0, 0.0 };
 	soundVel = { 0.0, 0.0, 0.0 };
 	isPlaying = false;
+	fastForward = false;
 	LoadSound();
 }
 FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType, ROLLOFF_TYPE _rolloff, float _minDist, float _maxDist){
@@ -32,6 +33,7 @@ FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType, ROLL
 	soundVel = { 0.0, 0.0, 0.0 };
 	rollOff = _rolloff;
 	isPlaying = false;
+	fastForward = false;
 	LoadSound(_minDist, _maxDist);
 }
 FSound::~FSound(){
@@ -239,6 +241,13 @@ void FSound::Update(){
 	ChannelPtr->isPlaying(&isPlaying);
 	GetSpectrum();
 	FSystemPtr->cm->Update();
+	if (fastForward){
+		
+		ChannelPtr->setFrequency(22000);
+	}
+	if (!fastForward){
+		ChannelPtr->setFrequency(44000);
+	}
 	distToSys = sqrt((pow((FSystemPtr->sysPos.x - soundPos.x), 2)) + (pow((FSystemPtr->sysPos.y - soundPos.y), 2)) + (pow((FSystemPtr->sysPos.z - soundPos.z), 2)));
 	if ((isPlaying && soundType == SOUND_TYPE_3D) || (isPlaying && soundType == SOUND_TYPE_3D_LOOP)){
 		
@@ -358,6 +367,10 @@ void FSound::GetSpectrum(){
 			else if (owner == std::string("Target")){
 				FSystemPtr->cm->SetForegroundColor(i, 49 - y, 2);
 				FSystemPtr->cm->SetBackgroundColor(i, 49 - y, 4);
+			}
+			else if (owner == std::string("Tutorial")){
+				FSystemPtr->cm->SetForegroundColor(i, 49 - y, 1);
+				FSystemPtr->cm->SetBackgroundColor(i, 49 - y, 2);
 			}
 		}
 	}

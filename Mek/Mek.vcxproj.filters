@@ -227,6 +227,9 @@
     <ClInclude Include="OwnerList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ReverbNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragment-shader.frag">

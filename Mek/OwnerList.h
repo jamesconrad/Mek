@@ -25,6 +25,8 @@ public:
 	void FindAndPause(char* _tag);
 	void UpdateOwnerSoundPos(const glm::vec3*);
 	void GetListSpectrum(char* _tag);
+	void FastForwardAll();
+	void ResetFastForwardAll();
 };
 
 #endif

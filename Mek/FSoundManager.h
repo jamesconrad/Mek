@@ -48,13 +48,14 @@ public:
 	void Amplify(char* _file, float _amp);
 	void Echo(char* _file, int _delay, int _echos);
 	void Convolution(char* _file, int _filterWidth, int _amp);
-	void Robot(char* _file, int _pitch,int _distortion, int _amp);
-	void Fishman(char* _file, float _volume, float _amount);
-	void BadConnection(char* _file, float _levels);
+	void Robot(FSound* s,char* _file, int _pitch, int _distortion, int _amp);
+	void Fishman(FSound* s, char* _file, float _volume, float _amount);
+	void BadConnection(char* _file, float _levels, float _radioStatic);
 
 	bool LoadRawData(const char * file_name, FMOD::System* system, std::vector<signed short>* rawData, int* channels);
 	bool CreateSoundFromData(FMOD::System* system, FMOD::Sound **sound, int channels, unsigned int frequency, bool loop, std::vector<signed short>* rawData);
-
+	void FastForwardAll();
+	void ResetFastForwardAll();
 };
 
 #endif

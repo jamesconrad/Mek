@@ -8,3 +8,4 @@ mechHitShield.wav Player ShieldHit SOUND_TYPE_2D
 mechHitNoShield2.wav Player NoShield SOUND_TYPE_2D
 laser6.wav Player Projectile SOUND_TYPE_3D ROLLOFF_LINEAR 0.5 100.0
 mechHitNoShield2.wav Player NoShield SOUND_TYPE_2D
+all.wav Tutorial welcome SOUND_TYPE_2D

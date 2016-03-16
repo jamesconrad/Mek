@@ -99,3 +99,13 @@ void OwnerList::GetListSpectrum(char* _tag){
 		list[c]->GetSpectrum();
 	}
 }
+void OwnerList::FastForwardAll(){
+	for (int c = 0; c < list.size(); c++){
+		list[c]->fastForward = true;
+	}
+}
+void OwnerList::ResetFastForwardAll(){
+	for (int c = 0; c < list.size(); c++){
+		list[c]->fastForward = false;
+	}
+}

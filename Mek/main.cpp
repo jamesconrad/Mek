@@ -109,6 +109,7 @@ Terrain* ground;
 Skybox* sky;
 Skybox* skyObs;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
+FSound* s;
 void FreqBand(){
 	 //Create an instance of the ConsoleMagic class
 	cm.Init(100, 50);//Resize the console window to 100 by 50 characters
@@ -120,8 +121,13 @@ void FreqBand(){
 void initFSystem(){
 	SoundSystem = new FSystem;
 	SoundSystem->cm = &cm;
+	s = new FSound(SoundSystem, "FishTutorial", SOUND_TYPE_2D);
 	SManager = new FSoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
-
+	SManager->printOList();
+	SManager->Robot(s, "../debug/media/all.wav", 750, 3,1.6);
+	//SManager->Fishman(s,"../debug/media/all.wav",2,100);
+	s->owner = std::string("Tutorial");
+	s->Play();
 };
 
 void LoadShaders(char* vertFilename, char* fragFilename) 
@@ -185,6 +191,7 @@ void wonGame()
 	std::reverse(scoreTable.begin(), scoreTable.end());
 	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
+	SManager->StopAll();
 
 	shieldHealth = 100.f; //Just work with me.
 }
@@ -227,7 +234,7 @@ void LoadTargets()
 	targets.reserve(100);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 6; i++)
 	{	
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
@@ -661,8 +668,8 @@ static void Update(float secondsElapsed) {
 		if (glfwGetKey(gWindow, GLFW_KEY_LEFT_SHIFT) && bulletTimeHitZero == false)
 		{
 			isUsingBulletTime = true;
+			SManager->FastForwardAll();
 		}
-
 		if (isUsingBulletTime)
 		{
 			bulletTimeCooldown -= secondsElapsed;
@@ -674,6 +681,7 @@ static void Update(float secondsElapsed) {
 		}
 		else if (!isUsingBulletTime)
 		{
+			SManager->ResetFastForwardAll();
 			bulletTimeCooldown += secondsElapsed / 5;
 			if (bulletTimeCooldown > maxBulletTimeCooldown)
 			{
