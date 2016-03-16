@@ -473,12 +473,15 @@ void CollisionManager::checkAll()
 					ComponentCollision* thatCC = static_cast<ComponentCollision*>(thatGO->GetComponent(PHYSICS));
 
 					thatCC->updateFrame(thatGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thatCC->_cMesh[0]->boneNum == -1 ? false : true));
-
+					if (thatCC->getOwner()->GetName() == "Target" && thatCC->getOwner()->dir.x != thatCC->getOwner()->dir.x)
+					{
+						thatCC->getOwner()->dir = glm::vec3(1.f, 0.f, 0.f);
+					}
 					if (thatCC->type == STATIC)
 						thisCC->checkVs(thatCC);
 				}
 			}
-		}
+		}   
 	}
 	
 	//STAGE 2 ALL VS PROJECTILES

@@ -203,6 +203,9 @@
     <ClInclude Include="ShieldVariables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AISpawner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragment-shader.frag">
@@ -296,6 +299,9 @@
     </None>
     <None Include="terrainshadow.vert">
       <Filter>Resource Files\Shadow</Filter>
+    </None>
+    <None Include="AISpawner.inl">
+      <Filter>Inline Files</Filter>
     </None>
   </ItemGroup>
 </Project>

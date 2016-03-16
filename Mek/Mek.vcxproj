@@ -40,6 +40,7 @@
     <ClInclude Include="2dOverlay.h" />
     <ClInclude Include="2dOverlayAnim.h" />
     <ClInclude Include="AIBehaviour.h" />
+    <ClInclude Include="AISpawner.h" />
     <ClInclude Include="Bitmap.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
@@ -75,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AIBehaviour.inl" />
+    <None Include="AISpawner.inl" />
     <None Include="combine.frag" />
     <None Include="fxaa.frag" />
     <None Include="gblurH.frag" />
