@@ -533,7 +533,7 @@ void CollisionManager::checkAll()
 
 				thatCC->updateFrame(thatGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thatCC->_cMesh[0]->boneNum == -1 ? false : true));
 
-				if (thatCC->type == STATIC)
+				if (thatCC->type == STATIC && thatGO->GetName() != "Target")
 					thatCC->checkVs(ObjectManager::instance().enemyPMap[i]->cc);
 
 			}

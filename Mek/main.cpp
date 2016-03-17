@@ -36,6 +36,7 @@
 #include "Model.h"
 #include "NavMesh.h"
 #include "RayVsOBB.h"
+#include "AISpawner.h"
 
 enum game_state { GAME, MENU };
 float hitTimer = 0.0;
@@ -45,6 +46,8 @@ float dshield = 0.0;
 float runTime = 0;
 std::vector<GameObject*> goVec;
 std::vector<Target*> targets;
+int maxNumOfTargets;
+TargetSpawner targetSpawner1;
 int currentEnemyToUpdate = 0;
 int targetsKilled = 0;
 twodOverlay* crosshair;
@@ -58,8 +61,13 @@ twodOverlay* machineIcon;
 twodOverlay* shotgunIcon;
 twodOverlay* bfgIcon;
 twodOverlay* iconGlow;
+twodOverlay* bulletTimeIconFront;
+twodOverlay* bulletTimeIconBack;
+twodOverlay* dashIconFront;
+twodOverlay* dashIconBack;
 //todo: revert back to menu
 game_state gameState = MENU;
+bool isPlayingSearchAndDestroy = true;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
 glm::vec3 white = glm::vec3(1.0, 1.0, 1.0);
@@ -204,15 +212,16 @@ void startGame()
 		s->Play();
 	}
 	gameState = GAME;
+	openingMessageTimer = 3.5f;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
 	model->pos = glm::vec3(15.5, 0.5, 1);
 	model->health = 100.f;
 	score = 0;
 	playTime = 0;
-	ammo = 11;
+	ammo = 10;
 	reloadTimer = 0.0f;
-	maxShieldHealth = 1.f;
+	maxShieldHealth = 100.f;
 	shieldRechargeTimer = 0.f;
 	shieldMaxTimer = 3.5f;
 	shieldRechargeAmount = 30.f;
@@ -221,22 +230,46 @@ void startGame()
 	hitInvulnTimer = 0.0f;
 	maxInvulnTime = 0.5f;
 	targetsKilled = 0;
-	for (int i = 0, s = targets.size(); i < s; i++)
+	for (int i = 0, s = maxNumOfTargets; i < s; i++)
 	{
 		targets[i]->go->scale = glm::vec3(1, 1, 1);
 		targets[i]->hasSpottedPlayer = false;
-		targets[i]->update(0.166f, testNaveMesh);
+		int randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+		int randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+		targets[i]->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+		targets[i]->go->pos = targets[i]->tempPosition.center;
+		targets[i]->generatePath(testNaveMesh);
 		targets[i]->hit = false;
 		targets[i]->alive = true;
 		targets[i]->go->health = 100.f;
+		targets[i]->go->dir = glm::vec3(1.f, 0.f, 0.f);
 	}
+    for (int i = maxNumOfTargets; i < targets.size(); i++)
+    {
+        targets[i]->go->scale = glm::vec3(0.1f);
+        targets[i]->hasSpottedPlayer = false;
+        targets[i]->update(0.166f, testNaveMesh);
+        targets[i]->hit = false;
+        targets[i]->alive = false;
+        targets[i]->go->health = 0.f;
+        targets[i]->go->pos = glm::vec3(5000.f);
+        targets[i]->go->dir = glm::vec3(1.f, 0.f, 0.f);
+    }
+    if (isPlayingSearchAndDestroy)
+    {
+        targetSpawner1.deactivate();
+    }
+    else
+    {
+        targetSpawner1.activate();
+    }
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
 	//SManager->vSounds[0][5]->Play();
 }
 void LoadTargets()
 {
-	targets.reserve(100);
+	targets.reserve(50);
 	float randomX, randomY;
 	//load in targets
 	for (int i = 0; i < 6; i++)
@@ -363,6 +396,27 @@ void LoadTargets()
 		tar->interp.buildCurve();
 		targets.push_back(tar);
 	}
+    for (unsigned int i = 6; i < 50; i++)
+    {
+        Target* tar = new Target("models/Mek.fbx", 0.5, SManager->GetOwnerList("Target"));
+        tar->interp.state = LINEAR;
+        randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+        randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+        tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+        tar->generatePath(testNaveMesh);
+        //tar->laserSound = laserSound;
+        tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+        if (tar->fireTimeTolerance < 3.f)
+            tar->firingfromRightBarrel = true;
+        else
+            tar->firingfromRightBarrel = false;
+        tar->interp.buildCurve();
+        tar->go->scale = glm::vec3(0);
+        tar->go->dir = glm::vec3(1, 0, 0);
+        tar->alive = false;
+        tar->go->health = 0.0f;
+        targets.push_back(tar);
+     }
 }
 
 static void DrawSceneShadowPass()
@@ -493,16 +547,39 @@ static void Render() {
 	{
 		crosshair->render();
 		skull->render();
-		char buffer[8];
-		_snprintf_s(buffer, 8, "%i/%i", targetsKilled, targets.size());
-		TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
+		if (isPlayingSearchAndDestroy)
+        {
+            char buffer[8];
+            _snprintf_s(buffer, 8, "%i/%i", targetsKilled, maxNumOfTargets);
+            TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
+        }
+        else
+        {
+            char buffer[8];
+            _snprintf_s(buffer, 8, "%i", maxNumOfTargets);
+            TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
+        }
 		char scbuff[64];
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
 		TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
-		if (openingMessageTimer >= 0.0f)
+		if (isPlayingSearchAndDestroy)
+        {
+            if (openingMessageTimer >= 0.0f)
+            {
+                char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
+                TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
+            }
+        }
+		else
 		{
-			char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
-			TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
+			if (openingMessageTimer >= 0.0f)
+			{
+				if (openingMessageTimer >= 0.0f)
+				{
+					char opMessageBuff[] = "SURVIVE";
+					TextRendering::getInstance().printText2D(opMessageBuff, -0.3, 0.3, 0.1, glm::mix(fontColour, white, openningMessageInterp));
+				}
+			}
 		}
 		char amBuff[8];
 		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
@@ -520,6 +597,19 @@ static void Render() {
 		shotgunIcon->render();
 		bfgIcon->render();
 		iconGlow->render();
+		dashIconBack->render();
+        if (!dashingHitZero)
+            dashIconFront->cutoffPercent(dashingCooldown / maxDashingCooldown);
+        else
+            dashIconFront->cutoffPercent(0);
+        dashIconFront->render();
+        bulletTimeIconBack->render();
+        if (!bulletTimeHitZero)
+            bulletTimeIconFront->cutoffPercent(bulletTimeCooldown / maxBulletTimeCooldown);
+        else
+            bulletTimeIconFront->cutoffPercent(0);
+        bulletTimeIconFront->render();
+
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -541,28 +631,6 @@ static void Update(float secondsElapsed) {
 	SManager->Update();
 	SoundSystem->Update();
 	runTime += secondsElapsed;
-
-
-	if (openningMessageInterpIsIncreasing)
-	{
-		openningMessageInterp += secondsElapsed;
-		if (openningMessageInterp >= 1.0f)
-		{
-			openningMessageInterp = 1.0f;
-			openningMessageInterpIsIncreasing = false;
-		}
-	}
-	else if (!openningMessageInterpIsIncreasing)
-	{
-		openningMessageInterp -= secondsElapsed;
-		if (openningMessageInterp <= 0.0f)
-		{
-			openningMessageInterp = 0.0f;
-			openningMessageInterpIsIncreasing = true;
-		}
-	}
-	if (openingMessageTimer >= 0.0f)
-		openingMessageTimer -= secondsElapsed;
 
 	glm::vec3 lInput;
 	glm::vec2 rInput;
@@ -739,6 +807,26 @@ static void Update(float secondsElapsed) {
 
 	if (gameState == GAME)
 	{
+		if (openningMessageInterpIsIncreasing)
+		{
+			openningMessageInterp += secondsElapsed;
+			if (openningMessageInterp >= 1.0f)
+			{
+				openningMessageInterp = 1.0f;
+				openningMessageInterpIsIncreasing = false;
+			}
+		}
+		else if (!openningMessageInterpIsIncreasing)
+		{
+			openningMessageInterp -= secondsElapsed;
+			if (openningMessageInterp <= 0.0f)
+			{
+				openningMessageInterp = 0.0f;
+				openningMessageInterpIsIncreasing = true;
+			}
+		}
+		if (openingMessageTimer >= 0.0f)
+			openingMessageTimer -= secondsElapsed;
 
 		//Begin Camera code
 		model->pos += fmy * (((c->getOwner()->vel + (IsDashing ? 0.2f : 0.0f)) * (isUsingBulletTime ? timeFactor + 0.3f : 1.0f)) * lInput.z) + model->force;
@@ -905,52 +993,60 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
-			targets[i]->currentMaxVelocity = targets[i]->maxVelocity;
-			if (isUsingBulletTime)
+			if (targets[i]->alive == true)
 			{
-				targets[i]->currentMaxVelocity = targets[i]->maxVelocity * timeFactor;
-			}
-			targets[i]->update(secondsElapsed / 5, testNaveMesh);
-			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) - 0.05; //this moves the targets to the correct position above the ground.
+				targets[i]->currentMaxVelocity = targets[i]->maxVelocity;
+				if (isUsingBulletTime)
+				{
+					targets[i]->currentMaxVelocity = targets[i]->maxVelocity * timeFactor;
+				}
+				targets[i]->update(secondsElapsed / 5, testNaveMesh);
+				targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) - 0.05; //this moves the targets to the correct position above the ground.
 
-			if (targets[i]->hasSpottedPlayer == false && targets[i]->alive)
-			{
-				targets[i]->canSeePlayer(model->pos);
-			}
+				if (targets[i]->hasSpottedPlayer == false && targets[i]->alive)
+				{
+					targets[i]->canSeePlayer(model->pos);
+				}
 
-			//if (shoot)
-			//{
-			//	if (RayVsOBB((model->pos), cam->forward(), targets[i]->cc->_cMesh[0]->fmin, targets[i]->cc->_cMesh[0]->fmax))
-			//	{
-			//		targets[i]->alive = false;
-			//		skull->play();
-			//		targetsKilled++;
-			//	}
-			//}
+				//if (shoot)
+				//{
+				//	if (RayVsOBB((model->pos), cam->forward(), targets[i]->cc->_cMesh[0]->fmin, targets[i]->cc->_cMesh[0]->fmax))
+				//	{
+				//		targets[i]->alive = false;
+				//		skull->play();
+				//		targetsKilled++;
+				//	}
+				//}
 
-			if (targets[i]->hit && targets[i]->alive)
-			{
-				targets[i]->alive = false;
-				skull->play();
-				targetsKilled++;
-			}
+				if (targets[i]->hit && targets[i]->alive)
+				{
+					targets[i]->alive = false;
+					targets[i]->go->pos = glm::vec3(50000.f);
+					skull->play();
+					targetsKilled++;
+				}
 
-			targets[i]->fireTimer += secondsElapsed * timeFactor;
-			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
-			{
-				targets[i]->fireTimer = 0.f;
-				if (targets[i]->firingfromRightBarrel)
-					targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
-				else
-					targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
-				targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
-				targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
-				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
-				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
-				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
-				targets[i]->fireTimeTolerance = randomClampedFloat(0.5f, 2.f);
+				targets[i]->fireTimer += secondsElapsed * (isUsingBulletTime ? timeFactor : 1.0f);
+				if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive == true && targets[i]->hasSpottedPlayer)
+				{
+					targets[i]->fireTimer = 0.f;
+					if (targets[i]->firingfromRightBarrel)
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
+					else
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
+					targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
+					targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
+					targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
+					targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
+					ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
+					targets[i]->fireTimeTolerance = randomClampedFloat(0.5f, 2.f);
+				}
 			}
 		}
+	    if (targetSpawner1.isActive)
+        {
+            targetSpawner1.update(targets, secondsElapsed);
+        }
 
 		skull->update(secondsElapsed);
 
@@ -970,8 +1066,23 @@ static void Update(float secondsElapsed) {
 		else
 			score = 0;
 
-		if (targetsKilled == targets.size() || c->IsPressed(XINPUT_GAMEPAD_BACK))
-			wonGame();
+	    if (isPlayingSearchAndDestroy)
+        {
+            if (targetsKilled == maxNumOfTargets || c->IsPressed(XINPUT_GAMEPAD_BACK))
+                wonGame();
+        }
+        else
+        {
+            TargetNumberIncreaseTime -= secondsElapsed * (isUsingBulletTime ? timeFactor : 1.0f);
+            if (TargetNumberIncreaseTime <= 0.0f)
+            {
+                TargetNumberIncreaseTime = maxTargetNumberIncreaseTimer;
+                maxNumOfTargets += 1;
+                if (maxNumOfTargets > 50)
+                    maxNumOfTargets = 50;
+            }
+        }
+
 
 		//Only a different if statement because we need a loseGame function to replace the wonGame function.
 		if (model->health <= 0)
@@ -1001,10 +1112,18 @@ static void Update(float secondsElapsed) {
 		}
 		else
 		{
-			if (glfwGetKey(gWindow, ' '))
-			{
-				startGame();
-			}
+		    if (glfwGetKey(gWindow, '1'))
+            {
+                maxNumOfTargets = 6;
+                isPlayingSearchAndDestroy = true;
+                startGame();
+            }
+            if (glfwGetKey(gWindow, '2'))
+            {
+                maxNumOfTargets = 6;
+                isPlayingSearchAndDestroy = false;
+                startGame();
+            }
 		}
 	}
 	std::vector<glm::mat4> trans;
@@ -1131,6 +1250,11 @@ void AppMain() {
 	shotgunIcon = new twodOverlay("Shotgun Icon.png", 0, -0.85, 4);
 	bfgIcon = new twodOverlay("Slug Shell Icon.png", 0.2f, -0.85f, 4);
 	iconGlow = new twodOverlay("Under Glow Icon.png", -0.2f, -0.85f, 4);
+	dashIconBack = new twodOverlay("Dash Not Active.png", -0.68f, 0.65f, 5);
+	dashIconFront = new twodOverlay("Dash Active.png", -0.68f, 0.65f, 5);
+	bulletTimeIconBack = new twodOverlay("Time Not Active.png", 0.68f, 0.65f, 5);
+	bulletTimeIconFront = new twodOverlay("Time Active.png", 0.68f, 0.65f, 5);
+
 	skull->updatePos(-0.85f, -0.75f, 4);
 	skull->cycle = true;
 
