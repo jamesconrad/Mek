@@ -120,8 +120,8 @@ Skybox* skyObs;
 FSound* s;
 void FreqBand(){
 	//Create an instance of the ConsoleMagic class
-	cm.Init(100, 50);//Resize the console window to 100 by 50 characters
-	cm.SetTitle("Frequency Bands");
+//cm.Init(100, 50);//Resize the console window to 100 by 50 characters
+//cm.SetTitle("Frequency Bands");
 
 
 
@@ -625,9 +625,9 @@ static void Update(float secondsElapsed) {
 	}
 
 	//SManager->FindSound("Background", "one")->ChannelPtr->setPaused(true);
-	cm.Clear(char(254), 0, 0);
+	//cm.Clear(char(254), 0, 0);
 	//SManager->FindSound("Background", "one")->GetSpectrum();
-	cm.Update();
+	//fclcm.Update();
 	SManager->Update();
 	SoundSystem->Update();
 	runTime += secondsElapsed;

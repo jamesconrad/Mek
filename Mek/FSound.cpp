@@ -239,7 +239,7 @@ void FSound::LoadSound(float _minDist, float _maxDist){
 }
 void FSound::Update(){
 	ChannelPtr->isPlaying(&isPlaying);
-	GetSpectrum();
+	//GetSpectrum();
 	FSystemPtr->cm->Update();
 	if (fastForward){
 		
