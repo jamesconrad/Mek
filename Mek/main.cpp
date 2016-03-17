@@ -120,8 +120,8 @@ Skybox* skyObs;
 FSound* s;
 void FreqBand(){
 	//Create an instance of the ConsoleMagic class
-	cm.Init(100, 50);//Resize the console window to 100 by 50 characters
-	cm.SetTitle("Frequency Bands");
+//cm.Init(100, 50);//Resize the console window to 100 by 50 characters
+//cm.SetTitle("Frequency Bands");
 
 
 
@@ -136,6 +136,15 @@ void initFSystem(){
 	//SManager->Fishman(s,"../debug/media/all.wav",2,100);
 	s->owner = std::string("Tutorial");
 	//s->Play();
+
+
+	FMOD::Reverb *reverb;
+	SoundSystem->SystemPtr->createReverb(&reverb);
+	FMOD_REVERB_PROPERTIES reverbProps = FMOD_PRESET_HANGAR;
+	reverb->setProperties(&reverbProps);
+	FMOD_VECTOR reverbPos = { 20.0f, 0.0f, 20.0f };
+	reverb->set3DAttributes(&reverbPos, 10.0f, 20.0f);
+	reverb->setActive(true);
 };
 
 void LoadShaders(char* vertFilename, char* fragFilename)
@@ -625,9 +634,9 @@ static void Update(float secondsElapsed) {
 	}
 
 	//SManager->FindSound("Background", "one")->ChannelPtr->setPaused(true);
-	cm.Clear(char(254), 0, 0);
+	//cm.Clear(char(254), 0, 0);
 	//SManager->FindSound("Background", "one")->GetSpectrum();
-	cm.Update();
+	//fclcm.Update();
 	SManager->Update();
 	SoundSystem->Update();
 	runTime += secondsElapsed;
@@ -1469,7 +1478,7 @@ void AppMain() {
 			else if (i == 20)
 			{
 				gObject->SetName("Wall");
-				cModel->loadModel("models/wallz.dae");
+				cModel->loadModel("models/2boxes.dae");
 
 				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
