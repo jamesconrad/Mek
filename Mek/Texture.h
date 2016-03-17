@@ -2,10 +2,12 @@
 
 #include "include\GL\glew.h"
 #include "Bitmap.h"
+#include <map>
 
 class Texture {
 public:
 	Texture(char* file,
+		bool mip = true,
 		GLint minMagFiler = GL_LINEAR,
 		GLint wrapMode = GL_CLAMP_TO_EDGE);
 
@@ -25,4 +27,6 @@ private:
 	//copying disabled
 	Texture(const Texture&);
 	const Texture& operator=(const Texture&);
+
+	static std::map<char*, Texture*> imgMap;
 };

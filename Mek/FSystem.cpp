@@ -1,0 +1,109 @@
+#include "FSystem.h"
+namespace {
+	FMOD_RESULT result;
+	char name[256];
+
+	void ERRCHECK(FMOD_RESULT result)
+	{
+		if (result != FMOD_OK)
+		{
+			std::cout << "FMOD error! (%d) %s\n" << " " << result << " " << FMOD_ErrorString(result);
+			//	exit(-1);
+		}
+	}
+}
+FSystem::FSystem(){
+	sysVel = { 0.0, 0.0, 0.0 };
+	sysFor = { 0.0, 0.0, 0.0 };
+	sysUp = { 0.0, 0.0, 0.0 };
+	sysPos = { 0.0, 0.0, 0.0 };
+
+	result = FMOD::System_Create(&SystemPtr);
+	if (result != FMOD_OK){
+		std::cout << "Failed to create system! Error: "; ERRCHECK(result); std::cout << std::endl;
+	}
+
+	result = SystemPtr->getNumDrivers(&numberDrivers);
+	if (result != FMOD_OK){
+		std::cout << "Failed to get number of drivers! Error: "; ERRCHECK(result); std::cout << std::endl;
+	}
+
+	result = SystemPtr->getVersion(&version);
+	if (result != FMOD_OK){
+		std::cout << "Failed to get system version! Error: "; ERRCHECK(result); std::cout << std::endl;
+	}
+
+	if (numberDrivers == 0){
+		result = SystemPtr->setOutput(FMOD_OUTPUTTYPE_NOSOUND);
+		if (result != FMOD_OK){
+			std::cout << "Failed to set system output to no sound! Error: "; ERRCHECK(result); std::cout << std::endl;
+		}
+	}
+	else{
+		//retrieves current system's speakermode;
+		result = SystemPtr->getDriverCaps(0, &caps, 0, &speakermode);
+		if (result != FMOD_OK){
+			std::cout << "Failed to get speakermode! Error: "; ERRCHECK(result); std::cout << std::endl;
+		}
+		//sets speakermode to current system speakermode
+		result = SystemPtr->setSpeakerMode(speakermode);
+		if (result != FMOD_OK){
+			std::cout << "Failed to set speakermode! Error: "; ERRCHECK(result); std::cout << std::endl;
+		}
+
+		if (caps & FMOD_CAPS_HARDWARE_EMULATED){
+			result = SystemPtr->setDSPBufferSize(1024, 10);
+			if (result != FMOD_OK){
+				std::cout << "Failed to set DSP Buffer Size! Error: "; ERRCHECK(result); std::cout << std::endl;
+			}
+		}
+
+		result = SystemPtr->getDriverInfo(0, name, 256, 0);
+		if (result != FMOD_OK){
+			std::cout << "Failed to get Driver Info! Error: "; ERRCHECK(result); std::cout << std::endl;
+		}
+	}
+
+	result = SystemPtr->init(1000, FMOD_INIT_NORMAL, 0);
+	//if speakermode is not supported by the system switch it to stereo
+	if (result == FMOD_ERR_OUTPUT_CREATEBUFFER){
+		result = SystemPtr->setSpeakerMode(FMOD_SPEAKERMODE_STEREO);
+		if (result != FMOD_OK){
+			std::cout << "Failed to set Speakermode to Stereo! Error: "; ERRCHECK(result); std::cout << std::endl;
+		}
+
+		result = SystemPtr->init(100, FMOD_INIT_NORMAL, 0);
+		if (result != FMOD_OK){
+			std::cout << "Failed to Initialize System Stereo! Error: "; ERRCHECK(result); std::cout << std::endl;
+		}
+	}
+
+	result = SystemPtr->set3DSettings(1, 1, 1);
+	if (result != FMOD_OK){
+		std::cout << "Failed to set 3D Settings! Error: "; ERRCHECK(result); std::cout << std::endl;
+	}
+}
+FSystem::~FSystem(){
+	result = SystemPtr->close();
+	if (result != FMOD_OK){
+		std::cout << "Failed to Close System: "; ERRCHECK(result); std::cout << std::endl;
+	}
+	Clear();
+}
+void FSystem::Update(){
+	result = SystemPtr->set3DListenerAttributes(0, &sysPos, &sysVel, &sysFor, &sysUp); //up=
+	if (result != FMOD_OK){
+		std::cout << "Failed to set 3D Listerner Attributes in System: "; ERRCHECK(result); std::cout << std::endl;
+	}
+	SystemPtr->update();
+}
+void FSystem::Set(FMOD_VECTOR _pos, FMOD_VECTOR _for, FMOD_VECTOR _up, FMOD_VECTOR _vel){
+	sysPos = _pos;
+	sysFor = _for;
+	sysUp = _up;
+	sysVel = _vel;
+}
+void FSystem::Clear(){
+	SystemPtr = NULL;
+	delete SystemPtr;
+}

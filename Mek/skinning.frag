@@ -190,9 +190,9 @@ layout(location = 1) out vec4 Depth;
 layout(location = 2) out vec4 Normal;
 layout(location = 3) out vec4 LightObscurers;
 
-vec3 warmColour = vec3(0.25, 0.0, 0.0);
+vec3 warmColour = vec3(0.05, 0.0, 0.0);
 float alphaWarm = 0.1;
-vec3 coolColour = vec3(0.0, 0.0, 0.25);
+vec3 coolColour = vec3(0.0, 0.0, 0.05);
 float alphaCool = 0.8;
 
 vec3 getGoochColour(VSOutput In, vec3 coolColour, vec3 warmColour, PointLight Light)

@@ -6,7 +6,7 @@
 #include "lib\glm\gtc\matrix_transform.hpp"
 #include "lib\glm\gtx\rotate_vector.hpp"
 #include "include\IL\ilut.h"
-#include "SoundManager.h"
+#include "FSoundManager.h"
 
 // standard C++ libraries
 #include <cassert>
@@ -36,6 +36,7 @@
 #include "Model.h"
 #include "NavMesh.h"
 #include "RayVsOBB.h"
+#include "AISpawner.h"
 
 enum game_state { GAME, MENU };
 float hitTimer = 0.0;
@@ -45,6 +46,8 @@ float dshield = 0.0;
 float runTime = 0;
 std::vector<GameObject*> goVec;
 std::vector<Target*> targets;
+int maxNumOfTargets;
+TargetSpawner targetSpawner1;
 int currentEnemyToUpdate = 0;
 int targetsKilled = 0;
 twodOverlay* crosshair;
@@ -58,8 +61,13 @@ twodOverlay* machineIcon;
 twodOverlay* shotgunIcon;
 twodOverlay* bfgIcon;
 twodOverlay* iconGlow;
+twodOverlay* bulletTimeIconFront;
+twodOverlay* bulletTimeIconBack;
+twodOverlay* dashIconFront;
+twodOverlay* dashIconBack;
 //todo: revert back to menu
 game_state gameState = MENU;
+bool isPlayingSearchAndDestroy = true;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
 glm::vec3 white = glm::vec3(1.0, 1.0, 1.0);
@@ -92,10 +100,12 @@ float openningMessageInterp = 0.0f;
 bool openningMessageInterpIsIncreasing = false;
 NavMesh testNaveMesh;
 bool dShield = false;
-SoundManager* SManager;
+bool BackPaused = false;
+ConsoleMagic cm;
+FSoundManager* SManager;
 FSystem* SoundSystem;
 //Model* testmodel;
-
+bool isTutorial = false;
 Framebuffer* framebuff[4];
 FramebufferEffects* framebuffeffects;
 
@@ -107,18 +117,28 @@ Terrain* ground;
 Skybox* sky;
 Skybox* skyObs;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
+FSound* s;
+void FreqBand(){
+	//Create an instance of the ConsoleMagic class
+//cm.Init(100, 50);//Resize the console window to 100 by 50 characters
+//cm.SetTitle("Frequency Bands");
 
+
+
+}
 void initFSystem(){
 	SoundSystem = new FSystem;
-	SManager = new SoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
-	//FSound* laserSound = new FSound(SoundSystem, "../Debug/media/drumloop.wav", SOUND_TYPE_3D_LOOP, ROLLOFF_LINEARSQUARE, 0.5, 20);
-	//laserSound->Play();
-	//laserSound->soundPos = FMOD_VECTOR{ 0, -28, 0 };
-	SManager->printOList(); 
-	SManager->FindAndPlay("Player", "ShieldWarning");
+	SoundSystem->cm = &cm;
+	s = new FSound(SoundSystem, "FishTutorial", SOUND_TYPE_2D);
+	SManager = new FSoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
+	SManager->printOList();
+	SManager->Robot(s, "../debug/media/all.wav", 750, 3, 1.6);
+	//SManager->Fishman(s,"../debug/media/all.wav",2,100);
+	s->owner = std::string("Tutorial");
+	//s->Play();
 };
 
-void LoadShaders(char* vertFilename, char* fragFilename) 
+void LoadShaders(char* vertFilename, char* fragFilename)
 {
 	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
 	Program::getInstance().createShader("standard", GL_FRAGMENT_SHADER, fragFilename);
@@ -152,20 +172,20 @@ float tElap = 0;
 static Texture* LoadTexture(char* filename) {
 	Bitmap bmp;
 	bmp.bitmapFromFile(filename);
-    bmp.flipVertically();
-    return new Texture(filename);
+	bmp.flipVertically();
+	return new Texture(filename);
 }
 // initialises the gWoodenCrate global
 static void LoadWoodenCrateAsset() {
-    LoadShaders("shaders/vertex-shader.vert", "shaders/fragment-shader.frag");
+	LoadShaders("shaders/vertex-shader.vert", "shaders/fragment-shader.frag");
 }
 // convenience function that returns a translation matrix
 glm::mat4 translate(GLfloat x, GLfloat y, GLfloat z) {
-    return glm::translate(glm::mat4(), glm::vec3(x,y,z));
+	return glm::translate(glm::mat4(), glm::vec3(x, y, z));
 }
 // convenience function that returns a scaling matrix
 glm::mat4 scale(GLfloat x, GLfloat y, GLfloat z) {
-    return glm::scale(glm::mat4(), glm::vec3(x,y,z));
+	return glm::scale(glm::mat4(), glm::vec3(x, y, z));
 }
 //create all the `instance` structs for the 3D scene, and add them to `gInstances`
 static void CreateInstances() {
@@ -179,20 +199,27 @@ void wonGame()
 	std::reverse(scoreTable.begin(), scoreTable.end());
 	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
+	SManager->StopAll();
 
 	shieldHealth = 100.f; //Just work with me.
 }
 void startGame()
 {
 	SManager->FindAndPlay("Background", "one");
+	SManager->FindAndPause("Background", "one");
+	if (!isTutorial){
+		isTutorial = true;
+		s->Play();
+	}
 	gameState = GAME;
+	openingMessageTimer = 3.5f;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
 	model->pos = glm::vec3(15.5, 0.5, 1);
 	model->health = 100.f;
 	score = 0;
 	playTime = 0;
-	ammo = 11;
+	ammo = 10;
 	reloadTimer = 0.0f;
 	maxShieldHealth = 100.f;
 	shieldRechargeTimer = 0.f;
@@ -203,29 +230,53 @@ void startGame()
 	hitInvulnTimer = 0.0f;
 	maxInvulnTime = 0.5f;
 	targetsKilled = 0;
-	for (int i = 0, s = targets.size(); i < s; i++)
+	for (int i = 0, s = maxNumOfTargets; i < s; i++)
 	{
 		targets[i]->go->scale = glm::vec3(1, 1, 1);
 		targets[i]->hasSpottedPlayer = false;
-		targets[i]->update(0.166f, testNaveMesh);
+		int randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+		int randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+		targets[i]->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+		targets[i]->go->pos = targets[i]->tempPosition.center;
+		targets[i]->generatePath(testNaveMesh);
 		targets[i]->hit = false;
 		targets[i]->alive = true;
 		targets[i]->go->health = 100.f;
+		targets[i]->go->dir = glm::vec3(1.f, 0.f, 0.f);
 	}
+    for (int i = maxNumOfTargets; i < targets.size(); i++)
+    {
+        targets[i]->go->scale = glm::vec3(0.1f);
+        targets[i]->hasSpottedPlayer = false;
+        targets[i]->update(0.166f, testNaveMesh);
+        targets[i]->hit = false;
+        targets[i]->alive = false;
+        targets[i]->go->health = 0.f;
+        targets[i]->go->pos = glm::vec3(5000.f);
+        targets[i]->go->dir = glm::vec3(1.f, 0.f, 0.f);
+    }
+    if (isPlayingSearchAndDestroy)
+    {
+        targetSpawner1.deactivate();
+    }
+    else
+    {
+        targetSpawner1.activate();
+    }
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
 	//SManager->vSounds[0][5]->Play();
 }
 void LoadTargets()
 {
-	targets.reserve(100);
+	targets.reserve(50);
 	float randomX, randomY;
 	//load in targets
 	for (int i = 0; i < 6; i++)
-	{	
+	{
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
-		Target* tar = new Target("models/Mek.fbx", 0.5,SManager->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", 0.5, SManager->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -345,6 +396,27 @@ void LoadTargets()
 		tar->interp.buildCurve();
 		targets.push_back(tar);
 	}
+    for (unsigned int i = 6; i < 50; i++)
+    {
+        Target* tar = new Target("models/Mek.fbx", 0.5, SManager->GetOwnerList("Target"));
+        tar->interp.state = LINEAR;
+        randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
+        randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
+        tar->tempPosition = testNaveMesh.TriangleSet[randomX][randomY];
+        tar->generatePath(testNaveMesh);
+        //tar->laserSound = laserSound;
+        tar->fireTimeTolerance = randomClampedFloat(1.f, 3.f);
+        if (tar->fireTimeTolerance < 3.f)
+            tar->firingfromRightBarrel = true;
+        else
+            tar->firingfromRightBarrel = false;
+        tar->interp.buildCurve();
+        tar->go->scale = glm::vec3(0);
+        tar->go->dir = glm::vec3(1, 0, 0);
+        tar->alive = false;
+        tar->go->health = 0.0f;
+        targets.push_back(tar);
+     }
 }
 
 static void DrawSceneShadowPass()
@@ -374,9 +446,9 @@ static void DrawSceneShadowPass()
 
 static void DrawScene(int shadowMapTexID)
 {
-	
+
 	sky->render(false);
-//	skyObs->render(true);
+	//	skyObs->render(true);
 	ground->Render(shadowMapTexID);
 	//animatedMechGC->render(); //Source of the glError 1282
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
@@ -387,7 +459,7 @@ static void DrawScene(int shadowMapTexID)
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			//cc->renderHitbox();
+			cc->renderHitbox();
 		}
 	}
 
@@ -408,7 +480,7 @@ static void DrawScene(int shadowMapTexID)
 		if (targets[i]->alive)
 		{
 			targets[i]->cg->render();
-			//targets[i]->cc->renderHitbox();
+			targets[i]->cc->renderHitbox();
 		}
 	}
 	//gCol->renderHitbox();
@@ -421,16 +493,16 @@ static void Render() {
 
 
 
-    // clear everything
-    glClearColor(0, 0, 0, 1); // black
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// clear everything
+	glClearColor(0, 0, 0, 1); // black
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	framebuffeffects->PrepShadowMap();
 	DrawSceneShadowPass();
 	DrawScene(framebuffeffects->FinShadowMap());
 
 	//_snprintf_s(buffer, 5, "%i", score);
-    // swap the display buffers (displays what was just drawn)
+	// swap the display buffers (displays what was just drawn)
 
 	//if (numpadPress[3])
 	if (gameState == GAME)
@@ -445,7 +517,7 @@ static void Render() {
 	//if (numpadPress[1])
 	framebuffeffects->Bloom(4);
 	//if (numpadPress[2])
-	framebuffeffects->FXAA();		
+	framebuffeffects->FXAA();
 
 	framebuff[0]->Unbind();
 	Program::getInstance().bind("pass");
@@ -475,16 +547,39 @@ static void Render() {
 	{
 		crosshair->render();
 		skull->render();
-		char buffer[8];
-		_snprintf_s(buffer, 8, "%i/%i", targetsKilled, targets.size());
-		TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
+		if (isPlayingSearchAndDestroy)
+        {
+            char buffer[8];
+            _snprintf_s(buffer, 8, "%i/%i", targetsKilled, maxNumOfTargets);
+            TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
+        }
+        else
+        {
+            char buffer[8];
+            _snprintf_s(buffer, 8, "%i", maxNumOfTargets);
+            TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
+        }
 		char scbuff[64];
 		_snprintf_s(scbuff, 64, "SCORE:%i", score);
 		TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
-		if (openingMessageTimer >= 0.0f)
+		if (isPlayingSearchAndDestroy)
+        {
+            if (openingMessageTimer >= 0.0f)
+            {
+                char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
+                TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
+            }
+        }
+		else
 		{
-			char opMessageBuff[] = "DESTROY ALL ENEMY MEKS";
-			TextRendering::getInstance().printText2D(opMessageBuff, -0.9, 0.3, 0.085, glm::mix(fontColour, white, openningMessageInterp));
+			if (openingMessageTimer >= 0.0f)
+			{
+				if (openingMessageTimer >= 0.0f)
+				{
+					char opMessageBuff[] = "SURVIVE";
+					TextRendering::getInstance().printText2D(opMessageBuff, -0.3, 0.3, 0.1, glm::mix(fontColour, white, openningMessageInterp));
+				}
+			}
 		}
 		char amBuff[8];
 		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
@@ -494,52 +589,53 @@ static void Render() {
 			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, white, noammoInterp));
 		ShieldBack->render();
 		ShieldFront->cutoffPercent(shieldHealth / maxShieldHealth);
-	    ShieldFront->render();
+		ShieldFront->render();
 		HPback->render();
 		HPFront->cutoffPercent(model->health / 100.f);
-	    HPFront->render();
+		HPFront->render();
 		machineIcon->render();
 		shotgunIcon->render();
 		bfgIcon->render();
 		iconGlow->render();
+		dashIconBack->render();
+        if (!dashingHitZero)
+            dashIconFront->cutoffPercent(dashingCooldown / maxDashingCooldown);
+        else
+            dashIconFront->cutoffPercent(0);
+        dashIconFront->render();
+        bulletTimeIconBack->render();
+        if (!bulletTimeHitZero)
+            bulletTimeIconFront->cutoffPercent(bulletTimeCooldown / maxBulletTimeCooldown);
+        else
+            bulletTimeIconFront->cutoffPercent(0);
+        bulletTimeIconFront->render();
+
 	}
 	glEnable(GL_DEPTH_TEST);
 
-    glfwSwapBuffers(gWindow);
+	glfwSwapBuffers(gWindow);
 }
 #define SHOT_CD 0.1
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
+	s->Update();
+	if (!s->IsPlaying()){
+		SManager->FindAndUnpause("Background", "one");
+	}
+
+	//SManager->FindSound("Background", "one")->ChannelPtr->setPaused(true);
+	//cm.Clear(char(254), 0, 0);
+	//SManager->FindSound("Background", "one")->GetSpectrum();
+	//fclcm.Update();
 	SManager->Update();
 	SoundSystem->Update();
 	runTime += secondsElapsed;
 
-	
-	if (openningMessageInterpIsIncreasing)
-	{
-		openningMessageInterp += secondsElapsed;
-		if (openningMessageInterp >= 1.0f)
-		{
-			openningMessageInterp = 1.0f;
-			openningMessageInterpIsIncreasing = false;
-		}
-	}
-	else if (!openningMessageInterpIsIncreasing)
-	{
-		openningMessageInterp -= secondsElapsed;
-		if (openningMessageInterp <= 0.0f)
-		{
-			openningMessageInterp = 0.0f;
-			openningMessageInterpIsIncreasing = true;
-		}
-	}
-	if (openingMessageTimer >= 0.0f)
-		openingMessageTimer -= secondsElapsed;
-
 	glm::vec3 lInput;
 	glm::vec2 rInput;
 	Camera* cam = &Camera::getInstance();
+
 	glm::vec3 f = cam->forward();
 	glm::vec3 r = cam->right();
 	glm::vec3 fmy = cam->forward();
@@ -561,7 +657,7 @@ static void Update(float secondsElapsed) {
 			numpadPress[i] = false;
 	}
 
-	
+
 	//system("CLS");
 	//cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
 	//cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
@@ -633,13 +729,24 @@ static void Update(float secondsElapsed) {
 			currentWeapon = bfg;
 			iconGlow->pos = glm::vec3(0.2f, -0.85f, 4);
 		}
+		if (glfwGetKey(gWindow, 'P'))
+		{
+			if (BackPaused){
+				SManager->FindAndUnpause("Background", "one");
+				BackPaused = false;
+			}
+			else{
+				SManager->FindAndPause("Background", "one");
+				BackPaused = true;
+			}
+		}
 
 		isUsingBulletTime = false;
 		if (glfwGetKey(gWindow, GLFW_KEY_LEFT_SHIFT) && bulletTimeHitZero == false)
 		{
 			isUsingBulletTime = true;
+			SManager->FastForwardAll();
 		}
-
 		if (isUsingBulletTime)
 		{
 			bulletTimeCooldown -= secondsElapsed;
@@ -651,6 +758,7 @@ static void Update(float secondsElapsed) {
 		}
 		else if (!isUsingBulletTime)
 		{
+			SManager->ResetFastForwardAll();
 			bulletTimeCooldown += secondsElapsed / 5;
 			if (bulletTimeCooldown > maxBulletTimeCooldown)
 			{
@@ -659,7 +767,7 @@ static void Update(float secondsElapsed) {
 			}
 		}
 		//std::cout << bulletTimeCooldown << std::endl;
-		
+
 
 
 
@@ -699,7 +807,27 @@ static void Update(float secondsElapsed) {
 
 	if (gameState == GAME)
 	{
-		
+		if (openningMessageInterpIsIncreasing)
+		{
+			openningMessageInterp += secondsElapsed;
+			if (openningMessageInterp >= 1.0f)
+			{
+				openningMessageInterp = 1.0f;
+				openningMessageInterpIsIncreasing = false;
+			}
+		}
+		else if (!openningMessageInterpIsIncreasing)
+		{
+			openningMessageInterp -= secondsElapsed;
+			if (openningMessageInterp <= 0.0f)
+			{
+				openningMessageInterp = 0.0f;
+				openningMessageInterpIsIncreasing = true;
+			}
+		}
+		if (openingMessageTimer >= 0.0f)
+			openingMessageTimer -= secondsElapsed;
+
 		//Begin Camera code
 		model->pos += fmy * (((c->getOwner()->vel + (IsDashing ? 0.2f : 0.0f)) * (isUsingBulletTime ? timeFactor + 0.3f : 1.0f)) * lInput.z) + model->force;
 		model->force = model->force / 1.2f;
@@ -722,7 +850,7 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD && ammo > 0 && reloadTimer == 0.0f)
 		{
-			FSound* sounds = SManager->FindSound("Player","Projectile");
+			FSound* sounds = SManager->FindSound("Player", "Projectile");
 			//sounds->Play();
 			Projectile* pr;
 
@@ -770,8 +898,8 @@ static void Update(float secondsElapsed) {
 
 
 
-				shotcd = 0;
-			
+			shotcd = 0;
+
 		}
 
 		if (reloadTimer > 0.0f)
@@ -806,8 +934,6 @@ static void Update(float secondsElapsed) {
 				}
 			}
 		}
-
-		std::cout << SManager->IsPlaying("Player", "ShieldWarning");
 		dshield += secondsElapsed;
 		hitTimer += secondsElapsed;
 		if (playerIsHit){
@@ -819,13 +945,14 @@ static void Update(float secondsElapsed) {
 			if (hitTimer > 0.5 && shieldHealth < 0){
 				dShield = true;
 				SManager->FindAndPlay("Player", "NoShield");
+
 			}
 			if (dShield = true && dshield >5){
 				SManager->FindAndPlay("Player", "ShieldWarning");
 				dShield = false;
 				dshield = 0;
 			}
-			
+
 		}
 		if (hitInvulnTimer >= 0.0f)
 		{
@@ -847,13 +974,13 @@ static void Update(float secondsElapsed) {
 					shieldHealth = maxShieldHealth;
 			}
 		}
-		
+
 
 		CollisionManager::instance().checkAll();
-		
+
 		ObjectManager::instance().updateProjectile(secondsElapsed);
 		ObjectManager::instance().updateEnemyProjectile(secondsElapsed);
-		
+
 		if (targets[currentEnemyToUpdate]->hasSpottedPlayer == true && targets[currentEnemyToUpdate]->alive)
 		{
 			targets[currentEnemyToUpdate]->selectedToDoCombatUpdate = true;
@@ -866,52 +993,60 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
-			targets[i]->currentMaxVelocity = targets[i]->maxVelocity;
-			if (isUsingBulletTime)
+			if (targets[i]->alive == true)
 			{
-				targets[i]->currentMaxVelocity = targets[i]->maxVelocity * timeFactor;
-			}
-			targets[i]->update(secondsElapsed / 5, testNaveMesh);
-			targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) - 0.05; //this moves the targets to the correct position above the ground.
+				targets[i]->currentMaxVelocity = targets[i]->maxVelocity;
+				if (isUsingBulletTime)
+				{
+					targets[i]->currentMaxVelocity = targets[i]->maxVelocity * timeFactor;
+				}
+				targets[i]->update(secondsElapsed / 5, testNaveMesh);
+				targets[i]->go->pos.y = ground->HeightAtLocation(targets[i]->go->pos) - 0.05; //this moves the targets to the correct position above the ground.
 
-			if (targets[i]->hasSpottedPlayer == false && targets[i]->alive)
-			{
-				targets[i]->canSeePlayer(model->pos);
-			}
+				if (targets[i]->hasSpottedPlayer == false && targets[i]->alive)
+				{
+					targets[i]->canSeePlayer(model->pos);
+				}
 
-			//if (shoot)
-			//{
-			//	if (RayVsOBB((model->pos), cam->forward(), targets[i]->cc->_cMesh[0]->fmin, targets[i]->cc->_cMesh[0]->fmax))
-			//	{
-			//		targets[i]->alive = false;
-			//		skull->play();
-			//		targetsKilled++;
-			//	}
-			//}
+				//if (shoot)
+				//{
+				//	if (RayVsOBB((model->pos), cam->forward(), targets[i]->cc->_cMesh[0]->fmin, targets[i]->cc->_cMesh[0]->fmax))
+				//	{
+				//		targets[i]->alive = false;
+				//		skull->play();
+				//		targetsKilled++;
+				//	}
+				//}
 
-			if (targets[i]->hit && targets[i]->alive)
-			{
-				targets[i]->alive = false;
-				skull->play();
-				targetsKilled++;
-			}
-			
-			targets[i]->fireTimer += secondsElapsed * timeFactor;
-			if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive && targets[i]->hasSpottedPlayer)
-			{
-				targets[i]->fireTimer = 0.f;
-				if (targets[i]->firingfromRightBarrel)
-					targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
-				else
-					targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
-				targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
-				targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
-				targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
-				targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
-				ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
-				targets[i]->fireTimeTolerance = randomClampedFloat(0.5f, 2.f);
+				if (targets[i]->hit && targets[i]->alive)
+				{
+					targets[i]->alive = false;
+					targets[i]->go->pos = glm::vec3(50000.f);
+					skull->play();
+					targetsKilled++;
+				}
+
+				targets[i]->fireTimer += secondsElapsed * (isUsingBulletTime ? timeFactor : 1.0f);
+				if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive == true && targets[i]->hasSpottedPlayer)
+				{
+					targets[i]->fireTimer = 0.f;
+					if (targets[i]->firingfromRightBarrel)
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
+					else
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
+					targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
+					targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
+					targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
+					targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
+					ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
+					targets[i]->fireTimeTolerance = randomClampedFloat(0.5f, 2.f);
+				}
 			}
 		}
+	    if (targetSpawner1.isActive)
+        {
+            targetSpawner1.update(targets, secondsElapsed);
+        }
 
 		skull->update(secondsElapsed);
 
@@ -931,16 +1066,31 @@ static void Update(float secondsElapsed) {
 		else
 			score = 0;
 
-		if (targetsKilled == targets.size() || c->IsPressed(XINPUT_GAMEPAD_BACK))
-			wonGame();
-		
+	    if (isPlayingSearchAndDestroy)
+        {
+            if (targetsKilled == maxNumOfTargets || c->IsPressed(XINPUT_GAMEPAD_BACK))
+                wonGame();
+        }
+        else
+        {
+            TargetNumberIncreaseTime -= secondsElapsed * (isUsingBulletTime ? timeFactor : 1.0f);
+            if (TargetNumberIncreaseTime <= 0.0f)
+            {
+                TargetNumberIncreaseTime = maxTargetNumberIncreaseTimer;
+                maxNumOfTargets += 1;
+                if (maxNumOfTargets > 50)
+                    maxNumOfTargets = 50;
+            }
+        }
+
+
 		//Only a different if statement because we need a loseGame function to replace the wonGame function.
 		if (model->health <= 0)
 		{
 			wonGame();
 		}
 
-		
+
 		//printf("%f\n", ground->HeightAtLocation(model->pos));
 		//cam->lookAt(glm::vec3(7.5, 0, -11));
 	}
@@ -962,10 +1112,18 @@ static void Update(float secondsElapsed) {
 		}
 		else
 		{
-			if (glfwGetKey(gWindow, ' '))
-			{
-				startGame();
-			}
+		    if (glfwGetKey(gWindow, '1'))
+            {
+                maxNumOfTargets = 6;
+                isPlayingSearchAndDestroy = true;
+                startGame();
+            }
+            if (glfwGetKey(gWindow, '2'))
+            {
+                maxNumOfTargets = 6;
+                isPlayingSearchAndDestroy = false;
+                startGame();
+            }
 		}
 	}
 	std::vector<glm::mat4> trans;
@@ -977,48 +1135,49 @@ static void Update(float secondsElapsed) {
 }
 // records how far the y axis has been scrolled
 void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
-    gScrollY += deltaY;
+	gScrollY += deltaY;
 }
 void OnError(int errorCode, const char* msg) {
-    throw std::runtime_error(msg);
+	throw std::runtime_error(msg);
 }
 // the program starts here
 void AppMain() {
+	FreqBand();
 	initFSystem();
 	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/FirstLevelNavMesh-scaled.obj");
 	srand(time(NULL));
-    // initialise GLFW
-    glfwSetErrorCallback(OnError);
-    if(!glfwInit())
-        throw std::runtime_error("glfwInit failed");
+	// initialise GLFW
+	glfwSetErrorCallback(OnError);
+	if (!glfwInit())
+		throw std::runtime_error("glfwInit failed");
 
-    // open a window with GLFW
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	// open a window with GLFW
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
 	if (!gWindow)
 		throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 4.3?");
 
-    // GLFW settings
-    glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPos(gWindow, 0, 0);
-    glfwSetScrollCallback(gWindow, OnScroll);
-    glfwMakeContextCurrent(gWindow);
+	// GLFW settings
+	glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPos(gWindow, 0, 0);
+	glfwSetScrollCallback(gWindow, OnScroll);
+	glfwMakeContextCurrent(gWindow);
 
 	// required or we crash on VAO creation
 	glewExperimental = GL_TRUE;
-    // initialise GLEW
+	// initialise GLEW
 	if (glewInit() != GLEW_OK)
 	{
-        throw std::runtime_error("glewInit failed");
+		throw std::runtime_error("glewInit failed");
 	}
 
-    // GLEW throws some errors so discard all the errors so far
-    while(glGetError() != GL_NO_ERROR) {}
+	// GLEW throws some errors so discard all the errors so far
+	while (glGetError() != GL_NO_ERROR) {}
 
 	// Init DevIL
 	ilInit();
@@ -1033,37 +1192,37 @@ void AppMain() {
 		wglSwapIntervalEXT(1);
 #endif
 
-    // print out some info about the graphics drivers
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+	// print out some info about the graphics drivers
+	std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+	std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+	std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 
-    // make sure OpenGL version 3.2 API is available
-    if(!GLEW_VERSION_4_3)
-        throw std::runtime_error("OpenGL 4.3 API is not available.");
+	// make sure OpenGL version 3.2 API is available
+	if (!GLEW_VERSION_4_3)
+		throw std::runtime_error("OpenGL 4.3 API is not available.");
 
-    // OpenGL settings
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// OpenGL settings
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // initialise the gWoodenCrate asset
-    LoadWoodenCrateAsset();
+	// initialise the gWoodenCrate asset
+	LoadWoodenCrateAsset();
 
-    // create all the instances in the 3D scene based on the gWoodenCrate asset
-    CreateInstances();
+	// create all the instances in the 3D scene based on the gWoodenCrate asset
+	CreateInstances();
 
 	framebuff[0] = new Framebuffer();
 	framebuff[0]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuff[0]->CreateColorTexture(4, SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuff[1] = new Framebuffer();
-	framebuff[1]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
-	framebuff[1]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[1]->CreateDepthTexture(SCREEN_SIZE.x / 2, SCREEN_SIZE.y / 2);
+	framebuff[1]->CreateColorTexture(1, SCREEN_SIZE.x / 2, SCREEN_SIZE.y / 2);
 	framebuff[2] = new Framebuffer();
-	framebuff[2]->CreateDepthTexture(SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
-	framebuff[2]->CreateColorTexture(1, SCREEN_SIZE.x/2, SCREEN_SIZE.y/2);
+	framebuff[2]->CreateDepthTexture(SCREEN_SIZE.x / 2, SCREEN_SIZE.y / 2);
+	framebuff[2]->CreateColorTexture(1, SCREEN_SIZE.x / 2, SCREEN_SIZE.y / 2);
 	framebuff[3] = new Framebuffer();
 	framebuff[3]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuff[3]->CreateColorTexture(4, SCREEN_SIZE.x, SCREEN_SIZE.y);
@@ -1074,9 +1233,9 @@ void AppMain() {
 	framebuffeffects->LoadShadowMapShaders();
 	framebuffeffects->LoadGodRayShaders();
 
-    // setup Camera::getInstance()
-    Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
-    Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
+	// setup Camera::getInstance()
+	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
+	Camera::getInstance().setViewportAspectRatio(SCREEN_SIZE.x / SCREEN_SIZE.y);
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().setFieldOfView(maxFOV);
 
@@ -1091,6 +1250,11 @@ void AppMain() {
 	shotgunIcon = new twodOverlay("Shotgun Icon.png", 0, -0.85, 4);
 	bfgIcon = new twodOverlay("Slug Shell Icon.png", 0.2f, -0.85f, 4);
 	iconGlow = new twodOverlay("Under Glow Icon.png", -0.2f, -0.85f, 4);
+	dashIconBack = new twodOverlay("Dash Not Active.png", -0.68f, 0.65f, 5);
+	dashIconFront = new twodOverlay("Dash Active.png", -0.68f, 0.65f, 5);
+	bulletTimeIconBack = new twodOverlay("Time Not Active.png", 0.68f, 0.65f, 5);
+	bulletTimeIconFront = new twodOverlay("Time Active.png", 0.68f, 0.65f, 5);
+
 	skull->updatePos(-0.85f, -0.75f, 4);
 	skull->cycle = true;
 
@@ -1100,7 +1264,7 @@ void AppMain() {
 	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
 	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O.png", "fr-O.png" };
 	sky = new Skybox(sb, Osb);
-	
+
 	//skyObs = new Skybox(Osb);
 	//MODEL INITS
 
@@ -1124,10 +1288,10 @@ void AppMain() {
 	gCol->createHitboxRender();
 	gp = gCol;
 	model->AddComponent(PHYSICS, gp);
-	ComponentInput* ci = new ComponentInput(0.05,0.05);
+	ComponentInput* ci = new ComponentInput(0.05, 0.05);
 	gp = ci;
 	model->AddComponent(CONTROLLER, gp);
-	
+
 	//PROPER INIT
 	for (int i = 0; i < 22; i++)
 	{
@@ -1218,7 +1382,7 @@ void AppMain() {
 
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, 73);
-				gObject->rot = glm::vec3(0, 65.44f , 0);
+				gObject->rot = glm::vec3(0, 65.44f, 0);
 			}
 			else if (i == 10)
 			{
@@ -1304,8 +1468,8 @@ void AppMain() {
 			}
 			else if (i == 20)
 			{
-				gObject->SetName("Crane");
-				cModel->loadModel("models/Crane.dae");
+				gObject->SetName("Wall");
+				cModel->loadModel("models/wallz.dae");
 
 				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
@@ -1329,7 +1493,6 @@ void AppMain() {
 			cCollision->setOwner(gObject);
 			cCollision->setCollisionMask(cModel->getScene());
 			cCollision->type = STATIC;
-			cCollision->setCollisionElip(glm::vec3(1, 1, 1));
 			cCollision->createHitboxRender();
 			gObject->AddComponent(PHYSICS, cCollision);
 			goVec.push_back(gObject);
@@ -1337,7 +1500,7 @@ void AppMain() {
 	}
 
 	LoadTargets();
-	
+
 	//testmodel = new Model();
 	//testmodel->loadModel("models/Watertower.dae");
 
@@ -1352,15 +1515,15 @@ void AppMain() {
 			lc->Base.Base.Color = spotLightColour;
 			lc->Base.Base.AmbientIntensity = 0.04f;
 			lc->Base.Base.DiffuseIntensity = 0.04f;
-			
+
 			lc->Base.Atten.Constant = 1;
 			lc->Base.Atten.Exp = 0;
 			lc->Base.Atten.Linear = 0;
-			
+
 			lc->Cutoff = 0.9f;
 			lc->Base.Position = glm::vec3(-6, 10, 21);
 			lc->Direction = glm::vec3(0, 0, 0);
-			
+
 			light->SetVars(lSPOT, lc);
 		}
 		if (i == 1)
@@ -1370,15 +1533,15 @@ void AppMain() {
 			lc->Base.Base.Color = spotLightColour;
 			lc->Base.Base.AmbientIntensity = 0.025f;
 			lc->Base.Base.DiffuseIntensity = 0.025f;
-			
+
 			lc->Base.Atten.Constant = 1;
 			lc->Base.Atten.Exp = 0;
 			lc->Base.Atten.Linear = 0;
-			
+
 			lc->Cutoff = 0.8;
 			lc->Base.Position = glm::vec3(-8, 9, 10);
 			lc->Direction = (glm::vec3(-10, 0, 20));
-			
+
 			light->SetVars(lSPOT, lc);
 		}
 		if (i == 2)
@@ -1442,15 +1605,15 @@ void AppMain() {
 			lc->Base.Base.Color = spotLightColour;
 			lc->Base.Base.AmbientIntensity = 0.04f;
 			lc->Base.Base.DiffuseIntensity = 0.04f;
-			
+
 			lc->Base.Atten.Constant = 1.0f;
 			lc->Base.Atten.Exp = 0;
 			lc->Base.Atten.Linear = 0;
-			
+
 			lc->Cutoff = 0.9f;
 			lc->Base.Position = glm::vec3(-10, 10, -10);//4 1 0
 			lc->Direction = glm::vec3(-1, 0, -1);// 5 0 0
-			
+
 			light->SetVars(lSPOT, lc);
 		}
 	}
@@ -1478,44 +1641,45 @@ void AppMain() {
 	wglSwapIntervalEXT(1);
 
 
-    // run while the window is open
-    double lastTime = glfwGetTime();
-    while(!glfwWindowShouldClose(gWindow)){
-        // process pending events
-        glfwPollEvents();
+	// run while the window is open
+	double lastTime = glfwGetTime();
+	while (!glfwWindowShouldClose(gWindow)){
+		// process pending events
+		glfwPollEvents();
 
-        // update the scene based on the time elapsed since last update
-        double thisTime = glfwGetTime();
-        Update((float)(thisTime - lastTime));
-        lastTime = thisTime;
+		// update the scene based on the time elapsed since last update
+		double thisTime = glfwGetTime();
+		Update((float)(thisTime - lastTime));
+		lastTime = thisTime;
 
-        // draw one frame
-        Render();
+		// draw one frame
+		Render();
 
-        // check for errors
+		// check for errors
 		GLenum error = glGetError();
 		if (error != GL_NO_ERROR)
 		{
 			std::cerr << "OpenGL Error " << error << " - " << glewGetErrorString(error) << std::endl;
 		}
 
-        //exit program if escape key is pressed
-        if(glfwGetKey(gWindow, GLFW_KEY_ESCAPE))
-            glfwSetWindowShouldClose(gWindow, GL_TRUE);
-    }
+		//exit program if escape key is pressed
+		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE))
+			glfwSetWindowShouldClose(gWindow, GL_TRUE);
+	}
 
-    // clean up and exit
-    glfwTerminate();
+	// clean up and exit
+	glfwTerminate();
 }
 
 
 int main(int argc, char *argv[]) {
-    try {
-        AppMain();
-    } catch (const std::exception& e){
+	try {
+		AppMain();
+	}
+	catch (const std::exception& e){
 		std::cerr << "ERROR: " << e.what() << std::endl;
-	    return EXIT_FAILURE;
-    }
+		return EXIT_FAILURE;
+	}
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
