@@ -1369,7 +1369,6 @@ void AppMain() {
 			cCollision->setOwner(gObject);
 			cCollision->setCollisionMask(cModel->getScene());
 			cCollision->type = STATIC;
-			cCollision->setCollisionElip(glm::vec3(1, 1, 1));
 			cCollision->createHitboxRender();
 			gObject->AddComponent(PHYSICS, cCollision);
 			goVec.push_back(gObject);
