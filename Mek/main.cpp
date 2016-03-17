@@ -136,6 +136,15 @@ void initFSystem(){
 	//SManager->Fishman(s,"../debug/media/all.wav",2,100);
 	s->owner = std::string("Tutorial");
 	//s->Play();
+
+
+	FMOD::Reverb *reverb;
+	SoundSystem->SystemPtr->createReverb(&reverb);
+	FMOD_REVERB_PROPERTIES reverbProps = FMOD_PRESET_HANGAR;
+	reverb->setProperties(&reverbProps);
+	FMOD_VECTOR reverbPos = { 20.0f, 0.0f, 20.0f };
+	reverb->set3DAttributes(&reverbPos, 10.0f, 20.0f);
+	reverb->setActive(true);
 };
 
 void LoadShaders(char* vertFilename, char* fragFilename)
@@ -1469,7 +1478,7 @@ void AppMain() {
 			else if (i == 20)
 			{
 				gObject->SetName("Wall");
-				cModel->loadModel("models/wallz.dae");
+				cModel->loadModel("models/2boxes.dae");
 
 				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);

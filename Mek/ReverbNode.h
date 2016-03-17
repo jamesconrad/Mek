@@ -1,4 +1,6 @@
-#include "SoundSystem.h"
+#ifndef REVERBNODE_H
+#define REVERBNODE_H
+#include "FSoundManager.h"
 
 class ReverbNode{
 public:
@@ -12,3 +14,5 @@ public:
 	~ReverbNode();
 
 };
+
+#endif
