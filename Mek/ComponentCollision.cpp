@@ -455,7 +455,15 @@ bool ComponentCollision::checkVs(ComponentCollision* c)
 					if (strcmp(c->_owner->GetName(), "PlayerProjectile") == 0)
 						ObjectManager::instance().pMap[c->_owner->handle]->alive = false;
 					else if (strcmp(c->_owner->GetName(), "EnemyProjectile") == 0)
+					{
+						if (c->_owner->handle >= ObjectManager::instance().enemyPMap.size())
+						{
+							int handlol = c->_owner->handle;
+							int epmapSize = ObjectManager::instance().enemyPMap.size();
+							std::cout << "Thar be a problem here";
+						}
 						ObjectManager::instance().enemyPMap[c->_owner->handle]->alive = false;
+					}
 				}
 				printf("NOTICE: %s.%s and %s.%s\n", _owner->GetName(), _cMesh[i]->name.c_str(), c->_owner->GetName(), c->_cMesh[j]->name.c_str());
 				return true;
@@ -523,7 +531,7 @@ void CollisionManager::checkAll()
 	for (int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
 	{
 		ObjectManager::instance().enemyPMap[i]->cc->updateFrame(NULL, false);
-
+		ObjectManager::instance().enemyPMap[i]->cc->getOwner()->handle = i;
 		for (int j = 0, ss = ObjectManager::instance().colMap.size(); j < ss; j++)
 		{
 			if (j != i)
@@ -555,6 +563,7 @@ void CollisionManager::checkAll()
 
 				if (ObjectManager::instance().enemyPMap[i]->go->health > 0)
 				{
+					ObjectManager::instance().enemyPMap[i]->cc->getOwner()->handle = i;
 					if (playerCC->checkVs(ObjectManager::instance().enemyPMap[i]->cc))
 					{
 						shieldHealth -= ObjectManager::instance().enemyPMap[i]->dmg;

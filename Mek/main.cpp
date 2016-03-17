@@ -774,7 +774,7 @@ static void Update(float secondsElapsed) {
 		//rotate camera based on mouse movement
 		float mouseSensitivity = 0.05f;
 		zoomingIn = false;
-		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_RIGHT))
+		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_RIGHT) && gameState == GAME)
 		{
 			zoomingIn = true;
 		}
