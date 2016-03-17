@@ -19,7 +19,7 @@ void twodOverlay::cutoffPercent(float c)
 
 twodOverlay::twodOverlay(char* fp, float x, float y, float scale)
 {
-	_tex = new Texture(fp);
+	_tex = new Texture(fp, false);
 
 	pos = glm::vec3(x, y, scale);
 	cutoff = 1;

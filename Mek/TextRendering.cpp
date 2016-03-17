@@ -18,7 +18,7 @@ unsigned int vao;
 void TextRendering::initText2D(char * texturePath){
 
 	// Initialize texture
-	Texture * textureID = new Texture(texturePath);
+	Texture * textureID = new Texture(texturePath, false);
 	Text2DTextureID = textureID->object();
 
 	// Initialize VBO
