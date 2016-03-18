@@ -1287,8 +1287,8 @@ void AppMain() {
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 	gCol = new ComponentCollision();
-	gCol->setCollisionMask(gModel->getScene());
 	gCol->setOwner(model);
+	gCol->setCollisionMask(gModel->getScene());
 	model->pos = glm::vec3(7.5, 0.5, -11);
 	model->vel = 0.1;
 	model->dir = glm::vec3(1, 0, 0);
@@ -1478,9 +1478,9 @@ void AppMain() {
 			else if (i == 20)
 			{
 				gObject->SetName("Wall");
-				cModel->loadModel("models/2boxes.dae");
+				cModel->loadModel("models/wallz2.dae");
 
-				gObject->scale = glm::vec3(1.5);
+				gObject->scale = glm::vec3(0.5);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
 			}
 			else if (i == 21)
@@ -1499,11 +1499,11 @@ void AppMain() {
 			cModel->setOwner(gObject);
 			c = cModel;
 			gObject->AddComponent(GRAPHICS, c);
+			gObject->AddComponent(PHYSICS, cCollision);
 			cCollision->setOwner(gObject);
 			cCollision->setCollisionMask(cModel->getScene());
 			cCollision->type = STATIC;
 			cCollision->createHitboxRender();
-			gObject->AddComponent(PHYSICS, cCollision);
 			goVec.push_back(gObject);
 		}
 	}

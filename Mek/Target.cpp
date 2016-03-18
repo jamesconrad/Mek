@@ -11,8 +11,8 @@ Target::Target(char* fp, float t, OwnerList* _oList)
 	cg->setOwner(go);
 	cg->loadModel(fp);
 	cc = new ComponentCollision();
-	cc->setCollisionMask(cg->getScene());
 	cc->setOwner(go);
+	cc->setCollisionMask(cg->getScene());
 	cc->createHitboxRender();
 	cc->type = STATIC;
 

@@ -92,7 +92,8 @@ void Model::loadScene(aiScene* scene)
 	position.reserve(numVertices);
 	normal.reserve(numVertices);
 	texcoord.reserve(numVertices);
-	boneweight.reserve(numVertices);
+	//boneweight.reserve(numVertices);
+	boneweight.resize(numVertices);
 	indices.reserve(numIndices);
 
 	for (unsigned int i = 0, s = _entries.size(); i < s; i++)
@@ -470,15 +471,15 @@ void Model::render()
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
 	glm::mat4 WVP = VP * W;
-	if (_numBones > 0)
-	{
-		Program::getInstance().bind("anim");
-		Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
-		Program::getInstance().setUniform("gWVP", WVP);
-		Program::getInstance().setUniform("gWorld", W);
-		Program::getInstance().updateLighting("anim");
-	}
-	else
+	//if (_numBones > 0)
+	//{
+	//	Program::getInstance().bind("anim");
+	//	Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
+	//	Program::getInstance().setUniform("gWVP", WVP);
+	//	Program::getInstance().setUniform("gWorld", W);
+	//	Program::getInstance().updateLighting("anim");
+	//}
+	//else
 	{
 		Program::getInstance().bind("skinning");
 		Program::getInstance().setUniform("gWVP", WVP);
@@ -518,10 +519,10 @@ void Model::render()
 void Model::renderShadowPass()
 {
 	Program::getInstance().bind("skinnedShadow");//todo: convert to animated
-	if (_numBones > 0)
-	{
-		Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
-	}
+	//if (_numBones > 0)
+	//{
+	//	Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
+	//}
 
 	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
 
