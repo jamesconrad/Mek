@@ -59,7 +59,7 @@ void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 	//	}
 	//}
 	//else
-	{
+	//{
 		for (int i = 0, s = _cMesh.size(); i < s; i++)
 		{
 			glm::mat4 h = glm::translate(glm::mat4(), _owner->pos);
@@ -77,7 +77,7 @@ void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 			_cMesh[i]->fhwR = _cMesh[i]->hwR * 0.1f *_owner->scale.x;
 			_cMesh[i]->fc = (_cMesh[i]->centre + _owner->pos);// *_owner->scale;
 		}
-	}
+	//}
 }
 
 void ComponentCollision::setCollisionMask(const aiScene* m)
@@ -107,11 +107,18 @@ void ComponentCollision::setCollisionMask(const aiScene* m)
 					bb->name = bone->mName.C_Str();
 					bb->boneNum = boneIndex;
 
+					bool minmaxInit = false;
+
 					for (int vertexIndex = 0; vertexIndex < bone->mNumWeights; vertexIndex++)
 					{
 						if (bone->mWeights[vertexIndex].mWeight > 0.75)
 						{
 							aiVector3D aiV = m->mMeshes[i]->mVertices[bone->mWeights[vertexIndex].mVertexId];
+							if (!minmaxInit)
+							{
+								bb->min = bb->max = glm::vec3(aiV.x, aiV.y, aiV.z);
+								minmaxInit = true;
+							}
 							//check vs max
 							aiV.x > bb->max.x ? bb->max.x = aiV.x : (aiV.x < bb->min.x ? bb->min.x = aiV.x : aiV.x);
 							aiV.y > bb->max.y ? bb->max.y = aiV.y : (aiV.y < bb->min.y ? bb->min.y = aiV.y : aiV.y);
