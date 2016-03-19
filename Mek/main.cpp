@@ -136,6 +136,15 @@ void initFSystem(){
 	//SManager->Fishman(s,"../debug/media/all.wav",2,100);
 	s->owner = std::string("Tutorial");
 	//s->Play();
+
+
+	FMOD::Reverb *reverb;
+	SoundSystem->SystemPtr->createReverb(&reverb);
+	FMOD_REVERB_PROPERTIES reverbProps = FMOD_PRESET_HANGAR;
+	reverb->setProperties(&reverbProps);
+	FMOD_VECTOR reverbPos = { 20.0f, 0.0f, 20.0f };
+	reverb->set3DAttributes(&reverbPos, 10.0f, 20.0f);
+	reverb->setActive(true);
 };
 
 void LoadShaders(char* vertFilename, char* fragFilename)
@@ -774,7 +783,7 @@ static void Update(float secondsElapsed) {
 		//rotate camera based on mouse movement
 		float mouseSensitivity = 0.05f;
 		zoomingIn = false;
-		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_RIGHT))
+		if (glfwGetMouseButton(gWindow, GLFW_MOUSE_BUTTON_RIGHT) && gameState == GAME)
 		{
 			zoomingIn = true;
 		}
@@ -1278,8 +1287,8 @@ void AppMain() {
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 	gCol = new ComponentCollision();
-	gCol->setCollisionMask(gModel->getScene());
 	gCol->setOwner(model);
+	gCol->setCollisionMask(gModel->getScene());
 	model->pos = glm::vec3(7.5, 0.5, -11);
 	model->vel = 0.1;
 	model->dir = glm::vec3(1, 0, 0);
@@ -1469,9 +1478,9 @@ void AppMain() {
 			else if (i == 20)
 			{
 				gObject->SetName("Wall");
-				cModel->loadModel("models/wallz.dae");
+				cModel->loadModel("models/wallz2.dae");
 
-				gObject->scale = glm::vec3(1.5);
+				gObject->scale = glm::vec3(0.05);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
 			}
 			else if (i == 21)
@@ -1490,11 +1499,11 @@ void AppMain() {
 			cModel->setOwner(gObject);
 			c = cModel;
 			gObject->AddComponent(GRAPHICS, c);
+			gObject->AddComponent(PHYSICS, cCollision);
 			cCollision->setOwner(gObject);
 			cCollision->setCollisionMask(cModel->getScene());
 			cCollision->type = STATIC;
 			cCollision->createHitboxRender();
-			gObject->AddComponent(PHYSICS, cCollision);
 			goVec.push_back(gObject);
 		}
 	}
