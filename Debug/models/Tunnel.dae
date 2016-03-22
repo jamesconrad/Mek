@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>100488896</author>
+      <authoring_tool>OpenCOLLADA2015</authoring_tool>
+      <comments>
+			ColladaMaya export options: 
+			bakeTransforms=0;relativePaths=1;preserveSourceTree=0;copyTextures=0;exportTriangles=0;exportCgfxFileReferences=1;
+			isSampling=0;curveConstrainSampling=0;removeStaticCurves=1;exportPhysics=1;exportConvexMeshGeometries=1;exportPolygonMeshes=1;exportLights=1;
+			exportCameras=1;exportJointsAndSkin=1;exportAnimations=1;exportOptimizedBezierAnimation=0;exportInvisibleNodes=0;exportDefaultCameras=0;
+			exportTexCoords=1;exportNormals=1;exportNormalsPerVertex=1;exportVertexColors=1;exportVertexColorsPerVertex=1;
+			exportTexTangents=0;exportTangents=0;exportReferencedMaterials=1;exportMaterialsOnly=0;
+			exportXRefs=1;dereferenceXRefs=1;exportCameraAsLookat=0;cameraXFov=0;cameraYFov=1;doublePrecision=0
+		</comments>
+      <source_data>file:///C:/Users/100488896/Documents/UOIT%20WORK/Semester%202/Graphics/New%20Models%20Low%20Poly/Tunnel.mb</source_data>
+    </contributor>
+    <created>2016-03-21T15:10:52</created>
+    <modified>2016-03-21T15:10:52</modified>
+    <unit name="centimeter" meter="0.01"/>
+    <up_axis>Y_UP</up_axis>
+    <extra>
+      <technique profile="OpenCOLLADAMaya">
+        <pluginVersion>developer version</pluginVersion>
+      </technique>
+    </extra>
+  </asset>
+  <library_materials>
+    <material id="lambert1" name="lambert1">
+      <instance_effect url="#lambert1-fx"/>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="lambert1-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.4 0.4 0.4 1</color>
+            </diffuse>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId sid="originalMayaNodeId" type="string">lambert1</originalMayaNodeId>
+        </technique>
+      </extra>
+    </effect>
+  </library_effects>
+  <library_geometries>
+    <geometry id="pPlaneShape1" name="pPlaneShape1">
+      <mesh>
+        <source id="pPlaneShape1-positions" name="pPlaneShape1-positions">
+          <float_array id="pPlaneShape1-positions-array" count="51">-43.13693 -11.14163 18.01197 43.13693 -11.14163 18.01197 -43.13693 -11.14163 -18.01196 43.13693 -11.14163 -18.01196 43.13693 21.14163 18.01197 -43.13693 21.14163 -18.01196 43.13693 21.14163 -18.01196 -23.66378 21.14163 -18.01196 -23.66378 21.14163 18.01197 -23.66378 -11.14163 18.01197 -23.66378 -11.14163 -18.01196 43.13693 -11.14163 6.234722 -23.66378 -11.14163 6.234722 -43.13693 -11.14163 6.234722 -43.13693 21.14163 6.234722 -23.66378 21.14163 6.234722 43.13693 21.14163 6.234722</float_array>
+          <technique_common>
+            <accessor source="#pPlaneShape1-positions-array" count="17" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pPlaneShape1-normals" name="pPlaneShape1-normals">
+          <float_array id="pPlaneShape1-normals-array" count="93">0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 0 1 0 0 1 0 0 1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 0 1 0 0 1 0 0.9999999 0 0 1 0 0 0.9999999 0 1 0 0 1 0 0 1 0 0 1 0 0 0 -0.9999999 0 0 -0.9999999 0 0 -0.9999999 0 0 -1 0</float_array>
+          <technique_common>
+            <accessor source="#pPlaneShape1-normals-array" count="31" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pPlaneShape1-map1" name="pPlaneShape1-map1">
+          <float_array id="pPlaneShape1-map1-array" count="48">0 0 1 0 0 0.4175532 1 0.4175532 0 0 0 1 1 0 0.5 1 1 1 0 0 1 0 0.6128566 1 0.3871434 1 0.2257131 0 0.7742869 0 0.2257131 0 0.2257131 0.4175532 1 0.13651 0.2257131 0.13651 0.3269284 0 0 0.13651 0.5 1 0.4609355 1 0.3269284 1</float_array>
+          <technique_common>
+            <accessor source="#pPlaneShape1-map1-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="pPlaneShape1-vertices" name="pPlaneShape1-vertices">
+          <input semantic="POSITION" source="#pPlaneShape1-positions"/>
+        </vertices>
+        <polylist material="initialShadingGroup" count="11">
+          <input semantic="VERTEX" source="#pPlaneShape1-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#pPlaneShape1-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#pPlaneShape1-map1" offset="2" set="0"/>
+          <vcount>4 4 4 4 4 4 4 4 4 4 4</vcount>
+          <p>0 0 0 9 1 13 12 2 18 13 3 20 2 4 9 10 5 15 7 6 11 5 7 7 4 8 5 8 9 12 15 10 22 16 11 23 1 12 4 9 13 14 8 14 12 4 15 5 12 2 18 9 1 13 1 16 1 11 17 17 7 6 11 10 5 15 3 18 10 6 19 8 10 20 16 12 2 18 11 17 17 3 21 3 13 3 20 12 2 18 10 20 16 2 22 2 14 23 21 13 24 19 2 25 6 5 26 7 15 10 22 14 27 21 5 28 7 7 29 11 16 11 23 15 10 22 7 29 11 6 30 8</p>
+        </polylist>
+      </mesh>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId sid="originalMayaNodeId">pPlaneShape1</originalMayaNodeId>
+          <double_sided sid="double_sided">1</double_sided>
+        </technique>
+      </extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="VisualSceneNode" name="Tunnel">
+      <node id="_pPlane1" name="pPlane1" type="NODE">
+        <translate sid="translate">0 0 0</translate>
+        <translate sid="rotatePivot">0 5 0</translate>
+        <rotate sid="rotateZ">0 0 1 0</rotate>
+        <rotate sid="rotateY">0 1 0 0</rotate>
+        <rotate sid="rotateX">1 0 0 0</rotate>
+        <translate sid="rotatePivotInverse">0 -5 0</translate>
+        <translate sid="scalePivot">0 5 0</translate>
+        <scale sid="scale">1 1 1</scale>
+        <translate sid="scalePivotInverse">0 -5 0</translate>
+        <instance_geometry url="#pPlaneShape1">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="initialShadingGroup" target="#lambert1"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+        <extra>
+          <technique profile="OpenCOLLADAMaya">
+            <originalMayaNodeId sid="originalMayaNodeId" type="string">pPlane1</originalMayaNodeId>
+          </technique>
+        </extra>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#VisualSceneNode"/>
+  </scene>
+</COLLADA>

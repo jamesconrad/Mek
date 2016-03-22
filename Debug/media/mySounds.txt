@@ -1,5 +1,5 @@
 MechTheme2.wav Background one SOUND_TYPE_2D_LOOP
-drumloop.wav Background two SOUND_TYPE_2D_LOOP
+drumloop.wav Background two SOUND_TYPE_3D_LOOP ROLLOFF_LINEAR 9.1 15.0
 rwalk.wav Target Moving SOUND_TYPE_3D_LOOP ROLLOFF_LINEAR 0.5 10
 swish.wav Target Hit SOUND_TYPE_3D ROLLFF_LINEAR 0.5 50
 MovementMech.wav Target Moving2 SOUND_TYPE_3D_LOOP ROLLOFF_LINEARSQUARE 0.5 3

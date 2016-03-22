@@ -84,6 +84,9 @@ FSystem::FSystem(){
 	}
 }
 FSystem::~FSystem(){
+	for (int c = 0; c < nodes.size(); c++){
+		nodes[c]->destruct = true;
+	}
 	result = SystemPtr->close();
 	if (result != FMOD_OK){
 		std::cout << "Failed to Close System: "; ERRCHECK(result); std::cout << std::endl;
@@ -91,6 +94,7 @@ FSystem::~FSystem(){
 	Clear();
 }
 void FSystem::Update(){
+	UpdateNodes();
 	result = SystemPtr->set3DListenerAttributes(0, &sysPos, &sysVel, &sysFor, &sysUp); //up=
 	if (result != FMOD_OK){
 		std::cout << "Failed to set 3D Listerner Attributes in System: "; ERRCHECK(result); std::cout << std::endl;
@@ -106,4 +110,64 @@ void FSystem::Set(FMOD_VECTOR _pos, FMOD_VECTOR _for, FMOD_VECTOR _up, FMOD_VECT
 void FSystem::Clear(){
 	SystemPtr = NULL;
 	delete SystemPtr;
+}
+ReverbNode* FSystem::CreateReverb(char* _name, FMOD_REVERB_PROPERTIES _props, float _x, float _y, float _z, float _min, float _max, bool _isDoor){
+	ReverbNode* node = new ReverbNode();
+	node->isDoor = _isDoor;
+	node->name = _name;
+	node->init(this,_props, _x, _y, _z, _min, _max);
+	nodes.push_back(node);
+	return node;
+}
+void FSystem::SetReverbNodesActive(){
+	for (int c = 0; c < nodes.size(); c++){
+		nodes[c]->SetActive();
+	}
+}
+void FSystem::SetReverbNodesActiveFalse(){
+	for (int c = 0; c < nodes.size(); c++){
+		nodes[c]->SetActiveFalse();
+	}
+}
+void FSystem::NodeDistToSys(){
+	for (int c = 0; c < nodes.size(); c++){
+		nodes[c]->PrintDistToSys();
+	}
+}
+void FSystem::UpdateNodes(){
+	for (int c = 0; c < nodes.size(); c++){
+		nodes[c]->Update();
+	}
+}
+//_____________________REVERB NODE___________________________________________
+ReverbNode::ReverbNode(){
+	freverb = NULL;
+}
+void ReverbNode::init(FSystem* _fsystem, FMOD_REVERB_PROPERTIES _props, float _x, float _y, float _z, float _min, float _max){
+	FSystemPtr = _fsystem;
+	FSystemPtr->SystemPtr->createReverb(&freverb);
+	freverb->setProperties(&_props);
+	this->pos.x = _x;
+	this->pos.y = _y;
+	this->pos.z = _z;
+	min = _min;
+	max = _max;
+	freverb->set3DAttributes(&pos, _min, _max);
+	freverb->setActive(true);
+	destruct = false;
+}
+ReverbNode::~ReverbNode(){
+	if (destruct){
+		freverb->release();
+			std::cout << "ITS OVER";
+	}
+}
+void ReverbNode::Update(){
+	UpdateDist();
+}
+void ReverbNode::UpdateDist(){
+	distToSys = sqrt((pow(FSystemPtr->sysPos.x - pos.x, 2)) + (pow(FSystemPtr->sysPos.y - pos.y, 2)) + (pow(FSystemPtr->sysPos.z - pos.z, 2)));
+}
+void ReverbNode::PrintDistToSys(){
+	std::cout << distToSys << " " << pos.x << " " << pos.y << " " << pos.z << " " << std::endl;
 }

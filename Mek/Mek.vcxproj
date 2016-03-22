@@ -37,6 +37,7 @@
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="RayVsTriangle.cpp" />
     <ClCompile Include="Render.cpp" />
+    <ClCompile Include="ReverbNode.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Target.cpp" />
