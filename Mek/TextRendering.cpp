@@ -36,8 +36,11 @@ void TextRendering::initText2D(char * texturePath){
 
 }
 
-void TextRendering::printText2D(const char * text, float x, float y, float size, glm::vec3 colour)
+void TextRendering::printText2D(const char * text, float x, float y, float size, glm::vec3 colourT, glm::vec3 colourB)
 {
+	if (colourB == glm::vec3(-1, -1, -1))
+		colourB = colourT;
+	
 	unsigned int length = strlen(text);
 
 	// Fill buffers
@@ -83,7 +86,11 @@ void TextRendering::printText2D(const char * text, float x, float y, float size,
 	// Set our "myTextureSampler" sampler to user Texture Unit 0
 	//glUniform1i(Text2DUniformID, Text2DTextureID);
 	Program::getInstance().bind("text");
-	Program::getInstance().setUniform("textcol", colour);
+	Program::getInstance().setUniform("colT", colourT);
+	Program::getInstance().setUniform("colB", colourB);
+	Program::getInstance().setUniform("_min", y);
+	Program::getInstance().setUniform("_max", y + size);
+
 
 	// 1rst attribute buffer : vertices
 	glBindBuffer(GL_ARRAY_BUFFER, Text2DVertexBufferID);
