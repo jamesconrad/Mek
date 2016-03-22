@@ -24,6 +24,7 @@ FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType){
 	isPlaying = false;
 	fastForward = false;
 	LoadSound();
+	playDoor = false;
 }
 FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType, ROLLOFF_TYPE _rolloff, float _minDist, float _maxDist){
 	FSystemPtr = _fsystem;
@@ -35,6 +36,7 @@ FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType, ROLL
 	isPlaying = false;
 	fastForward = false;
 	LoadSound(_minDist, _maxDist);
+	playDoor = false;
 }
 FSound::~FSound(){
 	result = SoundPtr->release();
@@ -238,8 +240,9 @@ void FSound::LoadSound(float _minDist, float _maxDist){
 
 }
 void FSound::Update(){
+	UpdateDistToNode();
 	ChannelPtr->isPlaying(&isPlaying);
-	//GetSpectrum();
+	GetSpectrum();
 	FSystemPtr->cm->Update();
 	if (fastForward){
 		
@@ -251,15 +254,19 @@ void FSound::Update(){
 	distToSys = sqrt((pow((FSystemPtr->sysPos.x - soundPos.x), 2)) + (pow((FSystemPtr->sysPos.y - soundPos.y), 2)) + (pow((FSystemPtr->sysPos.z - soundPos.z), 2)));
 	if ((isPlaying && soundType == SOUND_TYPE_3D) || (isPlaying && soundType == SOUND_TYPE_3D_LOOP)){
 		
-		result = ChannelPtr->set3DAttributes(&soundPos, &soundVel);
+		if (playDoor){
+			result = ChannelPtr->set3DAttributes(&soundPosD, &soundVel);
+			if (attribute == "two")
+			std::cout << soundPosD.x << " " << soundPosD.y << " " << soundPosD.z << " " << std::endl;
+		}
+		if (!playDoor){
+			result = ChannelPtr->set3DAttributes(&soundPos, &soundVel);
+			if (attribute == "two")
+			std::cout << soundPos.x << " " << soundPos.y << " " << soundPos.z << " " << std::endl;
+		}
 		if (result != FMOD_OK){
 			std::cout << "cFS->U Failed to set Channel 3D Attributes in: " << sname << " "; ERRCHECK(result); std::cout << std::endl;
 		}
-
-		//result = FSystemPtr->SystemPtr->set3DListenerAttributes(0, &FSystemPtr->sysPos, &FSystemPtr->sysVel, &FSystemPtr->sysFor, &FSystemPtr->sysUp);
-		//if (result != FMOD_OK){
-		//	std::cout << "cFS->UFailed to set 3D Listener Attributes: "; ERRCHECK(result); std::cout << std::endl;
-		//}
 	}
 }
 void FSound::Clear(){
@@ -374,4 +381,39 @@ void FSound::GetSpectrum(){
 			}
 		}
 	}
+}
+void FSound::UpdateDistToNode(){
+	if (FSystemPtr->nodes.size() != NULL){
+		for (int c = 0; c < FSystemPtr->nodes.size(); c++){
+			float rdistToNode = sqrt((pow(FSystemPtr->nodes[c]->pos.x - soundPos.x, 2)) + (pow(FSystemPtr->nodes[c]->pos.y - soundPos.y, 2)) + (pow(FSystemPtr->nodes[c]->pos.z - soundPos.z, 2)));
+			if (rdistToNode <= FSystemPtr->nodes[c]->min){
+				node = FSystemPtr->nodes[c];
+				distToNode = rdistToNode;
+				//std::cout << "sound " << attribute << " in node " << FSystemPtr->nodes[c]->name << std::endl;
+
+				if (FSystemPtr->nodes[c]->distToSys >FSystemPtr->nodes[c]->min){
+
+					//std::cout << "Playing at door " << attribute << std::endl;
+					//float x = node->door.x;
+					//float y = node->door.y;
+					//float z = node->door.z;
+					//FMOD_VECTOR posd = { x, y, z };
+					FMOD_VECTOR vel = { 0.0, 0.0, 0.0 };
+					float volume = 1 / max*10;
+					ChannelPtr->setVolume(volume);
+					//soundPosD = posd;
+					playDoor = true;
+					std::cout << FSystemPtr->nodes[c]->distToSys << std::endl;
+				}
+				else{
+					playDoor = false;
+					//std::cout << "Playing at normal " << attribute << std::endl;
+					ChannelPtr->setVolume(1);
+				}
+			}
+		}
+	}
+}
+void FSound::FindDoor(){
+
 }

@@ -36,20 +36,21 @@ enum ROLLOFF_TYPE{
 };
 class FSound{
 public:
+
 	FSystem* FSystemPtr;
 	FMOD::Sound* SoundPtr;
 	FMOD::Channel* ChannelPtr;
-	FMOD_VECTOR soundPos, soundVel;
-	
+	FMOD_VECTOR soundPos, soundVel,soundPosD;
+	ReverbNode* node;
 	SOUND_TYPE soundType;
 	ROLLOFF_TYPE rollOff;
 	bool isPlaying;//gets checked everyupdate ..isSound playing?
-	bool fastForward;
+	bool fastForward,playDoor;
 	const char* fsname;	//full file path to the file
 	std::string sname; //Short file name sound.wav
 	std::string attribute; //attribute of sound or tag
 	std::string owner; //Owner of the sound
-	float min, max,distToSys;
+	float min, max, distToSys, distToNode;
 	unsigned int length;
 	float spectrum[128];
 
@@ -73,8 +74,9 @@ public:
 	inline void printPos(){ std::cout << sname << soundPos.x << " " << soundPos.y << " " << soundPos.z << std::endl; }
 	void printSound();
 	void GetSpectrum();
-
-
+	void UpdateDistToNode();
+	void FindDoor();
+	
 };
 
 

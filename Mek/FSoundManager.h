@@ -1,7 +1,6 @@
 #pragma once
 #ifndef FSOUNDMANAGER_H
 #define FOSUNDMANAGER_H
-
 #include "FSound.h"
 #include "OwnerList.h"
 #include "ConsoleMagic.h"

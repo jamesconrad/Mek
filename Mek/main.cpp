@@ -6,7 +6,7 @@
 #include "lib\glm\gtc\matrix_transform.hpp"
 #include "lib\glm\gtx\rotate_vector.hpp"
 #include "include\IL\ilut.h"
-#include "FSoundManager.h"
+
 
 // standard C++ libraries
 #include <cassert>
@@ -117,34 +117,31 @@ Terrain* ground;
 Skybox* sky;
 Skybox* skyObs;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
-FSound* s;
+GameObject* arms;
+
+
+#define MY_HALLWAY  {  0,  12, 1.00f, -1000,     0,   0,   1.49f,  0.59f, 1.3f,   1219, 0.007f,   441, 0.011f, 0.25f, 0.000f, 5000.0f, 250.0f, 100.0f, 100.0f, 0x3f }
+bool isReverb = true;
+void ReverbNodes(){
+	SManager->FindAndPlay("Background", "two");
+	SManager->FindSound("Background", "two")->soundPos = { 5.0f, 12.0f, 14.0f };
+	SoundSystem->CreateReverb("warehouse", FMOD_PRESET_ARENA, 10.7593f, 13.3389f, 14.0625f, 10.0f, 10.0f, true);
+	SoundSystem->CreateReverb("warehouse",FMOD_PRESET_HANGAR, 5.0f, 12.0f, 14.0f, 10.0f, 10.0f,false);
+	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.651862f, 13.424f, 9.362f, 3.0f, 3.0f,false);
+	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.0486725f, 13.9996f, 3.88874f, 3.0f, 3.0f,false);
+	SoundSystem->CreateReverb("warehouse", FMOD_PRESET_ARENA, 0.0f, 5.199f, 0.0f, 10.0f, 10.0f, true);
+}
 void FreqBand(){
 	//Create an instance of the ConsoleMagic class
 //cm.Init(100, 50);//Resize the console window to 100 by 50 characters
 //cm.SetTitle("Frequency Bands");
-
-
-
 }
 void initFSystem(){
 	SoundSystem = new FSystem;
 	SoundSystem->cm = &cm;
-	s = new FSound(SoundSystem, "FishTutorial", SOUND_TYPE_2D);
 	SManager = new FSoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
-	SManager->printOList();
-	SManager->Robot(s, "../debug/media/all.wav", 750, 3, 1.6);
-	//SManager->Fishman(s,"../debug/media/all.wav",2,100);
-	s->owner = std::string("Tutorial");
-	//s->Play();
-
-
-	FMOD::Reverb *reverb;
-	SoundSystem->SystemPtr->createReverb(&reverb);
-	FMOD_REVERB_PROPERTIES reverbProps = FMOD_PRESET_HANGAR;
-	reverb->setProperties(&reverbProps);
-	FMOD_VECTOR reverbPos = { 20.0f, 0.0f, 20.0f };
-	reverb->set3DAttributes(&reverbPos, 10.0f, 20.0f);
-	reverb->setActive(true);
+	ReverbNodes();
+	
 };
 
 void LoadShaders(char* vertFilename, char* fragFilename)
@@ -216,10 +213,6 @@ void startGame()
 {
 	SManager->FindAndPlay("Background", "one");
 	SManager->FindAndPause("Background", "one");
-	if (!isTutorial){
-		isTutorial = true;
-		s->Play();
-	}
 	gameState = GAME;
 	openingMessageTimer = 3.5f;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
@@ -281,7 +274,7 @@ void LoadTargets()
 	targets.reserve(50);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
@@ -628,11 +621,10 @@ static void Render() {
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-	s->Update();
-	if (!s->IsPlaying()){
-		SManager->FindAndUnpause("Background", "one");
-	}
-
+	float volume;
+	SManager->FindSound("Background", "two")->ChannelPtr->getVolume(&volume);
+	std::cout << "two v: " << volume << std::endl;
+	
 	//SManager->FindSound("Background", "one")->ChannelPtr->setPaused(true);
 	//cm.Clear(char(254), 0, 0);
 	//SManager->FindSound("Background", "one")->GetSpectrum();
@@ -655,16 +647,34 @@ static void Update(float secondsElapsed) {
 	_pos = { cam->position().x, cam->position().y, cam->position().z };
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
+	//SManager->FindSound("Background", "two")->soundPos = { cam->position().x, cam->position().y, cam->position().z };
+	//std::cout << SManager->FindSound("background", "two")->IsPlaying() << std::endl;
+	std::cout << cam->position().x << " " << cam->position().y << " " << cam->position().z << std::endl;
+	//std::cout << SManager->FindSound("Background", "two")->soundPosD.x << " " << SManager->FindSound("Background", "two")->soundPosD.y << " " << SManager->FindSound("Background", "two")->soundPosD.z << std::endl;
+	
 
 	SManager->UpdateSysO(cam->position(), -cam->forward(), cam->up(), glm::vec3(0, 0, 0));
-
-	for (int i = 0; i < 9; i++)
-	{
-		if (glfwGetKey(gWindow, GLFW_KEY_KP_0 + i))
-			numpadPress[i] = true;
-		else
-			numpadPress[i] = false;
-	}
+	//distToSys.resize(reverbs.size());
+	//for (int c = 0; c < reverbs.size(); c++){
+	//	distToSys[c] = sqrt((pow(cam->position().x - rSets[c].pos.x, 2) + pow(cam->position().y - rSets[c].pos.y, 2), pow(cam->position().z - rSets[c].pos.z, 2)));
+	//	std::cout << distToSys[c] << std::endl;
+	//}
+	//for (int c = 0; c < distToSys.size(); c++){
+	//	if (distToSys[c] > rSets[c].min){
+	//		reverbs[c]->setActive(false);
+	//	}
+	//	else{
+	//		reverbs[c]->setActive(true);
+	//	}
+	//}
+	//
+	//for (int i = 0; i < 9; i++)
+	//{
+	//	if (glfwGetKey(gWindow, GLFW_KEY_KP_0 + i))
+	//		numpadPress[i] = true;
+	//	else
+	//		numpadPress[i] = false;
+	//}
 
 
 	//system("CLS");
@@ -747,6 +757,21 @@ static void Update(float secondsElapsed) {
 			else{
 				SManager->FindAndPause("Background", "one");
 				BackPaused = true;
+			}
+		}
+		if (glfwGetKey(gWindow, 'O'))
+		{
+			if (isReverb){
+				for (int c = 0; c < SoundSystem->nodes.size(); c++){
+					SoundSystem->SetReverbNodesActiveFalse();
+				}
+				isReverb = false;
+			}
+			else{
+				for (int c = 0; c < SoundSystem->nodes.size(); c++){
+					SoundSystem->SetReverbNodesActive();
+				}
+				isReverb = true;
 			}
 		}
 
@@ -1123,7 +1148,7 @@ static void Update(float secondsElapsed) {
 		{
 		    if (glfwGetKey(gWindow, '1'))
             {
-                maxNumOfTargets = 6;
+                maxNumOfTargets = 1;
                 isPlayingSearchAndDestroy = true;
                 startGame();
             }
@@ -1151,6 +1176,7 @@ void OnError(int errorCode, const char* msg) {
 }
 // the program starts here
 void AppMain() {
+
 	FreqBand();
 	initFSystem();
 	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/FirstLevelNavMesh-scaled.obj");
@@ -1302,7 +1328,7 @@ void AppMain() {
 	model->AddComponent(CONTROLLER, gp);
 
 	//PROPER INIT
-	for (int i = 0; i < 22; i++)
+	for (int i = 0; i < 24; i++)
 	{
 		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12)
 		{
@@ -1331,7 +1357,7 @@ void AppMain() {
 			else if (i == 2)
 			{
 				gObject->SetName("MenuScene");
-				cModel->loadModel("models/Warehouse.dae");
+				cModel->loadModel("models/1.dae");
 
 				gObject->scale = glm::vec3(1, 1, 1);// glm::vec3(1.6, 1.6, 1.6);
 				gObject->pos = glm::vec3(50, 0, 145);
@@ -1492,6 +1518,49 @@ void AppMain() {
 				gObject->pos = glm::vec3(-35, 0, -167.582f);
 				gObject->rot = glm::vec3(0, -90.f, 0);
 			}
+			else if (i==22)
+			{
+				gObject->SetName("Tunnel");
+				cModel->loadModel("models/Tunnel.dae");
+			
+				gObject->scale = glm::vec3(1);
+				gObject->pos = glm::vec3(0.0147653f,13.6108f,7.22379f);
+				gObject->rot = glm::vec3(0, -90.f, 0);
+				arms = gObject;
+				cModel->setOwner(gObject);
+				c = cModel;
+				gObject->AddComponent(GRAPHICS, c);
+				goVec.push_back(gObject);
+				continue;
+			}
+			else if (i == 23)
+			{
+				gObject->SetName("Sphere");
+				cModel->loadModel("models/sphere.dae");
+				gObject->scale = glm::vec3(1);
+				gObject->pos = glm::vec3(0, 15, 0);
+
+				cModel->setOwner(gObject);
+				c = cModel;
+				gObject->AddComponent(GRAPHICS, c);
+				goVec.push_back(gObject);
+				break;
+			}
+			else if (i == 24)
+			{
+				gObject->SetName("Guns");
+				cModel->loadModel("models/1.dae");
+
+				gObject->scale = glm::vec3(1);
+				//gObject->pos = glm::vec3(7, 14, 1.582f);
+				//gObject->rot = glm::vec3(0, -90.f, 0);
+				arms = gObject;
+				cModel->setOwner(gObject);
+				c = cModel;
+				gObject->AddComponent(GRAPHICS, c);
+				goVec.push_back(gObject);
+				break;
+			}
 
 			gObject->pos /= 10.f;
 			gObject->pos.y = ground->HeightAtLocation(gObject->pos);
@@ -1499,11 +1568,13 @@ void AppMain() {
 			cModel->setOwner(gObject);
 			c = cModel;
 			gObject->AddComponent(GRAPHICS, c);
-			gObject->AddComponent(PHYSICS, cCollision);
-			cCollision->setOwner(gObject);
-			cCollision->setCollisionMask(cModel->getScene());
-			cCollision->type = STATIC;
-			cCollision->createHitboxRender();
+			if (i != 2){
+				gObject->AddComponent(PHYSICS, cCollision);
+				cCollision->setOwner(gObject);
+				cCollision->setCollisionMask(cModel->getScene());
+				cCollision->type = STATIC;
+				cCollision->createHitboxRender();
+			}
 			goVec.push_back(gObject);
 		}
 	}
@@ -1672,8 +1743,9 @@ void AppMain() {
 		}
 
 		//exit program if escape key is pressed
-		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE))
+		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE)){
 			glfwSetWindowShouldClose(gWindow, GL_TRUE);
+		}
 	}
 
 	// clean up and exit
