@@ -55,6 +55,7 @@ public:
 	bool CreateSoundFromData(FMOD::System* system, FMOD::Sound **sound, int channels, unsigned int frequency, bool loop, std::vector<signed short>* rawData);
 	void FastForwardAll();
 	void ResetFastForwardAll();
+	void SoundVolumeAll(float _volume);
 };
 
 #endif

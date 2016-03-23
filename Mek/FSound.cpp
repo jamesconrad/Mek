@@ -269,7 +269,7 @@ void FSound::Update(){
 	if ((isPlaying && soundType == SOUND_TYPE_3D) || (isPlaying && soundType == SOUND_TYPE_3D_LOOP)){
 		ChannelPtr->setVolume(activeVoulme);
 		ChannelPtr->set3DMinMaxDistance(activeMin,activeMax);
-		if (attribute == "Projectile")
+		if (attribute == "Moving")
 			std::cout << "v: " << activeVoulme << "min: " << activeMin << "max: " << activeMax << " ip: " << isPlaying << " p: " << activePos.x << " " << activePos.y << " " << activePos.z << std::endl;
 		result = ChannelPtr->set3DAttributes(&activePos, &activeVel);
 		if (result != FMOD_OK){

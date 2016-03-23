@@ -27,6 +27,7 @@ public:
 	void GetListSpectrum(char* _tag);
 	void FastForwardAll();
 	void ResetFastForwardAll();
+	void SoundVolumeAll(float _volume);
 };
 
 #endif

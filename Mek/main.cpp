@@ -118,7 +118,11 @@ Skybox* sky;
 Skybox* skyObs;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 GameObject* arms;
-
+bool RunWasd = true;
+bool RunShield = true;
+bool RunEnemy = true;
+bool RunDash = true;
+bool RunSlowTime = true;
 
 #define MY_HALLWAY  {  0,  12, 1.00f, -1000,     0,   0,   1.49f,  0.59f, 1.3f,   1219, 0.007f,   441, 0.011f, 0.25f, 0.000f, 5000.0f, 250.0f, 100.0f, 100.0f, 0x3f }
 bool isReverb = true;
@@ -207,13 +211,26 @@ void wonGame()
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
 	SManager->StopAll();
 
-	shieldHealth = 100.f; //Just work with me.
+	shieldHealth = 100.0f; //Just work with me.
 }
 void startGame()
 {
 	SManager->FindAndPlay("Background", "one");
 	SManager->FindAndPause("Background", "one");
 	gameState = GAME;
+	if (RunWasd){
+		RunWasd = false;
+		SManager->SoundVolumeAll(0);
+		SManager->FindSound("Tutorial", "wasd")->SetVolume(1);
+		SManager->FindAndPlay("Tutorial", "wasd");
+		if (!SManager->FindSound("Tutorial", "wasd")->IsPlaying()){
+			SManager->SoundVolumeAll(1);
+		}
+		else{
+			std::cout << "Still playing" << std::endl;
+		} 
+	}
+
 	openingMessageTimer = 3.5f;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
@@ -650,7 +667,6 @@ static void Update(float secondsElapsed) {
 	std::cout << cam->position().x << " " << cam->position().y << " " << cam->position().z << std::endl;
 	//std::cout << SManager->FindSound("Background", "two")->soundPosD.x << " " << SManager->FindSound("Background", "two")->soundPosD.y << " " << SManager->FindSound("Background", "two")->soundPosD.z << std::endl;
 	
-
 	SManager->UpdateSysO(cam->position(), -cam->forward(), cam->up(), glm::vec3(0, 0, 0));
 	//distToSys.resize(reverbs.size());
 	//for (int c = 0; c < reverbs.size(); c++){
@@ -973,10 +989,30 @@ static void Update(float secondsElapsed) {
 				hitTimer = 0;
 				SManager->FindAndPlay("Player", "ShieldHit");
 				dShield = false;
+
+				if(RunShield){
+					RunShield = false;
+					SManager->SoundVolumeAll(0.25);
+					SManager->FindSound("Tutorial", "shield")->SetVolume(1);
+					SManager->FindAndPlay("Tutorial", "shield");
+					if (!SManager->FindSound("Tutorial", "shield")->IsPlaying()){
+						SManager->SoundVolumeAll(1);
+					}
+				}
 			}
 			if (hitTimer > 0.5 && shieldHealth < 0){
 				dShield = true;
 				SManager->FindAndPlay("Player", "NoShield");
+
+				if (RunSlowTime){
+					RunSlowTime = false;
+					SManager->SoundVolumeAll(0.25);
+					SManager->FindSound("Tutorial", "slowtime")->SetVolume(1);
+					SManager->FindAndPlay("Tutorial", "slowtime");
+					if (!SManager->FindSound("Tutorial", "slowtime")->IsPlaying()){
+						SManager->SoundVolumeAll(1);
+					}
+				}
 
 			}
 			if (dShield = true && dshield >5){
@@ -1025,6 +1061,17 @@ static void Update(float secondsElapsed) {
 
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
+			if (targets[i]->canSeePlayer(model->pos)){
+				if (RunEnemy){
+					RunEnemy = false;
+					SManager->SoundVolumeAll(0.25);
+					SManager->FindSound("Tutorial", "enemy")->SetVolume(1);
+					SManager->FindAndPlay("Tutorial", "enemy");
+					if (!SManager->FindSound("Tutorial", "enemy")->IsPlaying()){
+						SManager->SoundVolumeAll(1);
+					}
+				}
+			}
 			if (targets[i]->alive == true)
 			{
 				targets[i]->currentMaxVelocity = targets[i]->maxVelocity;

@@ -704,3 +704,8 @@ void FSoundManager::ResetFastForwardAll(){
 		oList[c]->ResetFastForwardAll();
 	}
 }
+void FSoundManager::SoundVolumeAll(float _volume){
+	for (int c= 0; c < oList.size(); c++){
+
+	}
+}

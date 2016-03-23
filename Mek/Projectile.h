@@ -20,7 +20,6 @@ public:
 		sound->soundPos = { pos.x, pos.y, pos.z };
 		life -= dtime;
 		ChannelPtr->isPlaying(&isSound);
-		std::cout << isSound << std::endl;
 		if (!isSound)
 			ChannelPtr->stop();
 

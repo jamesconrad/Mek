@@ -52,7 +52,7 @@ public:
 	std::string sname; //Short file name sound.wav
 	std::string attribute; //attribute of sound or tag
 	std::string owner; //Owner of the sound
-	float min, max, distToSys, distToNode,doorVolume,nodeMin,nodeMax,activeMin,activeMax,activeVoulme;
+	float min, max, distToSys, distToNode,doorVolume,nodeMin,nodeMax,activeMin,activeMax,activeVoulme,volume;
 	unsigned int length;
 	float spectrum[128];
 	FSound();
@@ -81,7 +81,7 @@ public:
 	
 	inline void PrintPos(){ std::cout << soundPos.x << " " << soundPos.y << " " << soundPos.z; };
 	void USoundSets();
-	
+	inline void SetVolume(float _volume){ activeVoulme = _volume; }
 };
 
 

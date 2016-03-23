@@ -109,3 +109,8 @@ void OwnerList::ResetFastForwardAll(){
 		list[c]->fastForward = false;
 	}
 }
+void OwnerList::SoundVolumeAll(float _volume){
+	for (int c = 0; c < list.size(); c++){
+		list[c]->SetVolume(_volume);
+	}
+}
