@@ -40,20 +40,22 @@ public:
 	FSystem* FSystemPtr;
 	FMOD::Sound* SoundPtr;
 	FMOD::Channel* ChannelPtr;
-	FMOD_VECTOR soundPos, soundVel,soundPosD;
+	FMOD_VECTOR soundPos, soundVel, soundPosD, activePos, activeVel;
 	ReverbNode* node;
+	ReverbNode* door;
 	SOUND_TYPE soundType;
 	ROLLOFF_TYPE rollOff;
 	bool isPlaying;//gets checked everyupdate ..isSound playing?
-	bool fastForward,playDoor;
+	bool fastForward,playDoor,seeNode,sysOut;
+	bool soundInsideNode;
 	const char* fsname;	//full file path to the file
 	std::string sname; //Short file name sound.wav
 	std::string attribute; //attribute of sound or tag
 	std::string owner; //Owner of the sound
-	float min, max, distToSys, distToNode;
+	float min, max, distToSys, distToNode,doorVolume,nodeMin,nodeMax,activeMin,activeMax,activeVoulme;
 	unsigned int length;
 	float spectrum[128];
-
+	FSound();
 	FSound(FSystem*, std::string, SOUND_TYPE);
 	FSound(FSystem*, std::string, SOUND_TYPE, ROLLOFF_TYPE, float minDist, float maxDist);
 	~FSound();
@@ -76,6 +78,9 @@ public:
 	void GetSpectrum();
 	void UpdateDistToNode();
 	void FindDoor();
+	
+	inline void PrintPos(){ std::cout << soundPos.x << " " << soundPos.y << " " << soundPos.z; };
+	void USoundSets();
 	
 };
 

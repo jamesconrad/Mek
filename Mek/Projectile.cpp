@@ -39,11 +39,10 @@ Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifesp
 
 
 	sound = _sound;
-	sound->Play();
+	ChannelPtr = sound->Play();
 
 	FMOD_VECTOR pos = { p.x, p.y, p.z };
 	FMOD_VECTOR vel = { d.x, d.y, d.z };
-	sound->ChannelPtr->set3DAttributes(&pos, &vel);
 	isSound = true;
 
 	cc->createHitboxRender();

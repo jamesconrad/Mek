@@ -17,17 +17,16 @@ public:
 	{
 		pos += dir * (_isUsingBulletTime ? (vel * dtime) * timeFactor : (vel * dtime));
 		go->pos = pos;
-		FMOD_VECTOR sp = { pos.x, pos.y, pos.z };
-		FMOD_VECTOR sv = { 0.0, 0.0, 0.0 };
-		sound->ChannelPtr->set3DAttributes(&sp, &sv);
+		sound->soundPos = { pos.x, pos.y, pos.z };
 		life -= dtime;
-		sound->ChannelPtr->isPlaying(&isSound);
+		ChannelPtr->isPlaying(&isSound);
+		std::cout << isSound << std::endl;
 		if (!isSound)
-			sound->ChannelPtr->stop();
+			ChannelPtr->stop();
 
 		if (life < 0){
 			alive = false;
-			sound->ChannelPtr->stop();
+			ChannelPtr->stop();
 		}
 	}
 
@@ -40,7 +39,7 @@ public:
 	bool isSound;
 	bool alive;
 	FSound* sound;
-
+	FMOD::Channel* ChannelPtr;
 	GameObject* go;
 	ComponentCollision* cc;
 	Model* cg;

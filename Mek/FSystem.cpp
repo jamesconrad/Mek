@@ -139,6 +139,13 @@ void FSystem::UpdateNodes(){
 		nodes[c]->Update();
 	}
 }
+void FSystem::GetChannelsPlaying(){
+	int channels,cpu;
+	float dsp,stream,geometry,update,total;
+	SystemPtr->getChannelsPlaying(&channels);
+	SystemPtr->getCPUUsage(&dsp, &stream, &geometry, &update, &total);
+	std::cout << "Channels: " << channels << " DSP: " << dsp << " Stream: " << stream << " Update: " << update << " Total: " << total << std::endl;
+}
 //_____________________REVERB NODE___________________________________________
 ReverbNode::ReverbNode(){
 	freverb = NULL;

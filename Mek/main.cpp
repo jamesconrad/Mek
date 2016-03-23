@@ -123,27 +123,27 @@ GameObject* arms;
 #define MY_HALLWAY  {  0,  12, 1.00f, -1000,     0,   0,   1.49f,  0.59f, 1.3f,   1219, 0.007f,   441, 0.011f, 0.25f, 0.000f, 5000.0f, 250.0f, 100.0f, 100.0f, 0x3f }
 bool isReverb = true;
 void ReverbNodes(){
-	SManager->FindAndPlay("Background", "two");
-	SManager->FindSound("Background", "two")->soundPos = { 5.0f, 12.0f, 14.0f };
-	SoundSystem->CreateReverb("warehouse", FMOD_PRESET_ARENA, 10.7593f, 13.3389f, 14.0625f, 10.0f, 10.0f, true);
-	SoundSystem->CreateReverb("warehouse",FMOD_PRESET_HANGAR, 5.0f, 12.0f, 14.0f, 10.0f, 10.0f,false);
-	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.651862f, 13.424f, 9.362f, 3.0f, 3.0f,false);
-	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.0486725f, 13.9996f, 3.88874f, 3.0f, 3.0f,false);
-	SoundSystem->CreateReverb("warehouse", FMOD_PRESET_ARENA, 0.0f, 5.199f, 0.0f, 10.0f, 10.0f, true);
+
+	SoundSystem->CreateReverb("Warehouse Door", FMOD_PRESET_ARENA, 10.7593f, 13.3389f, 14.0625f, 5.50f, 10.0f, true);
+	SoundSystem->CreateReverb("warehouse", FMOD_PRESET_HANGAR, 5.0f, 12.0f, 14.0f, 4.50f, 10.0f, false);
+	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.651862f, 13.424f, 9.362f, 3.0f, 3.0f, true);
+	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.0486725f, 13.9996f, 3.88874f, 3.0f, 3.0f, false);
+	SoundSystem->CreateReverb("Tunnel Door", FMOD_PRESET_ARENA, 0.0f, 5.199f, 0.0f, 10.0f, 10.0f, true);
 }
 void FreqBand(){
 	//Create an instance of the ConsoleMagic class
-//cm.Init(100, 50);//Resize the console window to 100 by 50 characters
-//cm.SetTitle("Frequency Bands");
+	//cm.Init(100, 50);//Resize the console window to 100 by 50 characters
+	//cm.SetTitle("Frequency Bands");
 }
+FSound* sound;
 void initFSystem(){
 	SoundSystem = new FSystem;
 	SoundSystem->cm = &cm;
 	SManager = new FSoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
 	ReverbNodes();
-	
+	SManager->FindAndPlay("Background", "two");
+	SManager->FindSound("Background", "two")->soundPos = { 5.0f, 12.0f, 14.0f };
 };
-
 void LoadShaders(char* vertFilename, char* fragFilename)
 {
 	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
@@ -621,9 +621,7 @@ static void Render() {
 float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-	float volume;
-	SManager->FindSound("Background", "two")->ChannelPtr->getVolume(&volume);
-	std::cout << "two v: " << volume << std::endl;
+	
 	
 	//SManager->FindSound("Background", "one")->ChannelPtr->setPaused(true);
 	//cm.Clear(char(254), 0, 0);
