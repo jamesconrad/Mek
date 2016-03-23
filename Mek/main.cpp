@@ -118,6 +118,7 @@ Skybox* sky;
 Skybox* skyObs;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 GameObject* arms;
+bool PTUT = false;
 bool RunWasd = true;
 bool RunShield = true;
 bool RunEnemy = true;
@@ -126,6 +127,35 @@ bool RunSlowTime = true;
 
 #define MY_HALLWAY  {  0,  12, 1.00f, -1000,     0,   0,   1.49f,  0.59f, 1.3f,   1219, 0.007f,   441, 0.011f, 0.25f, 0.000f, 5000.0f, 250.0f, 100.0f, 100.0f, 0x3f }
 bool isReverb = true;
+void Tutorial(){
+	system("CLS");
+	std::cout << "Play Tutorial : " << PTUT << std::endl << std::flush;
+	std::cout << "WASD Tutorial: " << RunWasd << " p: " << SManager->FindSound("Tutorial", "wasd")->isPlaying<<std::endl << std::flush;
+	std::cout << "Enemy Tutorial: " << RunEnemy << " p: " << SManager->FindSound("Tutorial", "enemy")->isPlaying << std::endl << std::flush;
+	std::cout << "Shield Tutorial: " << RunShield << " p: " << SManager->FindSound("Tutorial", "shield")->isPlaying << std::endl << std::flush;
+	std::cout << "Dash Tutorial: " << RunDash << " p: " << SManager->FindSound("Tutorial", "dash")->isPlaying << std::endl << std::flush;
+	std::cout << "Slow time Tutorial: " << RunSlowTime << " p: " << SManager->FindSound("Tutorial", "slowtime")->isPlaying << std::endl << std::flush;
+
+	if (SManager->FindSound("Tutorial", "wasd")->isPlaying){
+		PTUT = true;
+	}
+	else if (SManager->FindSound("Tutorial", "enemy")->isPlaying){
+		PTUT = true;
+	}
+	else if (SManager->FindSound("Tutorial", "shield")->isPlaying){
+		PTUT = true;
+	}
+	else if (SManager->FindSound("Tutorial", "slowtime")->isPlaying){
+		PTUT = true;
+	}
+	else if (SManager->FindSound("Tutorial", "dash")->isPlaying){
+		PTUT = true;
+	}
+	else{
+		PTUT = false;
+	}
+
+}
 void ReverbNodes(){
 
 	SoundSystem->CreateReverb("Warehouse Door", FMOD_PRESET_ARENA, 10.7593f, 13.3389f, 14.0625f, 5.50f, 10.0f, true);
@@ -218,19 +248,20 @@ void startGame()
 	SManager->FindAndPlay("Background", "one");
 	SManager->FindAndPause("Background", "one");
 	gameState = GAME;
-	if (RunWasd){
-		RunWasd = false;
-		SManager->SoundVolumeAll(0);
-		SManager->FindSound("Tutorial", "wasd")->SetVolume(1);
-		SManager->FindAndPlay("Tutorial", "wasd");
-		if (!SManager->FindSound("Tutorial", "wasd")->IsPlaying()){
-			SManager->SoundVolumeAll(1);
+	if (!PTUT){
+		if (RunWasd){
+			RunWasd = false;
+			SManager->SoundVolumeAll(0);
+			SManager->FindSound("Tutorial", "wasd")->SetVolume(1);
+			SManager->FindAndPlay("Tutorial", "wasd");
+			if (!SManager->FindSound("Tutorial", "wasd")->IsPlaying()){
+				SManager->SoundVolumeAll(1);
+			}
+			else{
+				std::cout << "Still playing" << std::endl;
+			}
 		}
-		else{
-			std::cout << "Still playing" << std::endl;
-		} 
 	}
-
 	openingMessageTimer = 3.5f;
 	//Camera::getInstance().offsetPosition(model->pos - Camera::getInstance().position());
 	Camera::getInstance().lookAt(glm::normalize(glm::vec3(1, 0, 1)));
@@ -639,7 +670,7 @@ float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
 	
-	
+	Tutorial();
 	//SManager->FindSound("Background", "one")->ChannelPtr->setPaused(true);
 	//cm.Clear(char(254), 0, 0);
 	//SManager->FindSound("Background", "one")->GetSpectrum();
@@ -787,6 +818,14 @@ static void Update(float secondsElapsed) {
 				}
 				isReverb = true;
 			}
+		}
+		if (glfwGetKey(gWindow, 'I'))
+		{
+			RunWasd = true;
+			RunShield = true;
+			RunEnemy = true;
+			RunDash = true;
+			RunSlowTime = true;
 		}
 
 		isUsingBulletTime = false;
@@ -989,12 +1028,13 @@ static void Update(float secondsElapsed) {
 				hitTimer = 0;
 				SManager->FindAndPlay("Player", "ShieldHit");
 				dShield = false;
-
-				if(RunShield){
-					RunShield = false;
-					SManager->SoundVolumeAll(0.25);
-					SManager->FindSound("Tutorial", "shield")->SetVolume(1);
-					SManager->FindAndPlay("Tutorial", "shield");
+				if (!PTUT){
+					if (RunShield){
+						RunShield = false;
+						SManager->SoundVolumeAll(0.25);
+						SManager->FindSound("Tutorial", "shield")->SetVolume(1);
+						SManager->FindAndPlay("Tutorial", "shield");
+					}
 					if (!SManager->FindSound("Tutorial", "shield")->IsPlaying()){
 						SManager->SoundVolumeAll(1);
 					}
@@ -1003,12 +1043,13 @@ static void Update(float secondsElapsed) {
 			if (hitTimer > 0.5 && shieldHealth < 0){
 				dShield = true;
 				SManager->FindAndPlay("Player", "NoShield");
-
-				if (RunSlowTime){
-					RunSlowTime = false;
-					SManager->SoundVolumeAll(0.25);
-					SManager->FindSound("Tutorial", "slowtime")->SetVolume(1);
-					SManager->FindAndPlay("Tutorial", "slowtime");
+				if (!PTUT){
+					if (RunSlowTime){
+						RunSlowTime = false;
+						SManager->SoundVolumeAll(0.25);
+						SManager->FindSound("Tutorial", "slowtime")->SetVolume(1);
+						SManager->FindAndPlay("Tutorial", "slowtime");
+					}
 					if (!SManager->FindSound("Tutorial", "slowtime")->IsPlaying()){
 						SManager->SoundVolumeAll(1);
 					}
