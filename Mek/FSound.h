@@ -45,9 +45,10 @@ public:
 	ReverbNode* door;
 	SOUND_TYPE soundType;
 	ROLLOFF_TYPE rollOff;
+	int typeOfActivePos;
 	bool isPlaying;//gets checked everyupdate ..isSound playing?
 	bool fastForward,playDoor,seeNode,sysOut;
-	bool soundInsideNode;
+	bool soundInsideNode,Gate;
 	const char* fsname;	//full file path to the file
 	std::string sname; //Short file name sound.wav
 	std::string attribute; //attribute of sound or tag
@@ -82,6 +83,7 @@ public:
 	inline void PrintPos(){ std::cout << soundPos.x << " " << soundPos.y << " " << soundPos.z; };
 	void USoundSets();
 	inline void SetVolume(float _volume){ activeVoulme = _volume; }
+	void UpdateTypeActivePos();
 };
 
 

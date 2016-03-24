@@ -59,7 +59,6 @@ public:
 class ReverbNode{
 public:
 	char* name;
-	glm::vec4 canSee;
 	bool isDoor;
 	FMOD::Reverb *freverb;
 	FMOD_REVERB_PROPERTIES props;
@@ -76,7 +75,6 @@ public:
 	inline void SetActiveFalse(){ freverb->setActive(false); }
 	void PrintDistToSys();
 	void UpdateDoor();
-	inline void CanSee(glm::mat4 _view){ canSee = _view*(glm::vec4{ pos.x, pos.y, pos.z,1 }); }
 	inline void PrintPos(){ std::cout << pos.x << " " << pos.y << " " << pos.z; };
 	
 };

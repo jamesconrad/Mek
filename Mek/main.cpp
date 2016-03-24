@@ -128,13 +128,13 @@ bool RunSlowTime = true;
 #define MY_HALLWAY  {  0,  12, 1.00f, -1000,     0,   0,   1.49f,  0.59f, 1.3f,   1219, 0.007f,   441, 0.011f, 0.25f, 0.000f, 5000.0f, 250.0f, 100.0f, 100.0f, 0x3f }
 bool isReverb = true;
 void Tutorial(){
-	system("CLS");
-	std::cout << "Play Tutorial : " << PTUT << std::endl << std::flush;
-	std::cout << "WASD Tutorial: " << RunWasd << " p: " << SManager->FindSound("Tutorial", "wasd")->isPlaying<<std::endl << std::flush;
-	std::cout << "Enemy Tutorial: " << RunEnemy << " p: " << SManager->FindSound("Tutorial", "enemy")->isPlaying << std::endl << std::flush;
-	std::cout << "Shield Tutorial: " << RunShield << " p: " << SManager->FindSound("Tutorial", "shield")->isPlaying << std::endl << std::flush;
-	std::cout << "Dash Tutorial: " << RunDash << " p: " << SManager->FindSound("Tutorial", "dash")->isPlaying << std::endl << std::flush;
-	std::cout << "Slow time Tutorial: " << RunSlowTime << " p: " << SManager->FindSound("Tutorial", "slowtime")->isPlaying << std::endl << std::flush;
+	//system("CLS");
+	//std::cout << "Play Tutorial : " << PTUT << std::endl << std::flush;
+	//std::cout << "WASD Tutorial: " << RunWasd << " p: " << SManager->FindSound("Tutorial", "wasd")->isPlaying<<std::endl << std::flush;
+	//std::cout << "Enemy Tutorial: " << RunEnemy << " p: " << SManager->FindSound("Tutorial", "enemy")->isPlaying << std::endl << std::flush;
+	//std::cout << "Shield Tutorial: " << RunShield << " p: " << SManager->FindSound("Tutorial", "shield")->isPlaying << std::endl << std::flush;
+	//std::cout << "Dash Tutorial: " << RunDash << " p: " << SManager->FindSound("Tutorial", "dash")->isPlaying << std::endl << std::flush;
+	//std::cout << "Slow time Tutorial: " << RunSlowTime << " p: " << SManager->FindSound("Tutorial", "slowtime")->isPlaying << std::endl << std::flush;
 
 	if (SManager->FindSound("Tutorial", "wasd")->isPlaying){
 		PTUT = true;
@@ -158,9 +158,9 @@ void Tutorial(){
 }
 void ReverbNodes(){
 
-	SoundSystem->CreateReverb("Warehouse Door", FMOD_PRESET_ARENA, 10.7593f, 13.3389f, 14.0625f, 5.50f, 10.0f, true);
+	SoundSystem->CreateReverb("Warehouse Door", FMOD_PRESET_ARENA, 10.31f, 13.546f, 13.03f, 5.50f, 10.0f, true);
 	SoundSystem->CreateReverb("warehouse", FMOD_PRESET_HANGAR, 5.0f, 12.0f, 14.0f, 4.50f, 10.0f, false);
-	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.651862f, 13.424f, 9.362f, 3.0f, 3.0f, true);
+	SoundSystem->CreateReverb("Warehouse/tunnel 1 Door", MY_HALLWAY, 1.09f, 13.38f, 9.62f, 3.0f, 3.0f, true);
 	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.0486725f, 13.9996f, 3.88874f, 3.0f, 3.0f, false);
 	SoundSystem->CreateReverb("Tunnel Door", FMOD_PRESET_ARENA, 0.0f, 5.199f, 0.0f, 10.0f, 10.0f, true);
 }
@@ -693,38 +693,9 @@ static void Update(float secondsElapsed) {
 	_pos = { cam->position().x, cam->position().y, cam->position().z };
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
-	//SManager->FindSound("Background", "two")->soundPos = { cam->position().x, cam->position().y, cam->position().z };
-	//std::cout << SManager->FindSound("background", "two")->IsPlaying() << std::endl;
-	std::cout << cam->position().x << " " << cam->position().y << " " << cam->position().z << std::endl;
-	//std::cout << SManager->FindSound("Background", "two")->soundPosD.x << " " << SManager->FindSound("Background", "two")->soundPosD.y << " " << SManager->FindSound("Background", "two")->soundPosD.z << std::endl;
+	std::cout << cam->position().x << " " << cam->position().y << " " << cam->position().z << std::endl << std::flush;
 	
 	SManager->UpdateSysO(cam->position(), -cam->forward(), cam->up(), glm::vec3(0, 0, 0));
-	//distToSys.resize(reverbs.size());
-	//for (int c = 0; c < reverbs.size(); c++){
-	//	distToSys[c] = sqrt((pow(cam->position().x - rSets[c].pos.x, 2) + pow(cam->position().y - rSets[c].pos.y, 2), pow(cam->position().z - rSets[c].pos.z, 2)));
-	//	std::cout << distToSys[c] << std::endl;
-	//}
-	//for (int c = 0; c < distToSys.size(); c++){
-	//	if (distToSys[c] > rSets[c].min){
-	//		reverbs[c]->setActive(false);
-	//	}
-	//	else{
-	//		reverbs[c]->setActive(true);
-	//	}
-	//}
-	//
-	//for (int i = 0; i < 9; i++)
-	//{
-	//	if (glfwGetKey(gWindow, GLFW_KEY_KP_0 + i))
-	//		numpadPress[i] = true;
-	//	else
-	//		numpadPress[i] = false;
-	//}
-
-
-	//system("CLS");
-	//cout << "CamPos: " << fsystem->listenerpos.x << " " << fsystem->listenerpos.y << " " << fsystem->listenerpos.z << flush;
-	//cout << "\nSoundPostion:" << test->name << " :" << test->soundPos.x << " " << test->soundPos.y << " " << test->soundPos.z << flush;
 
 	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
 	if (c->Refresh())

@@ -174,6 +174,8 @@ void ReverbNode::Update(){
 }
 void ReverbNode::UpdateDist(){
 	distToSys = sqrt((pow(FSystemPtr->sysPos.x - pos.x, 2)) + (pow(FSystemPtr->sysPos.y - pos.y, 2)) + (pow(FSystemPtr->sysPos.z - pos.z, 2)));
+	//if (name == "Warehouse Door" || name == "warehouse")
+	//	std::cout << name << " " << distToSys << std::endl;
 }
 void ReverbNode::PrintDistToSys(){
 	std::cout << distToSys << " " << pos.x << " " << pos.y << " " << pos.z << " " << std::endl;
