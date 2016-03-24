@@ -252,15 +252,15 @@ void FSound::LoadSound(float _minDist, float _maxDist){
 void FSound::Update(){
 	distToSys = sqrt((pow((FSystemPtr->sysPos.x - soundPos.x), 2)) + (pow((FSystemPtr->sysPos.y - soundPos.y), 2)) + (pow((FSystemPtr->sysPos.z - soundPos.z), 2)));
 	UpdateDistToNode();
-	if (attribute == "two")
-	if (!soundInsideNode){
-		std::cout << "Sound Not Inside Node" << std::endl << std::flush;
-		if (!playDoor){
-			std::cout << "Sound Not at Door" << std::endl << std::flush;
-			activePos = soundPos;
-		}
-		activePos = door->pos;
-	}
+	//if (attribute == "two")
+	//if (!soundInsideNode){
+	//	//std::cout << "Sound Not Inside Node" << std::endl << std::flush;
+	//	if (!playDoor){
+	//		//std::cout << "Sound Not at Door" << std::endl << std::flush;
+	//		activePos = soundPos;
+	//	}
+	//	activePos = door->pos;
+	//}
 	ChannelPtr->isPlaying(&isPlaying);
 	//GetSpectrum();
 	//FSystemPtr->cm->Update();
@@ -275,8 +275,8 @@ void FSound::Update(){
 	if ((isPlaying && soundType == SOUND_TYPE_3D) || (isPlaying && soundType == SOUND_TYPE_3D_LOOP)){
 		ChannelPtr->setVolume(activeVoulme);
 		ChannelPtr->set3DMinMaxDistance(activeMin,activeMax);
-		if (attribute == "two")
-			std::cout << "distance Sound: " << distToSys << " v: " << activeVoulme << "min: " << activeMin << "max: " << activeMax << " ip: " << isPlaying << " p: " << activePos.x << " " << activePos.y << " " << activePos.z << std::endl;
+		//if (attribute == "two")
+		//	std::cout << "distance Sound: " << distToSys << " v: " << activeVoulme << "min: " << activeMin << "max: " << activeMax << " ip: " << isPlaying << " p: " << activePos.x << " " << activePos.y << " " << activePos.z << std::endl;
 		result = ChannelPtr->set3DAttributes(&activePos, &activeVel);
 		if (result != FMOD_OK){
 			std::cout << "cFS->U Failed to set Channel 3D Attributes in: " << sname << " "; ERRCHECK(result); std::cout << std::endl;
@@ -430,7 +430,7 @@ void FSound::FindDoor(){
 	}
 }
 void FSound::USoundSets(){
-	system("cls");
+	//system("cls");
 	if (node != NULL && door != NULL){
 		if (attribute == "two"){
 			if (node->distToSys >= node->min){
@@ -444,7 +444,7 @@ void FSound::USoundSets(){
 				Gate = true;
 				sysOut = false;
 				playDoor = true;
-				std::cout << door->distToSys << std::endl;
+				//std::cout << door->distToSys << std::endl;
 			}
 			if(node->distToSys <=node->min){
 				playDoor = false;

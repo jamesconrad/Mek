@@ -693,7 +693,7 @@ static void Update(float secondsElapsed) {
 	_pos = { cam->position().x, cam->position().y, cam->position().z };
 	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
 	_up = { cam->up().x, cam->up().y, cam->up().z };
-	std::cout << cam->position().x << " " << cam->position().y << " " << cam->position().z << std::endl << std::flush;
+	//std::cout << cam->position().x << " " << cam->position().y << " " << cam->position().z << std::endl << std::flush;
 	
 	SManager->UpdateSysO(cam->position(), -cam->forward(), cam->up(), glm::vec3(0, 0, 0));
 
