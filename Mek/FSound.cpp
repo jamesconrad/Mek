@@ -31,6 +31,7 @@ FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType){
 	LoadSound();
 	playDoor = false;
 	activeVel = { 0.0, 0.0, 0.0 };
+	activeNetwork = false;
 }
 FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType, ROLLOFF_TYPE _rolloff, float _minDist, float _maxDist){
 	FSystemPtr = _fsystem;
@@ -47,6 +48,7 @@ FSound::FSound(FSystem* _fsystem, std::string _name, SOUND_TYPE _soundType, ROLL
 	activeMax = _maxDist;
 	activeMin = _minDist; 
 	activeVoulme = 1;
+	activeNetwork = false;
 }
 FSound::~FSound(){
 	result = SoundPtr->release();
@@ -404,7 +406,7 @@ void FSound::UpdateDistToNode(){
 			if ((rdistToNode <= FSystemPtr->nodes[c]->min)){
 				node = FSystemPtr->nodes[c];
 				distToNode = rdistToNode;
-				FindDoor();
+				door = FSystemPtr->closestDoor;
 				USoundSets();
 			}
 			else{
@@ -415,55 +417,75 @@ void FSound::UpdateDistToNode(){
 	
 }
 void FSound::FindDoor(){
-	ReverbNode* temp = new ReverbNode;
-	bool isFound = false;
-	float closest = 99999;
-	if (FSystemPtr->nodes.size() != NULL){
-		for (int c = 0; c < FSystemPtr->nodes.size(); c++){
-			if ((FSystemPtr->nodes[c]->isDoor)){
-				if (FSystemPtr->nodes[c]->distToSys < closest){
-					closest = FSystemPtr->nodes[c]->distToSys;
-					door = FSystemPtr->nodes[c];
-				}
-			}
-		}
-	}
+	//ReverbNode* temp = new ReverbNode;
+	//bool isFound = false;
+	//float closest = 99999;
+	//if (FSystemPtr->nodes.size() != NULL){
+	//	for (int c = 0; c < FSystemPtr->nodes.size(); c++){
+	//		if ((FSystemPtr->nodes[c]->isDoor)){
+	//			if (FSystemPtr->nodes[c]->distToSys < closest){
+	//				closest = FSystemPtr->nodes[c]->distToSys;
+	//				door = FSystemPtr->nodes[c];
+	//			}
+	//		}
+	//	}
+	//}
+	//for (int c = 0; c < nodes.size(); c++){
+	//
+	//}
 }
 void FSound::USoundSets(){
 	//system("cls");
 	if (node != NULL && door != NULL){
+		if (!activeNetwork){
+			activeNetwork = true;
+			InitNetwork();
+		}
 		if (attribute == "two"){
-			if (node->distToSys >= node->min){
+			
+		networkPtr->bellmanFord(node->name, FSystemPtr->closestDoor->name);
+		//std::cout << "Distance " << networkPtr->distance << std::endl;
+		
+		if (node->name == FSystemPtr->closestDoor->name){
+			playDoor = false;
+			soundInsideNode = true;
+			Gate = false;
+			//std::cout << "inisde " << std::endl;
+		}
+		if ((node->name != FSystemPtr->closestDoor->name)){
 				sysOut = true;
 				soundInsideNode = false;
 				playDoor = true;
 				Gate = false;
+				//std::cout << "Door " << std::endl;
 			}
-			if (!(door->distToSys >= door->min / 2)){
+		if (node->name != FSystemPtr->closestDoor->name && FSystemPtr->closestDoor->distToSys < FSystemPtr->closestDoor->min/2){
 				soundInsideNode = false;
 				Gate = true;
 				sysOut = false;
 				playDoor = true;
-				//std::cout << door->distToSys << std::endl;
+				//std::cout << "Gate " << std::endl;
 			}
-			if(node->distToSys <=node->min){
-				playDoor = false;
-				soundInsideNode = true;
-				Gate = false;
-			}
+			//if(node->distToSys <=node->min){
+			//	
+			//}
 			UpdateTypeActivePos();
 			switch (typeOfActivePos){
 			case 0:
-				activeMin = node->min;
-				activeMax = node->max;
+				activeMin = node->max;
+				activeMax = node->min;
 				activePos = door->pos;
-				activeVoulme = (0.25);
+				activeVoulme = 1-(1 /networkPtr->distance);
+			//	std::cout << "v " << activeVoulme << "am: " << activeMin << " aM: " << activeMax << " p:" << door->name << " n: " << networkPtr->next << " p: " << activePos.x << " " << activePos.y << " " << activePos.z << std::endl;
 				break;
 			case 1:
 				activePos = soundPos;
-				activeVoulme = (0.75);
+				activeMax = networkPtr->distance;
+				activeVoulme = 1 - (1 / networkPtr->distance);
+				//std::cout << "am: " << activeMin << " aM: " << activeMax << " p:" << door->name << " n: " << networkPtr->next << std::endl;
 				break;
 			case 2:
+				//std::cout << "v " << activeVoulme << "am: " << activeMin << " aM: " << activeMax << " p:" << door->name << " n: " << networkPtr->next << " p: " << activePos.x << " " << activePos.y << " " << activePos.z << std::endl;
 				activeMin = min;
 				activeMax = max;
 				activePos = soundPos;
@@ -492,4 +514,11 @@ void FSound::UpdateTypeActivePos(){
 			typeOfActivePos = 2;
 		}
 	}
+}
+void FSound::InitNetwork(){
+	networkPtr = new network;
+	std::vector<ReverbNode*> list = FSystemPtr->GetNodes();
+	std::cout << list.size();
+	networkPtr->init(list);
+	networkPtr->bellmanFord(node->name, door->name);
 }

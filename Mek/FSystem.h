@@ -39,6 +39,7 @@ public:
 	std::vector<ReverbNode*> nodes;
 	int numberDrivers, key;
 	unsigned int version;
+	ReverbNode* closestDoor,*nextDoor;
 	FSystem();
 	~FSystem();
 	void Update();
@@ -51,13 +52,18 @@ public:
 	void SetReverbNodesActive();
 	void SetReverbNodesActiveFalse();
 
+	inline std::vector<ReverbNode*> GetNodes() { return nodes; }
 	void NodeDistToSys();
 	void UpdateNodes();
 	void GetChannelsPlaying();
+	ReverbNode* FindNode(std::string _node);
+	void PrintNodesAndLinks();
+	void FindDoor();	
 };
 
 class ReverbNode{
 public:
+	std::vector<ReverbNode*> links;
 	char* name;
 	bool isDoor;
 	FMOD::Reverb *freverb;
@@ -76,6 +82,10 @@ public:
 	void PrintDistToSys();
 	void UpdateDoor();
 	inline void PrintPos(){ std::cout << pos.x << " " << pos.y << " " << pos.z; };
+
+	inline ReverbNode* GetRNode(){ return this; }
+	void AddLink(ReverbNode* node);
+	void PrintLinks();
 	
 };
 #endif

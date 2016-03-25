@@ -12,7 +12,7 @@
 #include <ostream>
 #include <sstream>
 #include <stdlib.h>
-
+#include "Network.h"
 
 #include "FSystem.h"
 
@@ -36,7 +36,8 @@ enum ROLLOFF_TYPE{
 };
 class FSound{
 public:
-
+	std::vector<std::string> spath;
+	network* networkPtr;
 	FSystem* FSystemPtr;
 	FMOD::Sound* SoundPtr;
 	FMOD::Channel* ChannelPtr;
@@ -47,7 +48,7 @@ public:
 	ROLLOFF_TYPE rollOff;
 	int typeOfActivePos;
 	bool isPlaying;//gets checked everyupdate ..isSound playing?
-	bool fastForward,playDoor,seeNode,sysOut;
+	bool fastForward, playDoor, seeNode, sysOut, activeNetwork;
 	bool soundInsideNode,Gate;
 	const char* fsname;	//full file path to the file
 	std::string sname; //Short file name sound.wav
@@ -84,6 +85,7 @@ public:
 	void USoundSets();
 	inline void SetVolume(float _volume){ activeVoulme = _volume; }
 	void UpdateTypeActivePos();
+	void InitNetwork();
 };
 
 

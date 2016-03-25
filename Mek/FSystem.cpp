@@ -94,6 +94,8 @@ FSystem::~FSystem(){
 	Clear();
 }
 void FSystem::Update(){
+	if (closestDoor!=NULL)
+	std::cout << closestDoor->name << " " << closestDoor->distToSys << std::endl;
 	UpdateNodes();
 	result = SystemPtr->set3DListenerAttributes(0, &sysPos, &sysVel, &sysFor, &sysUp); //up=
 	if (result != FMOD_OK){
@@ -138,6 +140,7 @@ void FSystem::UpdateNodes(){
 	for (int c = 0; c < nodes.size(); c++){
 		nodes[c]->Update();
 	}
+	FindDoor();
 }
 void FSystem::GetChannelsPlaying(){
 	int channels,cpu;
@@ -145,6 +148,46 @@ void FSystem::GetChannelsPlaying(){
 	SystemPtr->getChannelsPlaying(&channels);
 	SystemPtr->getCPUUsage(&dsp, &stream, &geometry, &update, &total);
 	std::cout << "Channels: " << channels << " DSP: " << dsp << " Stream: " << stream << " Update: " << update << " Total: " << total << std::endl;
+}
+ReverbNode* FSystem::FindNode(std::string _node){
+	for (int c = 0; c < nodes.size(); c++){
+		if (nodes[c]->name == _node)
+			return nodes[c];
+	}
+	std::cout << _node << " not found" << std::endl;
+}
+void FSystem::PrintNodesAndLinks(){
+	for (int c = 0; c < nodes.size(); c++){
+		nodes[c]->PrintLinks();
+	}
+}
+void FSystem::FindDoor(){
+	bool Found = false;
+	ReverbNode* temp;
+	for (int c = 0; c < nodes.size(); c++){
+		if (nodes[c]->distToSys <= nodes[c]->min){
+			if (closestDoor == NULL){
+				closestDoor = nodes[c];
+				//std::cout << closestDoor->name << " " << closestDoor->distToSys << std::endl;
+			}
+			else if (closestDoor->distToSys > nodes[c]->distToSys){
+				closestDoor = nodes[c];
+				
+			}
+			  
+				//for (int j = 0; j < closestDoor->links.size(); j++){
+				//	if (closestDoor->links[j]->distToSys <= closestDoor->min){
+				//		nextDoor = closestDoor->links[j];
+				//		std::cout<< "Next door " << nextDoor->name << std::endl;
+				//	}
+				//
+			//}
+			//else if ((nodes[c]->distToSys < closestDoor->distToSys)){
+			//	nextDoor = nodes[c];
+			//	std::cout << closestDoor->name << " " << closestDoor->distToSys << " " << nextDoor->name <<std::endl;
+			//}
+		}
+	}
 }
 //_____________________REVERB NODE___________________________________________
 ReverbNode::ReverbNode(){
@@ -180,3 +223,12 @@ void ReverbNode::UpdateDist(){
 void ReverbNode::PrintDistToSys(){
 	std::cout << distToSys << " " << pos.x << " " << pos.y << " " << pos.z << " " << std::endl;
 }
+void ReverbNode::AddLink(ReverbNode* node){
+	links.push_back(node);
+}
+void ReverbNode::PrintLinks(){
+	for (int c = 0; c < links.size();c++){
+		std::cout << name << " -> " << links[c]->name << std::endl;
+	}
+}
+

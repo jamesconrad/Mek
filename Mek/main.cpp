@@ -157,12 +157,38 @@ void Tutorial(){
 
 }
 void ReverbNodes(){
+	ReverbNode* node = new ReverbNode;
 
-	SoundSystem->CreateReverb("Warehouse Door", FMOD_PRESET_ARENA, 10.31f, 13.546f, 13.03f, 5.50f, 10.0f, true);
-	SoundSystem->CreateReverb("warehouse", FMOD_PRESET_HANGAR, 5.0f, 12.0f, 14.0f, 4.50f, 10.0f, false);
-	SoundSystem->CreateReverb("Warehouse/tunnel 1 Door", MY_HALLWAY, 1.09f, 13.38f, 9.62f, 3.0f, 3.0f, true);
-	SoundSystem->CreateReverb("tunnel 1", MY_HALLWAY, -0.0486725f, 13.9996f, 3.88874f, 3.0f, 3.0f, false);
-	SoundSystem->CreateReverb("Tunnel Door", FMOD_PRESET_ARENA, 0.0f, 5.199f, 0.0f, 10.0f, 10.0f, true);
+	SoundSystem->CreateReverb("wd", FMOD_PRESET_ARENA, 10.31f, 13.546f, 13.03f, 5.50f, 10.0f, true);
+	SoundSystem->CreateReverb("w", FMOD_PRESET_HANGAR, 5.0f, 12.0f, 14.0f, 4.50f, 10.0f, false);
+	SoundSystem->CreateReverb("wtd", MY_HALLWAY, 1.09f, 13.38f, 9.62f, 3.0f, 3.0f, false);
+	SoundSystem->CreateReverb("t", MY_HALLWAY, -0.0486725f, 13.9996f, 3.88874f, 3.0f, 3.0f, false);
+	SoundSystem->CreateReverb("td", FMOD_PRESET_ARENA, -0.482814f,14.0002f,3.07274f, 10.0f, 10.0f, true);
+	
+	node = SoundSystem->FindNode("wd");
+	node->AddLink(SoundSystem->FindNode("w"));
+
+	node = SoundSystem->FindNode("w");
+	node->AddLink(SoundSystem->FindNode("wd"));
+	node->AddLink(SoundSystem->FindNode("wtd"));
+
+	node = SoundSystem->FindNode("wtd");
+	node->AddLink(SoundSystem->FindNode("w"));
+	node->AddLink(SoundSystem->FindNode("t"));
+
+	node = SoundSystem->FindNode("t");
+	node->AddLink(SoundSystem->FindNode("wtd"));
+	node->AddLink(SoundSystem->FindNode("td"));
+
+	node = SoundSystem->FindNode("td");
+	node->AddLink(SoundSystem->FindNode("t"));
+
+	//SoundSystem->PrintNodesAndLinks();
+
+	//network* nodeNetwork = new network;
+	//nodeNetwork->init(SoundSystem->GetNodes());
+	//SoundSystem->networkPtr = nodeNetwork;
+	//SoundSystem->InitNetwork();
 }
 void FreqBand(){
 	//Create an instance of the ConsoleMagic class
@@ -677,7 +703,7 @@ static void Update(float secondsElapsed) {
 	//fclcm.Update();
 	SManager->Update();
 	SoundSystem->Update();
-	runTime += secondsElapsed;
+ 	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
 	glm::vec2 rInput;
