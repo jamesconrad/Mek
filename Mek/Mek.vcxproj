@@ -69,6 +69,7 @@
     <ClInclude Include="ComponentForce.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="LightComponent.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="NavMesh.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="OwnerList.h" />

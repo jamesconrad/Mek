@@ -1579,10 +1579,12 @@ void AppMain() {
 			else if (i == 19)
 			{
 				gObject->SetName("Fountain");
-				cModel->loadModel("models/Fountain.dae");
+				cModel->loadModel("models/MechWalk.dae");
 
 				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(0, 0, 0);
+				cModel->setActiveAnimation(cModel->getScene()->mAnimations[0]);
+				cModel->animate(0.5);
 			}
 			else if (i == 20)
 			{

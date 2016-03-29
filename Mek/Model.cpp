@@ -120,17 +120,18 @@ void Model::loadScene(aiScene* scene)
 				unsigned int index = 0;
 				std::string name(mesh->mBones[k]->mName.data);
 
-				if (_boneMap.find((char*)name.c_str()) == _boneMap.end())
+				if (_boneMap.find(mesh->mBones[k]->mName.data) == _boneMap.end())
 				{
 					//setup new bone
 					index = _numBones;
 					_numBones++;
 					_boneInfo.push_back(BoneInfo());
 					CopyaiMat(mesh->mBones[i]->mOffsetMatrix, _boneInfo[index].rootTransform);
-					_boneMap[(char*)name.c_str()] = index;
+					//_boneMap[(char*)name.c_str()] = index;
+					_boneMap.emplace(mesh->mBones[k]->mName.data, index);
 				}
 				else
-					index = _boneMap[(char*)name.c_str()];
+					index = _boneMap[mesh->mBones[k]->mName.data];
 
 				for (unsigned int l = 0; l < mesh->mBones[k]->mNumWeights; l++)
 				{ //For each affected vertex
@@ -259,6 +260,14 @@ layout (location = 4) in vec4 Weights;
 
 	//Pass the preset data to render
 	_render->forceOverride(vao, vbo, 2, NULL, true, numIndices, numVertices);
+
+	//Resize bone transform for animations if we have some
+	if (_scene != NULL && _scene->HasAnimations())
+	{
+		_finalFrameTransform.resize(_boneInfo.size());
+		_animated = true;
+	}
+
 }
 
 unsigned int Model::findScalingKey(float animTime, aiNodeAnim* animNode)
@@ -376,6 +385,9 @@ void Model::processAnimation(float animTime, aiAnimation* anim, bool blend, aiAn
 	glm::mat4 identity;
 
 	calcFinalTransform(animTime, anim, _scene->mRootNode, identity, blend, anim2, factor);
+
+	for (int i = 0; i < _boneInfo.size(); i++)
+		_finalFrameTransform[i] = _boneInfo[i].finalTransform;
 }
 
 void Model::animate(float animTime)
@@ -426,9 +438,9 @@ void Model::calcFinalTransform(float animTime, aiAnimation* anim, aiNode* node, 
 
 	glm::mat4 globaltransform = parent * nodetransform;
 
-	if (_boneMap.find((char*)node->mName.C_Str()) != _boneMap.end())
+	if (_boneMap.find(node->mName.data) != _boneMap.end())
 	{
-		unsigned int BoneIndex = _boneMap[(char*)node->mName.C_Str()];
+		unsigned int BoneIndex = _boneMap[node->mName.data];
 		_boneInfo[BoneIndex].finalTransform = globaltransform * _boneInfo[BoneIndex].rootTransform;
 	}
 
@@ -446,6 +458,8 @@ aiNodeAnim* Model::findAnimNode(aiAnimation* anim, std::string nodename)
 		if (std::string(nodeanim->mNodeName.data) == nodename)
 			return nodeanim;
 	}
+	printf("Error: Unable to find anim node %s\n", nodename.c_str());
+	return anim->mChannels[0];
 }
 
 glm::mat4 rotationMatrix(glm::vec3 &dir, glm::vec3 &baseDir, glm::vec3 &right)
@@ -471,15 +485,15 @@ void Model::render()
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();
 	glm::mat4 WVP = VP * W;
-	//if (_numBones > 0)
-	//{
-	//	Program::getInstance().bind("anim");
-	//	Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
-	//	Program::getInstance().setUniform("gWVP", WVP);
-	//	Program::getInstance().setUniform("gWorld", W);
-	//	Program::getInstance().updateLighting("anim");
-	//}
-	//else
+	if (_animated)
+	{
+		Program::getInstance().bind("anim");
+		Program::getInstance().setUniformMatrix4("gBones", &_finalFrameTransform[0][0][0], MAX_BONES);
+		Program::getInstance().setUniform("gWVP", WVP);
+		Program::getInstance().setUniform("gWorld", W);
+		Program::getInstance().updateLighting("anim");
+	}
+	else
 	{
 		Program::getInstance().bind("skinning");
 		Program::getInstance().setUniform("gWVP", WVP);
