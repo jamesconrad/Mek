@@ -12,9 +12,17 @@ public:
 	
 	Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,Sound*);
 	
-	void update(float &dtime, bool _isUsingBulletTime = false)
+	void update(float &dtime, bool _isUsingBulletTime = true)
 	{
-		pos += dir * (_isUsingBulletTime ? (vel * dtime) * timeFactor : (vel * dtime));
+		//pos += dir * (_isUsingBulletTime ? ((0.0000000000000000f) * dtime) * (timeFactor) : (vel * dtime));
+		if (_isUsingBulletTime)
+		{
+			pos += dir * (timeFactor / 4) * dtime;
+		}
+		else
+		{
+			pos += dir * vel * dtime;
+		}
 		go->pos = pos;
 		sound->SetSoundPosition(pos);
 		life -= dtime;

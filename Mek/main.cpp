@@ -75,7 +75,7 @@ glm::vec3 red = glm::vec3(1.0f, 0, 0);
 glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
 unsigned int score;
-unsigned int ammo = 10;
+
 float ammoInterp = 0.0f;
 float noammoInterp = 0.0f;
 bool noammoInterpIsIncreasing = false;
@@ -93,6 +93,7 @@ bool zoomingIn = false;
 float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 #include "ShieldVariables.h"
 #include "WeaponVariables.h"
+int* currentAmmo = &machineGunAmmo;
 
 float playTime = 0;
 float openingMessageTimer = 3.5f;
@@ -253,7 +254,6 @@ void startGame()
 	model->health = 100.f;
 	score = 0;
 	playTime = 0;
-	ammo = 10;
 	reloadTimer = 0.0f;
 	maxShieldHealth = 100.f;
 	shieldRechargeTimer = 0.f;
@@ -616,10 +616,10 @@ static void Render() {
 			}
 		}
 		char amBuff[8];
-		_snprintf_s(amBuff, 8, "AMMO:%i", ammo);
-		if (ammo > 0)
-			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, glm::normalize(fontColour), ammo / 10.f));
-		else if (ammo == 0)
+		_snprintf_s(amBuff, 8, "AMMO:%i", *currentAmmo);
+		if (*currentAmmo > 0)
+			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, glm::normalize(fontColour), *currentAmmo / 10.f));
+		else if (*currentAmmo == 0)
 			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, white, noammoInterp));
 		ShieldBack->render();
 		ShieldFront->cutoffPercent(shieldHealth / maxShieldHealth);
@@ -722,22 +722,29 @@ static void Update(float secondsElapsed) {
 		{
 			shoot = true;
 		}
-		if (glfwGetKey(gWindow, 'R') && ammo < 10 && reloadTimer == 0.0f)
+		if (glfwGetKey(gWindow, 'R') && *currentAmmo < 10 && reloadTimer == 0.0f)
 			reloadTimer = 0.0001f;
+		if (*currentAmmo <= 0 && reloadTimer == 0.0f)
+		{
+			reloadTimer = 0.0001f;
+		}
 
 		if (glfwGetKey(gWindow, '1'))
 		{
 			currentWeapon = machineGun;
+			currentAmmo = &machineGunAmmo;
 			iconGlow->pos = glm::vec3(-0.2f, -0.85f, 4);
 		}
 		if (glfwGetKey(gWindow, '2'))
 		{
 			currentWeapon = shotgun;
+			currentAmmo = &shotgunAmmo;
 			iconGlow->pos = glm::vec3(0.0f, -0.85f, 4);
 		}
 		if (glfwGetKey(gWindow, '3'))
 		{
 			currentWeapon = bfg;
+			currentAmmo = &bfgAmmo;
 			iconGlow->pos = glm::vec3(0.2f, -0.85f, 4);
 		}
 		if (glfwGetKey(gWindow, 'P'))
@@ -852,11 +859,11 @@ static void Update(float secondsElapsed) {
 			openingMessageTimer -= secondsElapsed;
 
 		//Begin Camera code
-		model->pos += fmy * (((c->getOwner()->vel + (IsDashing ? 0.2f : 0.0f)) * (isUsingBulletTime ? timeFactor + 0.3f : 1.0f)) * lInput.z) + model->force;
+		model->pos += fmy * (((c->getOwner()->vel + (IsDashing ? 0.2f : 0.0f)) ) * lInput.z) + model->force;
 		model->force = model->force / 1.2f;
 		if (glm::length(model->force) < 0.1f)
 			model->force = glm::vec3(0);
-		model->pos += cam->right() * (((c->getOwner()->vel + (IsDashing ? 0.2f : 0.0f)) * (isUsingBulletTime ? timeFactor + 0.3f : 1.0f)) * lInput.x);
+		model->pos += cam->right() * (((c->getOwner()->vel + (IsDashing ? 0.2f : 0.0f))) * lInput.x);
 
 		cam->offsetPosition(model->pos - cam->position());
 
@@ -871,7 +878,7 @@ static void Update(float secondsElapsed) {
 			ObjectManager::instance().enemyPMap[i]->update(secondsElapsed, isUsingBulletTime);
 
 		glm::vec3 p = Camera::getInstance().position();
-		if (shoot && shotcd > SHOT_CD && ammo > 0 && reloadTimer == 0.0f)
+		if (shoot && shotcd > SHOT_CD && *currentAmmo > 0 && reloadTimer == 0.0f)
 		{
 			Projectile* pr;
 
@@ -879,41 +886,41 @@ static void Update(float secondsElapsed) {
 			{
 				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 25, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 				ObjectManager::instance().pMap.push_back(pr);
-				ammo--;
+				*currentAmmo = *currentAmmo - 1;
 			}
 			else if (currentWeapon == shotgun)
 			{
-				if (ammo >= shotgun)
+				if (*currentAmmo >= shotgun)
 				{
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
-					ammo--;
+					*currentAmmo = *currentAmmo - 1;
 
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
-					ammo--;
+					*currentAmmo = *currentAmmo - 1;
 
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
-					ammo--;
+					*currentAmmo = *currentAmmo - 1;
 
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
-					ammo--;
+					*currentAmmo = *currentAmmo - 1;
 
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
-					ammo--;
+					*currentAmmo = *currentAmmo - 1;
 				}
 			}
 			else if (currentWeapon == bfg)
 			{
-				if (ammo >= bfg)
+				if (*currentAmmo >= bfg)
 				{
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 100, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					pr->go->scale = glm::vec3(1.5f);
 					ObjectManager::instance().pMap.push_back(pr);
-					ammo -= bfg;
+					*currentAmmo -= bfg;
 				}
 			}
 
@@ -929,12 +936,12 @@ static void Update(float secondsElapsed) {
 			if (reloadTimer > 2.f)
 			{
 				reloadTimer = 0.0f;
-				ammo = 10;
+				*currentAmmo = 10;
 				noammoInterp = 0.0f;
 			}
 		}
 
-		if (ammo == 0)
+		if (*currentAmmo == 0)
 		{
 			if (noammoInterpIsIncreasing)
 			{
@@ -1524,9 +1531,9 @@ void AppMain() {
 			else if (i == 20)
 			{
 				gObject->SetName("Wall");
-				cModel->loadModel("models/wallz2.dae");
+				cModel->loadModel("models/wallz3.dae");
 
-				gObject->scale = glm::vec3(0.05);
+				gObject->scale = glm::vec3(5.0);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
 			}
 			else if (i == 21)
