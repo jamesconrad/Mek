@@ -38,6 +38,9 @@
 #include "RayVsOBB.h"
 #include "AISpawner.h"
 
+//enable or disable the code slim wrote that steals console output
+#define HIJACKCONSOLE false
+
 enum game_state { GAME, MENU };
 float hitTimer = 0.0;
 float dshield = 0.0;
@@ -655,7 +658,8 @@ float shotcd = 0;
 static void Update(float secondsElapsed) {
 
 	manager->Update();
-	manager->GetSoundSystem()->GetChannelsPlaying();
+	if (HIJACKCONSOLE)
+		manager->GetSoundSystem()->GetChannelsPlaying();
 	Tutorial();
 	
 
