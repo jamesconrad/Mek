@@ -10,7 +10,7 @@ void prepProjectiles()
 	scene = (aiScene*)cg->getScene();
 }
 
-Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,FSound* _sound)
+Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifespan,Sound* _sound)
 {
 	pos = p;
 	dir = d;

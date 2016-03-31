@@ -6,7 +6,7 @@
 #include "lib\glm\gtc\matrix_transform.hpp"
 #include "lib\glm\gtx\rotate_vector.hpp"
 #include "include\IL\ilut.h"
-
+#include <SlimManager\Manager.h>
 
 // standard C++ libraries
 #include <cassert>
@@ -93,7 +93,7 @@ bool zoomingIn = false;
 float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 #include "ShieldVariables.h"
 #include "WeaponVariables.h"
-std::vector<OwnerList> soundcopy;
+
 float playTime = 0;
 float openingMessageTimer = 3.5f;
 float openningMessageInterp = 0.0f;
@@ -101,9 +101,7 @@ bool openningMessageInterpIsIncreasing = false;
 NavMesh testNaveMesh;
 bool dShield = false;
 bool BackPaused = false;
-ConsoleMagic cm;
-FSoundManager* SManager;
-FSystem* SoundSystem;
+
 //Model* testmodel;
 bool isTutorial = false;
 Framebuffer* framebuff[4];
@@ -118,14 +116,14 @@ Skybox* sky;
 Skybox* skyObs;
 //TODO : World/Target Loading, Menu, Timer, Target Counter
 GameObject* arms;
-bool PTUT = false;
+bool PTUT = true;
 bool RunWasd = true;
 bool RunShield = true;
 bool RunEnemy = true;
 bool RunDash = true;
 bool RunSlowTime = true;
+Manager* manager = new Manager;
 
-#define MY_HALLWAY  {  0,  12, 1.00f, -1000,     0,   0,   1.49f,  0.59f, 1.3f,   1219, 0.007f,   441, 0.011f, 0.25f, 0.000f, 5000.0f, 250.0f, 100.0f, 100.0f, 0x3f }
 bool isReverb = true;
 void Tutorial(){
 	//system("CLS");
@@ -136,74 +134,35 @@ void Tutorial(){
 	//std::cout << "Dash Tutorial: " << RunDash << " p: " << SManager->FindSound("Tutorial", "dash")->isPlaying << std::endl << std::flush;
 	//std::cout << "Slow time Tutorial: " << RunSlowTime << " p: " << SManager->FindSound("Tutorial", "slowtime")->isPlaying << std::endl << std::flush;
 
-	if (SManager->FindSound("Tutorial", "wasd")->isPlaying){
-		PTUT = true;
-	}
-	else if (SManager->FindSound("Tutorial", "enemy")->isPlaying){
-		PTUT = true;
-	}
-	else if (SManager->FindSound("Tutorial", "shield")->isPlaying){
-		PTUT = true;
-	}
-	else if (SManager->FindSound("Tutorial", "slowtime")->isPlaying){
-		PTUT = true;
-	}
-	else if (SManager->FindSound("Tutorial", "dash")->isPlaying){
-		PTUT = true;
-	}
-	else{
-		PTUT = false;
-	}
+	//if (manager->GetSoundManager()->FindSound("Tutorial", "wasd")->GetIsPlaying()){
+	//	PTUT = true;
+	//}
+	//else if (manager->GetSoundManager()->FindSound("Tutorial", "enemy")->GetIsPlaying()){
+	//	PTUT = true;
+	//}
+	//else if (manager->GetSoundManager()->FindSound("Tutorial", "shield")->GetIsPlaying()){
+	//	PTUT = true;
+	//}
+	//else if (manager->GetSoundManager()->FindSound("Tutorial", "slowtime")->GetIsPlaying()){
+	//	PTUT = true;
+	//}
+	//else if (manager->GetSoundManager()->FindSound("Tutorial", "dash")->GetIsPlaying()){
+	//	PTUT = true;
+	//}
+	//else{
+	//	PTUT = false;
+	//}
 
 }
-void ReverbNodes(){
-	ReverbNode* node = new ReverbNode;
 
-	SoundSystem->CreateReverb("wd", FMOD_PRESET_ARENA, 10.31f, 13.546f, 13.03f, 5.50f, 10.0f, true);
-	SoundSystem->CreateReverb("w", FMOD_PRESET_HANGAR, 5.0f, 12.0f, 14.0f, 4.50f, 10.0f, false);
-	SoundSystem->CreateReverb("wtd", MY_HALLWAY, 1.09f, 13.38f, 9.62f, 3.0f, 3.0f, false);
-	SoundSystem->CreateReverb("t", MY_HALLWAY, -0.0486725f, 13.9996f, 3.88874f, 3.0f, 3.0f, false);
-	SoundSystem->CreateReverb("td", FMOD_PRESET_ARENA, -0.482814f,14.0002f,3.07274f, 10.0f, 10.0f, true);
-	
-	node = SoundSystem->FindNode("wd");
-	node->AddLink(SoundSystem->FindNode("w"));
-
-	node = SoundSystem->FindNode("w");
-	node->AddLink(SoundSystem->FindNode("wd"));
-	node->AddLink(SoundSystem->FindNode("wtd"));
-
-	node = SoundSystem->FindNode("wtd");
-	node->AddLink(SoundSystem->FindNode("w"));
-	node->AddLink(SoundSystem->FindNode("t"));
-
-	node = SoundSystem->FindNode("t");
-	node->AddLink(SoundSystem->FindNode("wtd"));
-	node->AddLink(SoundSystem->FindNode("td"));
-
-	node = SoundSystem->FindNode("td");
-	node->AddLink(SoundSystem->FindNode("t"));
-
-	//SoundSystem->PrintNodesAndLinks();
-
-	//network* nodeNetwork = new network;
-	//nodeNetwork->init(SoundSystem->GetNodes());
-	//SoundSystem->networkPtr = nodeNetwork;
-	//SoundSystem->InitNetwork();
-}
 void FreqBand(){
 	//Create an instance of the ConsoleMagic class
 	//cm.Init(100, 50);//Resize the console window to 100 by 50 characters
 	//cm.SetTitle("Frequency Bands");
 }
-FSound* sound;
-void initFSystem(){
-	SoundSystem = new FSystem;
-	SoundSystem->cm = &cm;
-	SManager = new FSoundManager(SoundSystem, std::string("../Debug/media/"), std::string("mySounds.txt"));
-	ReverbNodes();
-	SManager->FindAndPlay("Background", "two");
-	SManager->FindSound("Background", "two")->soundPos = { 5.0f, 12.0f, 14.0f };
-};
+void InitManager(){
+	manager->Init();
+}
 void LoadShaders(char* vertFilename, char* fragFilename)
 {
 	Program::getInstance().createShader("standard", GL_VERTEX_SHADER, vertFilename);
@@ -265,23 +224,22 @@ void wonGame()
 	std::reverse(scoreTable.begin(), scoreTable.end());
 	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
-	SManager->StopAll();
+	manager->GetSoundManager()->StopAll();
 
 	shieldHealth = 100.0f; //Just work with me.
 }
 void startGame()
 {
-	SManager->FindAndPlay("Background", "one");
-	SManager->FindAndPause("Background", "one");
+	manager->GetSoundManager()->PlayAndPause("Background", "one",true);
 	gameState = GAME;
 	if (!PTUT){
 		if (RunWasd){
 			RunWasd = false;
-			SManager->SoundVolumeAll(0);
-			SManager->FindSound("Tutorial", "wasd")->SetVolume(1);
-			SManager->FindAndPlay("Tutorial", "wasd");
-			if (!SManager->FindSound("Tutorial", "wasd")->IsPlaying()){
-				SManager->SoundVolumeAll(1);
+			//SManager->SoundVolumeAll(0);
+			//SManager->FindSound("Tutorial", "wasd")->SetVolume(1);
+			manager->GetSoundManager()->FindAndPlay("Tutorial", "wasd");
+			if (!manager->GetSoundManager()->FindSound("Tutorial", "wasd")->GetIsPlaying()){
+				//SManager->SoundVolumeAll(1);
 			}
 			else{
 				std::cout << "Still playing" << std::endl;
@@ -352,7 +310,7 @@ void LoadTargets()
 	{
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
-		Target* tar = new Target("models/Mek.fbx", 0.5, SManager->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -474,7 +432,7 @@ void LoadTargets()
 	}
     for (unsigned int i = 6; i < 50; i++)
     {
-        Target* tar = new Target("models/Mek.fbx", 0.5, SManager->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
         tar->interp.state = LINEAR;
         randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
         randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
@@ -692,17 +650,15 @@ static void Render() {
 	glfwSwapBuffers(gWindow);
 }
 #define SHOT_CD 0.1
-float shotcd = 0;
+float shotcd = 0;	
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
-	
+
+	manager->Update();
+	manager->GetSoundSystem()->GetChannelsPlaying();
 	Tutorial();
-	//SManager->FindSound("Background", "one")->ChannelPtr->setPaused(true);
-	//cm.Clear(char(254), 0, 0);
-	//SManager->FindSound("Background", "one")->GetSpectrum();
-	//fclcm.Update();
-	SManager->Update();
-	SoundSystem->Update();
+	
+
  	runTime += secondsElapsed;
 
 	glm::vec3 lInput;
@@ -715,14 +671,8 @@ static void Update(float secondsElapsed) {
 	fmy.y = 0;
 	bool shoot = false;
 
-	FMOD_VECTOR _pos, _for, _up;
-	_pos = { cam->position().x, cam->position().y, cam->position().z };
-	_for = { -cam->forward().x, cam->forward().y, -cam->forward().z };
-	_up = { cam->up().x, cam->up().y, cam->up().z };
-	//std::cout << cam->position().x << " " << cam->position().y << " " << cam->position().z << std::endl << std::flush;
+	manager->SetSystemPFU(cam->position(),cam->forward(),cam->up());
 	
-	SManager->UpdateSysO(cam->position(), -cam->forward(), cam->up(), glm::vec3(0, 0, 0));
-
 	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
 	if (c->Refresh())
 	{
@@ -793,28 +743,17 @@ static void Update(float secondsElapsed) {
 		if (glfwGetKey(gWindow, 'P'))
 		{
 			if (BackPaused){
-				SManager->FindAndUnpause("Background", "one");
+				manager->GetSoundManager()->PauseSound("Background", "one",false);
 				BackPaused = false;
 			}
 			else{
-				SManager->FindAndPause("Background", "one");
+				manager->GetSoundManager()->PauseSound("Background", "one",true);
 				BackPaused = true;
 			}
 		}
 		if (glfwGetKey(gWindow, 'O'))
 		{
-			if (isReverb){
-				for (int c = 0; c < SoundSystem->nodes.size(); c++){
-					SoundSystem->SetReverbNodesActiveFalse();
-				}
-				isReverb = false;
-			}
-			else{
-				for (int c = 0; c < SoundSystem->nodes.size(); c++){
-					SoundSystem->SetReverbNodesActive();
-				}
-				isReverb = true;
-			}
+
 		}
 		if (glfwGetKey(gWindow, 'I'))
 		{
@@ -829,10 +768,10 @@ static void Update(float secondsElapsed) {
 		if (glfwGetKey(gWindow, GLFW_KEY_LEFT_SHIFT) && bulletTimeHitZero == false)
 		{
 			isUsingBulletTime = true;
-			SManager->FastForwardAll();
 		}
 		if (isUsingBulletTime)
 		{
+			manager->GetSoundManager()->FastForwardAll(true);
 			bulletTimeCooldown -= secondsElapsed;
 			if (bulletTimeCooldown <= 0.0f)
 			{
@@ -842,7 +781,7 @@ static void Update(float secondsElapsed) {
 		}
 		else if (!isUsingBulletTime)
 		{
-			SManager->ResetFastForwardAll();
+			manager->GetSoundManager()->FastForwardAll(false);
 			bulletTimeCooldown += secondsElapsed / 5;
 			if (bulletTimeCooldown > maxBulletTimeCooldown)
 			{
@@ -934,13 +873,11 @@ static void Update(float secondsElapsed) {
 		glm::vec3 p = Camera::getInstance().position();
 		if (shoot && shotcd > SHOT_CD && ammo > 0 && reloadTimer == 0.0f)
 		{
-			FSound* sounds = SManager->FindSound("Player", "Projectile");
-			//sounds->Play();
 			Projectile* pr;
 
 			if (currentWeapon == machineGun)
 			{
-				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 25, 10, SManager->FindSound("Player", "Projectile"));
+				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 25, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 				ObjectManager::instance().pMap.push_back(pr);
 				ammo--;
 			}
@@ -948,23 +885,23 @@ static void Update(float secondsElapsed) {
 			{
 				if (ammo >= shotgun)
 				{
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo--;
 				}
@@ -973,7 +910,7 @@ static void Update(float secondsElapsed) {
 			{
 				if (ammo >= bfg)
 				{
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 100, 10, SManager->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 100, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					pr->go->scale = glm::vec3(1.5f);
 					ObjectManager::instance().pMap.push_back(pr);
 					ammo -= bfg;
@@ -1023,38 +960,38 @@ static void Update(float secondsElapsed) {
 		if (playerIsHit){
 			if (hitTimer > 0.5 && shieldHealth>1){
 				hitTimer = 0;
-				SManager->FindAndPlay("Player", "ShieldHit");
+				manager->GetSoundManager()->FindAndPlay("Player", "ShieldHit");
 				dShield = false;
 				if (!PTUT){
 					if (RunShield){
 						RunShield = false;
-						SManager->SoundVolumeAll(0.25);
-						SManager->FindSound("Tutorial", "shield")->SetVolume(1);
-						SManager->FindAndPlay("Tutorial", "shield");
+					//	SManager->SoundVolumeAll(0.25);
+						//SManager->FindSound("Tutorial", "shield")->SetVolume(1);
+						manager->GetSoundManager()->FindAndPlay("Tutorial", "shield");
 					}
-					if (!SManager->FindSound("Tutorial", "shield")->IsPlaying()){
-						SManager->SoundVolumeAll(1);
+					if (!manager->GetSoundManager()->FindSound("Tutorial", "shield")->GetIsPlaying()){
+						//SManager->SoundVolumeAll(1);
 					}
 				}
 			}
 			if (hitTimer > 0.5 && shieldHealth < 0){
 				dShield = true;
-				SManager->FindAndPlay("Player", "NoShield");
+				manager->GetSoundManager()->FindAndPlay("Player", "NoShield");
 				if (!PTUT){
 					if (RunSlowTime){
 						RunSlowTime = false;
-						SManager->SoundVolumeAll(0.25);
-						SManager->FindSound("Tutorial", "slowtime")->SetVolume(1);
-						SManager->FindAndPlay("Tutorial", "slowtime");
+						//SManager->SoundVolumeAll(0.25);
+						//SManager->FindSound("Tutorial", "slowtime")->SetVolume(1);
+						manager->GetSoundManager()->FindAndPlay("Tutorial", "slowtime");
 					}
-					if (!SManager->FindSound("Tutorial", "slowtime")->IsPlaying()){
-						SManager->SoundVolumeAll(1);
+					if (!manager->GetSoundManager()->FindSound("Tutorial", "slowtime")->GetIsPlaying()){
+						//SManager->SoundVolumeAll(1);
 					}
 				}
 
 			}
 			if (dShield = true && dshield >5){
-				SManager->FindAndPlay("Player", "ShieldWarning");
+				manager->GetSoundManager()->FindAndPlay("Player", "ShieldWarning");
 				dShield = false;
 				dshield = 0;
 			}
@@ -1102,11 +1039,11 @@ static void Update(float secondsElapsed) {
 			if (targets[i]->canSeePlayer(model->pos)){
 				if (RunEnemy){
 					RunEnemy = false;
-					SManager->SoundVolumeAll(0.25);
-					SManager->FindSound("Tutorial", "enemy")->SetVolume(1);
-					SManager->FindAndPlay("Tutorial", "enemy");
-					if (!SManager->FindSound("Tutorial", "enemy")->IsPlaying()){
-						SManager->SoundVolumeAll(1);
+					//SManager->SoundVolumeAll(0.25);
+					//SManager->FindSound("Tutorial", "enemy")->SetVolume(1);
+					manager->GetSoundManager()->FindAndPlay("Tutorial", "enemy");
+					if (!manager->GetSoundManager()->FindSound("Tutorial", "enemy")->GetIsPlaying()){
+						//SManager->SoundVolumeAll(1);
 					}
 				}
 			}
@@ -1148,9 +1085,9 @@ static void Update(float secondsElapsed) {
 				{
 					targets[i]->fireTimer = 0.f;
 					if (targets[i]->firingfromRightBarrel)
-						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					else
-						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, SManager->FindSound("Player", "Projectile"));
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
 					targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
 					targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
@@ -1259,9 +1196,7 @@ void OnError(int errorCode, const char* msg) {
 }
 // the program starts here
 void AppMain() {
-
-	FreqBand();
-	initFSystem();
+	InitManager();
 	testNaveMesh.loadNavMesh("../Debug/models/NavMeshes/FirstLevelNavMesh-scaled.obj");
 	srand(time(NULL));
 	// initialise GLFW

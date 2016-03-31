@@ -1,6 +1,6 @@
 #include "Target.h"
 
-Target::Target(char* fp, float t, OwnerList* _oList)
+Target::Target(char* fp, float t, SoundList* _oList)
 {
 	tmod = t;
 	hit = false;
@@ -40,8 +40,8 @@ void Target::update(float dTime, NavMesh &mesh)
 
 	if (!hit && go->health <= 0) //go->scale == glm::vec3(0, 0, 0))
 	{
-		hit = true;
-		oList->FindAndPlay("Hit");
+		//hit = true;
+		//oList->FindAndPlay("Hit");
 	}
 	else
 	{
@@ -64,14 +64,14 @@ void Target::update(float dTime, NavMesh &mesh)
 		glm::vec3 temp2 = glm::vec3((pPos.x), (pPos.y), (pPos.z));
 
 		//std::cout << "go->pos: " << go->pos.x << " " << go->pos.y << " " << go->pos.z << std::endl;
-		oList->UpdateOwnerSoundPos(&go->pos);
-		movingsound->setPaused(false);
-		if ((oList->FindSound("Moving")->distToSys) > (oList->FindSound("Moving"))->max){
-			oList->FindSound("Moving")->ChannelPtr->setPaused(true);
-		}
-		else{
-			oList->FindSound("Moving")->ChannelPtr->setPaused(false);
-		}
+		oList->UpdateListPosition(go->pos);
+		//movingsound->setPaused(false);
+		//if ((oList->FindSound("Moving")->GetDistanceToSystem()) > (oList->FindSound("Moving"))->GetMaxDistance()){
+		//	oList->FindSound("Moving")->GetSoundChannelPtr()->setPaused(true);
+		//}
+		//else{
+		//	oList->FindSound("Moving")->GetSoundChannelPtr()->setPaused(false);
+		//}
 	}
 	
 }

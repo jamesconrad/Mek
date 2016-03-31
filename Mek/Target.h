@@ -7,10 +7,10 @@
 #include "RayVsOBB.h"
 #include "Projectile.h"
 
-#include "FSoundManager.h"
+
 
 #include "lib\glm\gtx\vector_angle.hpp"
-
+#include <SlimManager\SoundList.h>
 
 
 enum combatPositionType
@@ -31,7 +31,7 @@ class Target
 {
 public:
 	//Must manually set the interpolation vars through the public accessor
-	Target(char* fp, float tmod, OwnerList* _list);
+	Target(char* fp, float tmod, SoundList* _list);
 	//should be called after the collision check
 	void update(float dTime, NavMesh &_mesh);
 	Interpolation interp;
@@ -42,7 +42,7 @@ public:
 	Model* cg;
 	ComponentCollision* cc;
 
-	OwnerList* oList;
+	SoundList* oList;
 
 	AiBehaviour AiHandle;
 	NavFace tempPosition; //I don't like this, but it's my best idea atm. I'll try and improve this when it's not 4 am.
@@ -102,7 +102,7 @@ public:
 	bool firingfromRightBarrel;
 	float fireTimer = 0.f;
 	float fireTimeTolerance = 2.0f;
-	FSound *laserSound;
+	Sound *laserSound;
 	FMOD::Channel* movingsound;
 };
 
