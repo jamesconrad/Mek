@@ -1535,7 +1535,7 @@ void AppMain() {
 			else if (i == 20)
 			{
 				gObject->SetName("Wall");
-				cModel->loadModel("models/wallz3.dae");
+				cModel->loadModel("models/wallz2.dae");
 
 				gObject->scale = glm::vec3(5.0);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);

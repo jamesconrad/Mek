@@ -491,7 +491,7 @@ void Model::render()
 		Program::getInstance().setUniformMatrix4("gBones", &_finalFrameTransform[0][0][0], MAX_BONES);
 		Program::getInstance().setUniform("gWVP", WVP);
 		Program::getInstance().setUniform("gWorld", W);
-		Program::getInstance().updateLighting("anim");
+		//Program::getInstance().updateLighting("anim");
 	}
 	else
 	{

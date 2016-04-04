@@ -126,25 +126,26 @@ out vec4 FragColor;
 
 void main()
 {
-    VSOutput In;
-    In.TexCoord = TexCoord0;
-    In.Normal   = normalize(Normal0);
-    In.WorldPos = WorldPos0;
-
-    vec4 TotalLight = CalcDirectionalLight(In);
-
-    for (int i = 0 ; i < gNumPointLights ; i++)
-	{
-        TotalLight += CalcPointLight(gPointLights[i], In);
-    }
-
-    for (int i = 0 ; i < gNumSpotLights ; i++)
-	{
-        TotalLight += CalcSpotLight(gSpotLights[0], In);
-    }
-
-    FragColor = texture(gColorMap, In.TexCoord.xy) * TotalLight;
+    //VSOutput In;
+    //In.TexCoord = TexCoord0;
+    //In.Normal   = normalize(Normal0);
+    //In.WorldPos = WorldPos0;
+	//
+    //vec4 TotalLight = CalcDirectionalLight(In);
+	//
+    //for (int i = 0 ; i < gNumPointLights ; i++)
+	//{
+    //    TotalLight += CalcPointLight(gPointLights[i], In);
+    //}
+	//
+    //for (int i = 0 ; i < gNumSpotLights ; i++)
+	//{
+    //    TotalLight += CalcSpotLight(gSpotLights[0], In);
+    //}
+	//
+    //FragColor = texture(gColorMap, In.TexCoord.xy) * TotalLight;
 	//FragColor = CalcSpotLight(gSpotLights[0], In);
 	//FragColor = vec4(gSpotLights[0].Base.Position, 1);
 	//FragColor = vec4(CalcPointLight(gSpotLights[0].Base, In).xyz, 1);
+	FragColor = vec4(1,0,0,1);
 }
