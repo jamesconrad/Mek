@@ -272,6 +272,9 @@
     <ClInclude Include="include\SlimManager\SoundNetwork.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MenuSelectionVariables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragment-shader.frag">

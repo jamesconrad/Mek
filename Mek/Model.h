@@ -62,6 +62,9 @@ public:
 	void animate(float animTime);
 
 	const aiScene* getScene();
+
+	glm::mat4 rotMatrix;
+
 	
 private:
 	struct Entry

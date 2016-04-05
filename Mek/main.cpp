@@ -41,7 +41,7 @@
 //enable or disable the code slim wrote that steals console output
 #define HIJACKCONSOLE false
 
-enum game_state { GAME, MENU };
+enum game_state { GAME, MENU, VICTORYSCREEN };
 float hitTimer = 0.0;
 float dshield = 0.0;
 //Bad Inits need to fix at a later time
@@ -51,10 +51,13 @@ std::vector<GameObject*> goVec;
 std::vector<Target*> targets;
 int maxNumOfTargets;
 TargetSpawner targetSpawner1;
+TargetSpawner targetSpawner2;
 int currentEnemyToUpdate = 0;
 int targetsKilled = 0;
 twodOverlay* crosshair;
 twodOverlay* startscreen;
+twodOverlay* gameLogo;
+twodOverlay* studioLogo;
 twodOverlayAnim* skull;
 twodOverlay* ShieldBack;
 twodOverlay* ShieldFront;
@@ -70,25 +73,37 @@ twodOverlay* dashIconFront;
 twodOverlay* dashIconBack;
 //todo: revert back to menu
 game_state gameState = MENU;
+int nameSelect = 0;
+int nameOffset[3] = { 0, 0, 0 };
 bool isPlayingSearchAndDestroy = true;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
 glm::vec3 white = glm::vec3(1.0, 1.0, 1.0);
 glm::vec3 red = glm::vec3(1.0f, 0, 0);
+glm::vec3 menuItem2Colour = glm::vec3(0.68, 0.91, 1.0);
+glm::vec3 menuItem1Colour = glm::vec3(0.0, 0.4, 1.0);
 glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
 std::vector<unsigned int> scoreTable;
+std::vector<string> sndNames;
+std::vector<unsigned int> survivalScoreTable;
+std::vector<string> survivalNames;
+float characterSpaceInterp = 0.0f;
+float characterSpaceInterpIsIncreasing = true;
 unsigned int score;
 
 float ammoInterp = 0.0f;
 float noammoInterp = 0.0f;
 bool noammoInterpIsIncreasing = false;
-float reloadTimer = 0.0f;
+float machineGunReloadTimer = 0.0f;
+float shotgunReloadTimer = 0.0f;
+float bfgReloadTimer = 0.0f;
+float *currentReloadTimer = &machineGunReloadTimer;
 float timeFactor = 0.05f;
 float maxBulletTimeCooldown = 2.0f;
 float bulletTimeCooldown = maxBulletTimeCooldown;
 bool bulletTimeHitZero = false;
 bool isUsingBulletTime = false;
-float maxDashingCooldown = 0.3f;
+float maxDashingCooldown = 0.5f;
 float dashingCooldown = maxDashingCooldown;
 bool dashingHitZero = false;
 bool IsDashing = false;
@@ -96,6 +111,7 @@ bool zoomingIn = false;
 float maxFOV = 70, minFOV = 40, currentFOV, zoomingTimer = 0.0f;
 #include "ShieldVariables.h"
 #include "WeaponVariables.h"
+#include "MenuSelectionVariables.h"
 int* currentAmmo = &machineGunAmmo;
 
 float playTime = 0;
@@ -222,20 +238,33 @@ static void CreateInstances() {
 }
 void wonGame()
 {
-	gameState = MENU;
-	scoreTable.push_back(score);
-	sort(scoreTable.begin(), scoreTable.end());
-	std::reverse(scoreTable.begin(), scoreTable.end());
+	gameState = VICTORYSCREEN;
+	if (isPlayingSearchAndDestroy)
+	{
+		scoreTable.push_back(score);
+		sort(scoreTable.begin(), scoreTable.end());
+		std::reverse(scoreTable.begin(), scoreTable.end());
+	}
+	else
+	{
+		survivalScoreTable.push_back(targetsKilled);
+		sort(survivalScoreTable.begin(), survivalScoreTable.end());
+		std::reverse(survivalScoreTable.begin(), survivalScoreTable.end());
+	}
 	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
 	manager->GetSoundManager()->StopAll();
 
+	machineGunAmmo = 10.f;
+	shotgunAmmo = 10.f;
+	bfgAmmo = 10.f;
+	currentFOV = maxFOV;
 	shieldHealth = 100.0f; //Just work with me.
 }
 void startGame()
 {
 	manager->GetSoundManager()->PlayAndPause("Background", "one",true);
-	gameState = GAME;
+	gameState = GAME; // GAME
 	if (!PTUT){
 		if (RunWasd){
 			RunWasd = false;
@@ -257,12 +286,17 @@ void startGame()
 	model->health = 100.f;
 	score = 0;
 	playTime = 0;
-	reloadTimer = 0.0f;
+	machineGunReloadTimer = 0.0f;
+	shotgunReloadTimer = 0.0f;
+	bfgReloadTimer = 0.0f;
+	currentReloadTimer = &machineGunReloadTimer;
 	maxShieldHealth = 100.f;
 	shieldRechargeTimer = 0.f;
 	shieldMaxTimer = 3.5f;
 	shieldRechargeAmount = 30.f;
-
+	nameOffset[0] = 0;
+	nameOffset[1] = 0;
+	nameOffset[2] = 0;
 	playerIsHit = false;
 	hitInvulnTimer = 0.0f;
 	maxInvulnTime = 0.5f;
@@ -295,10 +329,12 @@ void startGame()
     if (isPlayingSearchAndDestroy)
     {
         targetSpawner1.deactivate();
+		targetSpawner2.deactivate();
     }
     else
     {
         targetSpawner1.activate();
+		targetSpawner2.activate();
     }
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.0f);
 	Camera::getInstance().lookAt(glm::vec3(0, 0.75, 0));
@@ -496,7 +532,7 @@ static void DrawScene(int shadowMapTexID)
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			cc->renderHitbox();
+			//cc->renderHitbox();
 		}
 	}
 
@@ -517,7 +553,7 @@ static void DrawScene(int shadowMapTexID)
 		if (targets[i]->alive)
 		{
 			targets[i]->cg->render();
-			targets[i]->cc->renderHitbox();
+			//targets[i]->cc->renderHitbox();
 		}
 	}
 	//gCol->renderHitbox();
@@ -547,7 +583,7 @@ static void Render() {
 		framebuffeffects->Toon(false);
 		framebuffeffects->GodRays(glm::vec3(-8.f, 9.f, 10.f), model->pos, Camera::getInstance().forward());
 	}
-	else if (gameState == MENU)
+	else if (gameState == MENU || VICTORYSCREEN)
 	{
 		framebuffeffects->Toon(true);
 	}
@@ -565,19 +601,66 @@ static void Render() {
 	glDisable(GL_DEPTH_TEST);
 	if (gameState == MENU)
 	{
-		startscreen->render();
-		TextRendering::getInstance().printText2D("HIGHSCORES", -0.6f, -0.675f, 0.125f, fontColour);
-		for (int i = 0, s = scoreTable.size(); i < s && i < 5; i++)
+		if (showHighScores)
 		{
-			char buffer[64];
-			_snprintf_s(buffer, 64, "SCORE:%i", scoreTable[i]);
-			TextRendering::getInstance().printText2D(buffer, -0.38f, -0.75f - i / 16.f, 0.075f, fontColour);
+			TextRendering::getInstance().printText2D("S N D", -0.7f, 0.875f, 0.09f, fontColour);
+			for (int i = 0, s = scoreTable.size(); i < s && i < 5; i++)
+			{
+				char buffer[64];
+				_snprintf_s(buffer, 64, "%s %i", sndNames[i].c_str(), scoreTable[i]);
+				TextRendering::getInstance().printText2D(buffer, -0.9f, 0.75f - i / 16.f, 0.075f, fontColour);
+			}
+
+			TextRendering::getInstance().printText2D("SURVIVAL", 0.15f, 0.875f, 0.09f, fontColour);
+			for (int i = 0, s = survivalScoreTable.size(); i < s && i < 5; i++)
+			{
+				char buffer[64];
+				_snprintf_s(buffer, 64, "%s %i", survivalNames[i].c_str(), survivalScoreTable[i]);
+				TextRendering::getInstance().printText2D(buffer, 0.25f, 0.75f - i / 16.f, 0.075f, fontColour);
+			}
 		}
-		if (score != 0)
+		else
 		{
-			char buffer[64];
-			_snprintf_s(buffer, 64, "SCORE:%i", score);
-			TextRendering::getInstance().printText2D(buffer, -0.38f, 0.85f, 0.075f, fontColour);
+			//startscreen->render();
+			gameLogo->render();
+			studioLogo->render();
+			if (currentlySelectedMenuItem == SEARCHANDDESTROY)
+			{
+				TextRendering::getInstance().printText2D("SEARCH AND DESTROY", -0.95f, 0.3f, 0.09f, menuItem2Colour, menuItem1Colour);
+				TextRendering::getInstance().printText2D("SURVIVAL", -0.95f, 0.2f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("HIGHSCORES", -0.95, 0.1f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("EXIT", -0.95f, 0.0f, 0.09f, glm::vec3(0));
+			}
+			if (currentlySelectedMenuItem == SURVIVAL)
+			{
+			
+
+				TextRendering::getInstance().printText2D("SEARCH AND DESTROY", -0.95f, 0.3f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("SURVIVAL", -0.95f, 0.2f, 0.09f, menuItem2Colour, menuItem1Colour);
+				TextRendering::getInstance().printText2D("HIGHSCORES", -0.95, 0.1f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("EXIT", -0.95f, 0.0f, 0.09f, glm::vec3(0));
+			}
+			if (currentlySelectedMenuItem == HIGHSCORES)
+			{
+				TextRendering::getInstance().printText2D("SEARCH AND DESTROY", -0.95f, 0.3f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("SURVIVAL", -0.95f, 0.2f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("HIGHSCORES", -0.95, 0.1f, 0.09f, menuItem2Colour, menuItem1Colour);
+				TextRendering::getInstance().printText2D("EXIT", -0.95f, 0.0f, 0.09f, glm::vec3(0));
+			}
+			if (currentlySelectedMenuItem == EXIT)
+			{
+				TextRendering::getInstance().printText2D("SEARCH AND DESTROY", -0.95f, 0.3f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("SURVIVAL", -0.95f, 0.2f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("HIGHSCORES", -0.95, 0.1f, 0.09f, glm::vec3(0));
+				TextRendering::getInstance().printText2D("EXIT", -0.95f, 0.0f, 0.09f, menuItem2Colour, menuItem1Colour);
+			}
+		
+		//if (score != 0)
+		//{
+		//	char buffer[64];
+		//	_snprintf_s(buffer, 64, "SCORE:%i", score);
+		//	TextRendering::getInstance().printText2D(buffer, -0.38f, 0.85f, 0.075f, fontColour);
+		//}
 		}
 	}
 	else if (gameState == GAME)
@@ -596,9 +679,12 @@ static void Render() {
             _snprintf_s(buffer, 8, "%i", maxNumOfTargets);
             TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
         }
-		char scbuff[64];
-		_snprintf_s(scbuff, 64, "SCORE:%i", score);
-		TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
+		if (isPlayingSearchAndDestroy)
+		{
+			char scbuff[64];
+			_snprintf_s(scbuff, 64, "SCORE:%i", score);
+			TextRendering::getInstance().printText2D(scbuff, -0.49f, 0.91f, 0.075f, fontColour);
+		}
 		if (isPlayingSearchAndDestroy)
         {
             if (openingMessageTimer >= 0.0f)
@@ -647,6 +733,44 @@ static void Render() {
             bulletTimeIconFront->cutoffPercent(0);
         bulletTimeIconFront->render();
 
+	}
+	else if (gameState = VICTORYSCREEN)
+	{
+		if (isPlayingSearchAndDestroy)
+		{
+			char victoryAndScore[] = "VICTORY! YOUR SCORE: ";
+			TextRendering::getInstance().printText2D(victoryAndScore, -0.9f, 0.5f, 0.07f, fontColour);
+			char scbuff[64];
+			_snprintf_s(scbuff, 64, "%i", score);
+			TextRendering::getInstance().printText2D(scbuff, 0.5f, 0.5f, 0.07f, fontColour);
+		}
+		else
+		{
+			char victoryAndScore[] = "TARGETS KILLED: ";
+			TextRendering::getInstance().printText2D(victoryAndScore, -0.6f, 0.5f, 0.07f, fontColour);
+			char scbuff[64];
+			_snprintf_s(scbuff, 64, "%i", targetsKilled);
+			TextRendering::getInstance().printText2D(scbuff, 0.55f, 0.5f, 0.07f, fontColour);
+		}
+		char name[3];
+		name[0] = 'A' + nameOffset[0];
+		name[1] = 'A' + nameOffset[1];
+		name[2] = 'A' + nameOffset[2];
+		switch (nameSelect)
+		{
+		case 0:
+			characterSpaceInterpIsIncreasing ? name[0] = ' ' : false;
+			break;
+		case 1:
+			characterSpaceInterpIsIncreasing ? name[1] = ' ' : false;
+			break;
+		case 2:
+			characterSpaceInterpIsIncreasing ? name[2] = ' ' : false;
+			break;
+		default:
+			break;
+		}
+		TextRendering::getInstance().printText2D(name, -0.4, 0.0f, 0.333f, fontColour);
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -698,8 +822,9 @@ static void Update(float secondsElapsed) {
 			lInput.x = 1;
 
 		IsDashing = false;
-		if (glfwGetKey(gWindow, ' ') && dashingHitZero == false)
+		if (glfwGetKey(gWindow, ' ') && dashingHitZero == false && gameState == GAME)
 		{
+			spaceHasBeenPressed = true;
 			IsDashing = true;
 		}
 		if (!IsDashing)
@@ -726,29 +851,32 @@ static void Update(float secondsElapsed) {
 		{
 			shoot = true;
 		}
-		if (glfwGetKey(gWindow, 'R') && *currentAmmo < 10 && reloadTimer == 0.0f)
-			reloadTimer = 0.0001f;
-		if (*currentAmmo <= 0 && reloadTimer == 0.0f)
+		if (glfwGetKey(gWindow, 'R') && *currentAmmo < 10 && *currentReloadTimer == 0.0f)
+			*currentReloadTimer = 0.0001f;
+		if (*currentAmmo <= 0 && *currentReloadTimer == 0.0f)
 		{
-			reloadTimer = 0.0001f;
+			*currentReloadTimer = 0.0001f;
 		}
 
 		if (glfwGetKey(gWindow, '1'))
 		{
 			currentWeapon = machineGun;
 			currentAmmo = &machineGunAmmo;
+			currentReloadTimer = &machineGunReloadTimer;
 			iconGlow->pos = glm::vec3(-0.2f, -0.85f, 4);
 		}
 		if (glfwGetKey(gWindow, '2'))
 		{
 			currentWeapon = shotgun;
 			currentAmmo = &shotgunAmmo;
+			currentReloadTimer = &shotgunReloadTimer;
 			iconGlow->pos = glm::vec3(0.0f, -0.85f, 4);
 		}
 		if (glfwGetKey(gWindow, '3'))
 		{
 			currentWeapon = bfg;
 			currentAmmo = &bfgAmmo;
+			currentReloadTimer = &bfgReloadTimer;
 			iconGlow->pos = glm::vec3(0.2f, -0.85f, 4);
 		}
 		if (glfwGetKey(gWindow, 'P'))
@@ -793,7 +921,7 @@ static void Update(float secondsElapsed) {
 		else if (!isUsingBulletTime)
 		{
 			manager->GetSoundManager()->FastForwardAll(false);
-			bulletTimeCooldown += secondsElapsed / 5;
+			bulletTimeCooldown += secondsElapsed / 2;
 			if (bulletTimeCooldown > maxBulletTimeCooldown)
 			{
 				bulletTimeCooldown = maxBulletTimeCooldown;
@@ -882,13 +1010,13 @@ static void Update(float secondsElapsed) {
 			ObjectManager::instance().enemyPMap[i]->update(secondsElapsed, isUsingBulletTime);
 
 		glm::vec3 p = Camera::getInstance().position();
-		if (shoot && shotcd > SHOT_CD && *currentAmmo > 0 && reloadTimer == 0.0f)
+		if (shoot && shotcd > SHOT_CD && *currentAmmo > 0 && *currentReloadTimer == 0.0f)
 		{
 			Projectile* pr;
 
 			if (currentWeapon == machineGun)
 			{
-				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 25, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 25, 25, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 				ObjectManager::instance().pMap.push_back(pr);
 				*currentAmmo = *currentAmmo - 1;
 			}
@@ -896,23 +1024,23 @@ static void Update(float secondsElapsed) {
 			{
 				if (*currentAmmo >= shotgun)
 				{
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 15, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 				}
@@ -921,7 +1049,7 @@ static void Update(float secondsElapsed) {
 			{
 				if (*currentAmmo >= bfg)
 				{
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 10, 100, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 25, 80, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					pr->go->scale = glm::vec3(1.5f);
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo -= bfg;
@@ -934,13 +1062,33 @@ static void Update(float secondsElapsed) {
 
 		}
 
-		if (reloadTimer > 0.0f)
+		if (machineGunReloadTimer > 0.0f)
 		{
-			reloadTimer += secondsElapsed;
-			if (reloadTimer > 2.f)
+			machineGunReloadTimer += secondsElapsed;
+			if (machineGunReloadTimer > 2.f)
 			{
-				reloadTimer = 0.0f;
-				*currentAmmo = 10;
+				machineGunReloadTimer = 0.0f;
+				machineGunAmmo = 10;
+				noammoInterp = 0.0f;
+			}
+		}
+		if (shotgunReloadTimer > 0.0f)
+		{
+			shotgunReloadTimer += secondsElapsed;
+			if (shotgunReloadTimer > 2.f)
+			{
+				shotgunReloadTimer = 0.0f;
+				shotgunAmmo = 10;
+				noammoInterp = 0.0f;
+			}
+		}
+		if (bfgReloadTimer > 0.0f)
+		{
+			bfgReloadTimer += secondsElapsed;
+			if (bfgReloadTimer > 2.f)
+			{
+				bfgReloadTimer = 0.0f;
+				bfgAmmo = 10;
 				noammoInterp = 0.0f;
 			}
 		}
@@ -1058,6 +1206,7 @@ static void Update(float secondsElapsed) {
 					}
 				}
 			}
+			
 			if (targets[i]->alive == true)
 			{
 				targets[i]->currentMaxVelocity = targets[i]->maxVelocity;
@@ -1072,6 +1221,8 @@ static void Update(float secondsElapsed) {
 				{
 					targets[i]->canSeePlayer(model->pos);
 				}
+				if (targets[i]->go->health < 100)
+					targets[i]->hasSpottedPlayer = true;
 
 				//if (shoot)
 				//{
@@ -1082,7 +1233,10 @@ static void Update(float secondsElapsed) {
 				//		targetsKilled++;
 				//	}
 				//}
-
+				if (targets[i]->go->health <= 0 && targets[i]->alive)
+				{
+					targets[i]->hit = true;
+				}
 				if (targets[i]->hit && targets[i]->alive)
 				{
 					targets[i]->alive = false;
@@ -1096,9 +1250,9 @@ static void Update(float secondsElapsed) {
 				{
 					targets[i]->fireTimer = 0.f;
 					if (targets[i]->firingfromRightBarrel)
-						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 20, 10, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					else
-						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 10, 10, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 20, 10, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
 					targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
 					targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
@@ -1111,7 +1265,9 @@ static void Update(float secondsElapsed) {
 	    if (targetSpawner1.isActive)
         {
             targetSpawner1.update(targets, secondsElapsed);
+			targetSpawner2.update(targets, secondsElapsed);
         }
+
 
 		skull->update(secondsElapsed);
 
@@ -1179,7 +1335,7 @@ static void Update(float secondsElapsed) {
 		{
 		    if (glfwGetKey(gWindow, '1'))
             {
-                maxNumOfTargets = 1;
+                maxNumOfTargets = 6;
                 isPlayingSearchAndDestroy = true;
                 startGame();
             }
@@ -1189,7 +1345,140 @@ static void Update(float secondsElapsed) {
                 isPlayingSearchAndDestroy = false;
                 startGame();
             }
+			if (glfwGetKey(gWindow, 'W') && currentlyPressedKey == 'n')
+			{
+				currentlyPressedKey = 'w';
+				currentlySelectedMenuItem -= 1;
+				if (currentlySelectedMenuItem < 0)
+					currentlySelectedMenuItem = maxChoices - 1;
+			}
+			else if (glfwGetKey(gWindow, 'S') && currentlyPressedKey == 'n')
+			{
+				currentlyPressedKey = 's';
+				currentlySelectedMenuItem += 1;
+				if (currentlySelectedMenuItem >= maxChoices)
+					currentlySelectedMenuItem = 0;
+			}
+
+			if (glfwGetKey(gWindow, 'W') == GLFW_RELEASE && currentlyPressedKey == 'w')
+			{
+				currentlyPressedKey = 'n';
+			}
+			else if (glfwGetKey(gWindow, 'S') == GLFW_RELEASE && currentlyPressedKey == 's')
+			{
+				currentlyPressedKey = 'n';
+			}
+
+			if (glfwGetKey(gWindow, GLFW_KEY_ENTER) || spaceHasBeenPressed ? false : glfwGetKey(gWindow, GLFW_KEY_SPACE))
+			{
+				switch (currentlySelectedMenuItem)
+				{
+				case 0:
+					maxNumOfTargets = 6;
+					isPlayingSearchAndDestroy = true;
+					startGame();
+					break;
+				case 1:
+					maxNumOfTargets = 6;
+					isPlayingSearchAndDestroy = false;
+					startGame();
+					break;
+				case 2:
+					showHighScores = true;
+					break;
+				case 3:
+					glfwSetWindowShouldClose(gWindow, GL_TRUE);
+					break;
+				}
+			}
+			if (glfwGetKey(gWindow, GLFW_KEY_SPACE) == GLFW_RELEASE)
+			{
+				spaceHasBeenPressed = false;
+			}
 		}
+	}
+	else if (gameState == VICTORYSCREEN)
+	{
+		cam->lookAt(glm::vec3(1000, 0, 0));
+		cam->offsetPosition(cam->right() * 0.1f);
+
+		if ((glfwGetKey(gWindow, 'W')) && currentlyPressedKey == 'n')
+		{
+			nameOffset[nameSelect] -= 1;
+			if (nameOffset[nameSelect] < 0)
+				nameOffset[nameSelect] = 25;
+			currentlyPressedKey = 'w';
+		}
+		if ((glfwGetKey(gWindow, 'S')) && currentlyPressedKey == 'n')
+		{
+			nameOffset[nameSelect] += 1;
+			if (nameOffset[nameSelect] > 25)
+				nameOffset[nameSelect] = 0;
+			currentlyPressedKey = 's';
+		}
+
+		if ((glfwGetKey(gWindow, 'A')) && currentlyPressedKey == 'n')
+		{
+			nameSelect -= 1;
+			if (nameSelect < 0)
+				nameSelect = 2;
+			currentlyPressedKey = 'a';
+		}
+		if ((glfwGetKey(gWindow, 'D')) && currentlyPressedKey == 'n')
+		{
+			nameSelect += 1;
+			if (nameSelect > 2)
+				nameSelect = 0;
+			currentlyPressedKey = 'd';
+		}
+
+		if (glfwGetKey(gWindow, 'W') == GLFW_RELEASE && currentlyPressedKey == 'w')
+		{
+			currentlyPressedKey = 'n';
+		}
+		if (glfwGetKey(gWindow, 'S') == GLFW_RELEASE && currentlyPressedKey == 's')
+		{
+			currentlyPressedKey = 'n';
+		}
+		if (glfwGetKey(gWindow, 'A') == GLFW_RELEASE && currentlyPressedKey == 'a')
+		{
+			currentlyPressedKey = 'n';
+		}
+		if (glfwGetKey(gWindow, 'D') == GLFW_RELEASE && currentlyPressedKey == 'd')
+		{
+			currentlyPressedKey = 'n';
+		}
+
+		if (glfwGetKey(gWindow, GLFW_KEY_ENTER) || glfwGetKey(gWindow, GLFW_KEY_SPACE))
+		{
+			gameState = MENU;
+			spaceHasBeenPressed = true;
+			if (isPlayingSearchAndDestroy)
+			{
+				string tempName;
+				tempName.push_back('A' + nameOffset[0]);
+				tempName.push_back('A' + nameOffset[1]);
+				tempName.push_back('A' + nameOffset[2]);
+				sndNames.push_back(tempName);
+			}
+			else
+			{
+				string tempName;
+				tempName.push_back('A' + nameOffset[0]);
+				tempName.push_back('A' + nameOffset[1]);
+				tempName.push_back('A' + nameOffset[2]);
+				survivalNames.push_back(tempName);
+			}
+		}
+		if (characterSpaceInterpIsIncreasing)
+			characterSpaceInterp += secondsElapsed;
+		else if (!characterSpaceInterpIsIncreasing)
+			characterSpaceInterp -= secondsElapsed;
+
+		if (characterSpaceInterp > 0.7f)
+			characterSpaceInterpIsIncreasing = false;
+		else if (characterSpaceInterp < 0.f)
+			characterSpaceInterpIsIncreasing = true;
 	}
 	std::vector<glm::mat4> trans;
 	shotcd += secondsElapsed;
@@ -1307,6 +1596,8 @@ void AppMain() {
 	skull = new twodOverlayAnim("killSkull.png", 5, 0.2);
 	ShieldBack = new twodOverlay("ShieldBarBackV3.png", 0, 0.85, 35);
 	ShieldFront = new twodOverlay("ShieldBarMeasure2.png", 0, 0.85, 35);
+	gameLogo = new twodOverlay("MainuMenu_Title.png", -0.7f, 0.5f, 10.0f);
+	studioLogo = new twodOverlay("MainMenu_Logo.png", 0.83f, -0.7f, 5.0f);
 	HPback = new twodOverlay("HPBarBack.png", 0, 0.84, 35);
 	HPFront = new twodOverlay("HPBarMeasure2.png", 0, 0.84, 35);
 	startscreen = new twodOverlay("pressStart.png", 0, 0, 10);
@@ -1356,10 +1647,13 @@ void AppMain() {
 	gp = ci;
 	model->AddComponent(CONTROLLER, gp);
 
+	targetSpawner2.position = glm::vec3(-55.f, 0, 70.f);
+	targetSpawner2.position = targetSpawner2.position * 0.1f;
+
 	//PROPER INIT
 	for (int i = 0; i < 24; i++)
 	{
-		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12)
+		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12 && i != 19)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
 			Model *cModel = new Model();
@@ -1535,7 +1829,7 @@ void AppMain() {
 			else if (i == 20)
 			{
 				gObject->SetName("Wall");
-				cModel->loadModel("models/wallz3.dae");
+				cModel->loadModel("models/wallz2.dae");
 
 				gObject->scale = glm::vec3(5.0);
 				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
@@ -1774,9 +2068,17 @@ void AppMain() {
 		}
 
 		//exit program if escape key is pressed
-		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE)){
+		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) && showHighScores == false && escapeHasBeenPressed == false){
 			glfwSetWindowShouldClose(gWindow, GL_TRUE);
 		}
+		else if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) && showHighScores == true)
+		{
+			showHighScores = false;
+			escapeHasBeenPressed = true;
+		}
+
+		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) == GLFW_RELEASE)
+			escapeHasBeenPressed = false;
 	}
 
 	// clean up and exit

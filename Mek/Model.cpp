@@ -479,8 +479,8 @@ void Model::render()
 	glm::mat4 W;// = _transform;
 	//W = glm::rotate(W, _owner->rot);
 	W = glm::translate(W, _owner->pos);
-
-	W *= rotationMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
+	rotMatrix = rotationMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
+	W *= rotMatrix;
 	W = glm::scale(W, 0.1f * _owner->scale);
 	glm::mat4 VP;
 	VP = Camera::getInstance().matrix();

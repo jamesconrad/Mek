@@ -63,6 +63,9 @@ void Target::update(float dTime, NavMesh &mesh)
 		glm::vec3 temp = glm::vec3((npos.x), (npos.y), (npos.z));
 		glm::vec3 temp2 = glm::vec3((pPos.x), (pPos.y), (pPos.z));
 
+		leftGunBarrel = glm::vec3(cg->rotMatrix * glm::vec4(-0.4f, 0.93f, -0.4f, 1.0f));
+		rightGunBarrel = glm::vec3(cg->rotMatrix * glm::vec4(-0.4f, 0.93f, 0.4f, 1.0f));
+
 		//std::cout << "go->pos: " << go->pos.x << " " << go->pos.y << " " << go->pos.z << std::endl;
 		oList->UpdateListPosition(go->pos);
 		//movingsound->setPaused(false);

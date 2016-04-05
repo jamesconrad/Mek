@@ -17,7 +17,7 @@ public:
 		//pos += dir * (_isUsingBulletTime ? ((0.0000000000000000f) * dtime) * (timeFactor) : (vel * dtime));
 		if (_isUsingBulletTime)
 		{
-			pos += dir * (timeFactor / 4) * dtime;
+			pos += dir * (timeFactor + 0.7f) * dtime;
 		}
 		else
 		{
