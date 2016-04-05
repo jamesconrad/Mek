@@ -40,7 +40,7 @@
 #include "SaveFunctions.h"
 
 //enable or disable the code slim wrote that steals console output
-#define HIJACKCONSOLE false
+#define HIJACKCONSOLE true
 
 enum game_state { GAME, MENU, VICTORYSCREEN };
 float hitTimer = 0.0;
@@ -184,6 +184,10 @@ void FreqBand(){
 }
 void InitManager(){
 	manager->Init();
+	manager->GetSoundManager()->FindAndPlay("Background", "two");
+	glm::vec3 pos{ 5.0,12.0,14.0 };
+	manager->GetSoundManager()->FindSound("Background", "two")->SetSoundPosition(pos);
+	manager->GetSoundManager()->FindAndPlay("Load", "one");
 }
 void LoadShaders(char* vertFilename, char* fragFilename)
 {
@@ -283,7 +287,8 @@ void wonGame()
 }
 void startGame()
 {
-	manager->GetSoundManager()->PlayAndPause("Background", "one",true);
+	manager->GetSoundManager()->PlayAndPause("Background", "one",false);
+	manager->GetSoundManager()->PauseSound("Load", "one",true);
 	gameState = GAME; // GAME
 	if (!PTUT){
 		if (RunWasd){
@@ -803,8 +808,9 @@ float shotcd = 0;
 static void Update(float secondsElapsed) {
 
 	manager->Update();
-	if (HIJACKCONSOLE)
-		manager->GetSoundSystem()->GetChannelsPlaying();
+	if (HIJACKCONSOLE){
+		manager->GetSoundManager()->FindSound("Background", "two")->PrintSoundInformation();
+	}
 	Tutorial();
 	
 

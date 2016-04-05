@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>100488896</author>
+      <authoring_tool>OpenCOLLADA2015</authoring_tool>
+      <comments>
+			ColladaMaya export options: 
+			bakeTransforms=0;relativePaths=0;preserveSourceTree=0;copyTextures=0;exportTriangles=1;exportCgfxFileReferences=1;
+			isSampling=0;curveConstrainSampling=0;removeStaticCurves=1;exportPhysics=0;exportPolygonMeshes=1;exportLights=1;
+			exportCameras=1;exportJointsAndSkin=0;exportAnimations=1;exportInvisibleNodes=1;exportDefaultCameras=0;
+			exportTexCoords=1;exportNormals=1;exportNormalsPerVertex=0;exportVertexColors=0;exportVertexColorsPerVertex=0;
+			exportTexTangents=0;exportTangents=0;exportReferencedMaterials=1;exportMaterialsOnly=0;
+			exportXRefs=0;dereferenceXRefs=1;exportCameraAsLookat=0;cameraXFov=0;cameraYFov=1;doublePrecision=0
+		</comments>
+      <source_data>file:///C:/Users/100488896/Documents/UOIT%20WORK/Semester%202/Graphics/New%20Models%20Low%20Poly/Shipping%20Container.mb</source_data>
+    </contributor>
+    <created>2016-03-31T15:58:09</created>
+    <modified>2016-03-31T15:58:09</modified>
+    <unit name="centimeter" meter="0.01"/>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_materials>
+    <material id="lambert1" name="lambert1">
+      <instance_effect url="#lambert1-fx"/>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="lambert1-fx">
+      <profile_COMMON>
+        <newparam sid="file1-surface">
+          <surface type="2D">
+            <init_from>file1</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="file1-sampler">
+          <sampler2D>
+            <source>file1-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="file3-surface">
+          <surface type="2D">
+            <init_from>file3</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="file3-sampler">
+          <sampler2D>
+            <source>file3-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="file1-sampler" texcoord="TEX0">
+                <extra>
+                  <technique profile="OpenCOLLADAMaya">
+                    <wrapU sid="wrapU" type="bool">1</wrapU>
+                    <wrapV sid="wrapV" type="bool">1</wrapV>
+                    <mirrorU sid="mirrorU" type="bool">0</mirrorU>
+                    <mirrorV sid="mirrorV" type="bool">0</mirrorV>
+                    <coverageU sid="coverageU" type="float">1</coverageU>
+                    <coverageV sid="coverageV" type="float">1</coverageV>
+                    <translateFrameU sid="translateFrameU" type="float">0</translateFrameU>
+                    <translateFrameV sid="translateFrameV" type="float">0</translateFrameV>
+                    <rotateFrame sid="rotateFrame" type="float">0</rotateFrame>
+                    <stagger sid="stagger" type="bool">0</stagger>
+                    <fast sid="fast" type="bool">0</fast>
+                    <repeatU sid="repeatU" type="float">1</repeatU>
+                    <repeatV sid="repeatV" type="float">1</repeatV>
+                    <offsetU sid="offsetU" type="float">0</offsetU>
+                    <offsetV sid="offsetV" type="float">0</offsetV>
+                    <rotateUV sid="rotateUV" type="float">0</rotateUV>
+                    <noiseU sid="noiseU" type="float">0</noiseU>
+                    <noiseV sid="noiseV" type="float">0</noiseV>
+                    <blend_mode sid="blend_mode" type="string">NONE</blend_mode>
+                  </technique>
+                </extra>
+              </texture>
+            </diffuse>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </lambert>
+          <extra>
+            <technique profile="OpenCOLLADAMaya">
+              <bump>
+                <texture texture="file3-sampler" texcoord="TEX1">
+                  <extra>
+                    <technique profile="OpenCOLLADA3dsMax">
+                      <amount sid="amount" type="float">1</amount>
+                      <bumpInterp sid="bumpInterp" type="int">0</bumpInterp>
+                    </technique>
+                    <technique profile="OpenCOLLADAMaya">
+                      <wrapU sid="wrapU" type="bool">1</wrapU>
+                      <wrapV sid="wrapV" type="bool">1</wrapV>
+                      <mirrorU sid="mirrorU" type="bool">0</mirrorU>
+                      <mirrorV sid="mirrorV" type="bool">0</mirrorV>
+                      <coverageU sid="coverageU" type="float">1</coverageU>
+                      <coverageV sid="coverageV" type="float">1</coverageV>
+                      <translateFrameU sid="translateFrameU" type="float">0</translateFrameU>
+                      <translateFrameV sid="translateFrameV" type="float">0</translateFrameV>
+                      <rotateFrame sid="rotateFrame" type="float">0</rotateFrame>
+                      <stagger sid="stagger" type="bool">0</stagger>
+                      <fast sid="fast" type="bool">0</fast>
+                      <repeatU sid="repeatU" type="float">1</repeatU>
+                      <repeatV sid="repeatV" type="float">1</repeatV>
+                      <offsetU sid="offsetU" type="float">0</offsetU>
+                      <offsetV sid="offsetV" type="float">0</offsetV>
+                      <rotateUV sid="rotateUV" type="float">0</rotateUV>
+                      <noiseU sid="noiseU" type="float">0</noiseU>
+                      <noiseV sid="noiseV" type="float">0</noiseV>
+                      <blend_mode sid="blend_mode" type="string">NONE</blend_mode>
+                    </technique>
+                  </extra>
+                </texture>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId sid="originalMayaNodeId" type="string">lambert1</originalMayaNodeId>
+        </technique>
+      </extra>
+    </effect>
+  </library_effects>
+  <library_images>
+    <image id="file1" name="file1">
+      <init_from>file:///Container2.png</init_from>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId sid="originalMayaNodeId" type="string">file1</originalMayaNodeId>
+          <dgnode_type sid="dgnode_type" type="string">kFile</dgnode_type>
+          <image_sequence sid="image_sequence" type="bool">0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+    <image id="file3" name="file3">
+      <init_from>file:///normal_container.png</init_from>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId sid="originalMayaNodeId" type="string">file3</originalMayaNodeId>
+          <dgnode_type sid="dgnode_type" type="string">kFile</dgnode_type>
+          <image_sequence sid="image_sequence" type="bool">0</image_sequence>
+        </technique>
+      </extra>
+    </image>
+  </library_images>
+  <library_geometries>
+    <geometry id="ContainerShape" name="ContainerShape">
+      <mesh>
+        <source id="ContainerShape-positions" name="ContainerShape-positions">
+          <float_array id="ContainerShape-positions-array" count="24">-5 0 9.5 5 0 9.5 -5 10 9.5 5 10 9.5 -5 10 -9.5 5 10 -9.5 -5 0 -9.5 5 0 -9.5</float_array>
+          <technique_common>
+            <accessor source="#ContainerShape-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ContainerShape-normals" name="ContainerShape-normals">
+          <float_array id="ContainerShape-normals-array" count="72">0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0</float_array>
+          <technique_common>
+            <accessor source="#ContainerShape-normals-array" count="24" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="ContainerShape-map1" name="ContainerShape-map1">
+          <float_array id="ContainerShape-map1-array" count="48">0.1409339 0.7316427 0.3782428 0.7316428 0.1409339 0.2675055 0.3782428 0.2675055 0.3871036 0.01975977 0.6345402 0.01975977 0.6345402 0.2707342 0.3871036 0.2707342 0.4003847 0.293629 0.6159795 0.293629 0.6159795 0.7032591 0.4003847 0.7032591 0.6177536 0.9807856 0.4021589 0.9807856 0.4021589 0.765191 0.6177536 0.765191 1.176477 0.2277612 1.392071 0.2277612 1.392071 0.6373913 1.176477 0.6373913 0.653203 0.7001646 0.653203 0.2905345 0.8687978 0.2905345 0.8687978 0.7001646</float_array>
+          <technique_common>
+            <accessor source="#ContainerShape-map1-array" count="24" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="ContainerShape-vertices" name="ContainerShape-vertices">
+          <input semantic="POSITION" source="#ContainerShape-positions"/>
+        </vertices>
+        <triangles material="initialShadingGroup" count="12">
+          <input semantic="VERTEX" source="#ContainerShape-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#ContainerShape-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#ContainerShape-map1" offset="2" set="0"/>
+          <p>0 0 4 1 1 5 2 2 7 2 2 7 1 1 5 3 3 6 2 4 8 3 5 9 4 6 11 4 6 11 3 5 9 5 7 10 4 8 12 5 9 13 6 10 15 6 10 15 5 9 13 7 11 14 6 12 16 7 13 17 0 14 19 0 14 19 7 13 17 1 15 18 1 16 0 7 17 2 3 18 1 3 18 1 7 17 2 5 19 3 6 20 20 0 21 21 4 22 23 4 22 23 0 21 21 2 23 22</p>
+        </triangles>
+      </mesh>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId sid="originalMayaNodeId">ContainerShape</originalMayaNodeId>
+          <double_sided sid="double_sided">1</double_sided>
+        </technique>
+      </extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="VisualSceneNode" name="Shipping_Container">
+      <node id="Container" name="Container" type="NODE">
+        <translate sid="translate">0 0 0</translate>
+        <translate sid="rotatePivot">0 5 0</translate>
+        <rotate sid="rotateZ">0 0 1 0</rotate>
+        <rotate sid="rotateY">0 1 0 0</rotate>
+        <rotate sid="rotateX">1 0 0 0</rotate>
+        <translate sid="rotatePivotInverse">0 -5 0</translate>
+        <translate sid="scalePivot">0 5 0</translate>
+        <scale sid="scale">1 1 1</scale>
+        <translate sid="scalePivotInverse">0 -5 0</translate>
+        <instance_geometry url="#ContainerShape">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="initialShadingGroup" target="#lambert1">
+                <bind_vertex_input semantic="TEX0" input_semantic="TEXCOORD" input_set="0"/>
+                <bind_vertex_input semantic="TEX1" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+        <extra>
+          <technique profile="OpenCOLLADAMaya">
+            <originalMayaNodeId sid="originalMayaNodeId" type="string">Container</originalMayaNodeId>
+          </technique>
+        </extra>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#VisualSceneNode"/>
+  </scene>
+</COLLADA>

@@ -10,7 +10,7 @@ void Manager::Init(){
 
 	m_SoundManagerPtr.Init(&m_SoundSystemPtr, m_RNManagerPtr.GetNodes(), pathName, "sounds.txt");
 
-	m_RNManagerPtr.PrintRNodes();
+	//m_RNManagerPtr.PrintRNodes();
 }
 
 //display fucntions
