@@ -21,10 +21,11 @@ uniform mat4 gBones[MAX_BONES];
 
 void main()
 {
-    mat4 BoneTransform = gBones[BoneIDs[0]] * Weights[0];
-    BoneTransform     += gBones[BoneIDs[1]] * Weights[1];
-    BoneTransform     += gBones[BoneIDs[2]] * Weights[2];
-    BoneTransform     += gBones[BoneIDs[3]] * Weights[3];
+	mat4 BoneTransform;
+	BoneTransform	= gBones[BoneIDs[0]] * Weights[0];
+	BoneTransform	+= gBones[BoneIDs[1]] * Weights[1];
+	BoneTransform	+= gBones[BoneIDs[2]] * Weights[2];
+	BoneTransform	+= gBones[BoneIDs[3]] * Weights[3];
 
 	Debug0 = Weights;
 	Debug1 = BoneIDs;
@@ -33,7 +34,7 @@ void main()
     gl_Position  = gWVP * PosL;
     //gl_Position  = gWVP * vec4(Position, 1.0);
 	TexCoord0    = TexCoord;
-    vec4 NormalL = BoneTransform  vec4(Normal, 0.0);
+    vec4 NormalL = BoneTransform * vec4(Normal, 0.0);
     Normal0      = (gWorld * NormalL).xyz;
     WorldPos0    = (gWorld * PosL).xyz;
 }
