@@ -14,3 +14,4 @@ shield.wav Tutorial shield 0 0
 slowtime.wav Tutorial slowtime 0 0
 wasd.wav Tutorial wasd 0 0
 pwalk.wav Player Walk 1 1 0 3
+load.mp3 Load one 0 1

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>100488896</author>
+      <authoring_tool>OpenCOLLADA2015</authoring_tool>
+      <comments>
+			ColladaMaya export options: 
+			bakeTransforms=0;relativePaths=0;preserveSourceTree=0;copyTextures=0;exportTriangles=1;exportCgfxFileReferences=1;
+			isSampling=0;curveConstrainSampling=0;removeStaticCurves=1;exportPhysics=0;exportPolygonMeshes=1;exportLights=1;
+			exportCameras=1;exportJointsAndSkin=0;exportAnimations=1;exportInvisibleNodes=1;exportDefaultCameras=0;
+			exportTexCoords=1;exportNormals=1;exportNormalsPerVertex=0;exportVertexColors=0;exportVertexColorsPerVertex=0;
+			exportTexTangents=0;exportTangents=0;exportReferencedMaterials=1;exportMaterialsOnly=0;
+			exportXRefs=0;dereferenceXRefs=1;exportCameraAsLookat=0;cameraXFov=0;cameraYFov=1;doublePrecision=0
+		</comments>
+      <source_data>file:///C:/Users/100488896/Documents/UOIT%20WORK/Semester%202/Graphics/New%20Models%20Low%20Poly/Tall%20Rock.mb</source_data>
+    </contributor>
+    <created>2016-03-31T18:16:49</created>
+    <modified>2016-03-31T18:16:49</modified>
+    <unit name="centimeter" meter="0.01"/>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_materials>
+    <material id="lambert1" name="lambert1">
+      <instance_effect url="#lambert1-fx"/>
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="lambert1-fx">
+      <profile_COMMON>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.4 0.4 0.4 1</color>
+            </diffuse>
+            <transparent opaque="RGB_ZERO">
+              <color>0 0 0 1</color>
+            </transparent>
+            <transparency>
+              <float>1</float>
+            </transparency>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId sid="originalMayaNodeId" type="string">lambert1</originalMayaNodeId>
+        </technique>
+      </extra>
+    </effect>
+  </library_effects>
+  <library_geometries>
+    <geometry id="pCubeShape1" name="pCubeShape1">
+      <mesh>
+        <source id="pCubeShape1-positions" name="pCubeShape1-positions">
+          <float_array id="pCubeShape1-positions-array" count="36">-0.9833333 0.009296715 0.7609035 0.9833333 0.009296715 0.9880664 -0.9833333 1.009296 0.7609035 0.9833333 0.7107223 0.9880664 -0.9833333 1.009296 -0.7609035 0.9833333 1.009296 -0.9880664 -0.9833333 0.009296715 -0.7609035 0.9833333 0.009296715 -0.9880664 -0.9833333 5.013757 0.2455434 0.9833333 5.013757 0.6380107 0.9833333 5.013757 -0.9868095 -0.9833333 5.013757 -0.514151</float_array>
+          <technique_common>
+            <accessor source="#pCubeShape1-positions-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pCubeShape1-normals" name="pCubeShape1-normals">
+          <float_array id="pCubeShape1-normals-array" count="96">-0.1147437 0 0.9933952 -0.1147437 0 0.9933952 -0.1408992 0.0822547 0.9866011 -0.1426745 0.08793822 0.9858554 0 1 0 0 1 0 0 1 0 0 0.9999999 0 -0.1632241 0.02446087 -0.9862857 -0.1631811 0.02443909 -0.9862934 -0.1147437 0 -0.9933951 -0.1147437 0 -0.9933951 0 -1 0 0 -1 0 0 -1 0 0 -1 0 1 0 0 1 0 0 1 0 0 1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -0.1471991 0.1024836 0.9837833 -0.1471991 0.1024836 0.9837832 1 0 0 1 0 0 -0.1750884 0.03047368 -0.984081 -0.1750884 0.03047368 -0.984081 -1 0 0 -0.9999999 0 0</float_array>
+          <technique_common>
+            <accessor source="#pCubeShape1-normals-array" count="32" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="pCubeShape1-map1" name="pCubeShape1-map1">
+          <float_array id="pCubeShape1-map1-array" count="38">0.2545257 0.2409646 0.482353 0.2238266 0.4864649 0.3038022 0.2684412 0.3541716 0.5257772 0.7948713 0.2988263 0.8127525 0.07860297 0.2737262 0.1000067 0.3860025 0.50463 0.9792249 0.2877942 0.8990383 0.9359833 0.3378447 0.7112026 0.3377824 0.7112186 0.2234842 0.9360148 0.2235465 0.9358566 0.7955475 0.7110674 0.7954853 0.222754 0.07007524 0.4385864 0.002108186 0.2134217 0.8303272</float_array>
+          <technique_common>
+            <accessor source="#pCubeShape1-map1-array" count="19" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="pCubeShape1-vertices" name="pCubeShape1-vertices">
+          <input semantic="POSITION" source="#pCubeShape1-positions"/>
+        </vertices>
+        <triangles material="initialShadingGroup" count="20">
+          <input semantic="VERTEX" source="#pCubeShape1-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#pCubeShape1-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#pCubeShape1-map1" offset="2" set="0"/>
+          <p>1 1 1 3 2 2 0 0 0 0 0 0 3 2 2 2 3 3 8 4 5 9 5 4 11 7 9 11 7 9 9 5 4 10 6 8 4 8 10 5 9 11 6 11 13 6 11 13 5 9 11 7 10 12 6 12 16 7 13 17 0 15 0 0 15 0 7 13 17 1 14 1 1 16 1 7 17 12 3 19 2 3 19 2 7 17 12 5 18 11 6 20 6 0 21 0 4 23 7 4 23 7 0 21 0 2 22 3 3 2 2 9 24 4 2 3 3 2 3 3 9 24 4 8 25 5 3 19 2 5 18 11 9 27 4 9 27 4 5 18 11 10 26 15 5 9 11 4 8 10 10 29 15 10 29 15 4 8 10 11 28 14 2 22 3 8 30 5 4 23 7 4 23 7 8 30 5 11 31 18</p>
+        </triangles>
+      </mesh>
+      <extra>
+        <technique profile="OpenCOLLADAMaya">
+          <originalMayaNodeId sid="originalMayaNodeId">pCubeShape1</originalMayaNodeId>
+          <double_sided sid="double_sided">1</double_sided>
+        </technique>
+      </extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="VisualSceneNode" name="Tall_Rock">
+      <node id="pCube1" name="pCube1" type="NODE">
+        <translate sid="translate">0 0 0</translate>
+        <translate sid="rotatePivot">0 2.511527 0</translate>
+        <rotate sid="rotateZ">0 0 1 0</rotate>
+        <rotate sid="rotateY">0 1 0 0</rotate>
+        <rotate sid="rotateX">1 0 0 0</rotate>
+        <translate sid="rotatePivotInverse">0 -2.511527 0</translate>
+        <translate sid="scalePivot">0 2.511527 0</translate>
+        <scale sid="scale">1 1 1</scale>
+        <translate sid="scalePivotInverse">0 -2.511527 0</translate>
+        <instance_geometry url="#pCubeShape1">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="initialShadingGroup" target="#lambert1"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+        <extra>
+          <technique profile="OpenCOLLADAMaya">
+            <originalMayaNodeId sid="originalMayaNodeId" type="string">pCube1</originalMayaNodeId>
+          </technique>
+        </extra>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#VisualSceneNode"/>
+  </scene>
+</COLLADA>
