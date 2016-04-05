@@ -15,7 +15,7 @@ public:
 	Bitmap();
 	~Bitmap();
 
-	bool bitmapFromFile(std::string filePath);
+	bool bitmapFromFile(std::string filePath, int *format = nullptr);
 
 	unsigned width() const;
 

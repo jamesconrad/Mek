@@ -64,36 +64,46 @@ Skybox::Skybox(char* fp[6], char* op[6])
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glBufferData(GL_ARRAY_BUFFER, 108 * sizeof(float), cubeVertices, GL_STATIC_DRAW);
 
-	_bmp[0].bitmapFromFile(fp[0]);
-	_bmp[1].bitmapFromFile(fp[1]);
-	_bmp[2].bitmapFromFile(fp[2]);
+	int farr[6];
+	int ofarr[6];
+
+	_bmp[0].bitmapFromFile(fp[0], &farr[0]);
+	_bmp[1].bitmapFromFile(fp[1], &farr[1]);
+	_bmp[2].bitmapFromFile(fp[2], &farr[2]);
 	_bmp[2].rotate90CounterClockwise();
-	_bmp[3].bitmapFromFile(fp[3]);
+	_bmp[3].bitmapFromFile(fp[3], &farr[3]);
 	_bmp[3].rotate90CounterClockwise();
 	_bmp[3].rotate90CounterClockwise();
 	_bmp[3].rotate90CounterClockwise();
-	_bmp[4].bitmapFromFile(fp[4]);
-	_bmp[5].bitmapFromFile(fp[5]);
+	_bmp[4].bitmapFromFile(fp[4], &farr[4]);
+	_bmp[5].bitmapFromFile(fp[5], &farr[5]);
 
 	
-	_obscureBMP[0].bitmapFromFile(op[0]);
-	_obscureBMP[1].bitmapFromFile(op[1]);
-	_obscureBMP[2].bitmapFromFile(op[2]);
+	_obscureBMP[0].bitmapFromFile(op[0], &ofarr[0]);
+	_obscureBMP[1].bitmapFromFile(op[1], &ofarr[1]);
+	_obscureBMP[2].bitmapFromFile(op[2], &ofarr[2]);
 	_obscureBMP[2].rotate90CounterClockwise();
-	_obscureBMP[3].bitmapFromFile(op[3]);
+	_obscureBMP[3].bitmapFromFile(op[3], &ofarr[3]);
 	_obscureBMP[3].rotate90CounterClockwise();
 	_obscureBMP[3].rotate90CounterClockwise();
 	_obscureBMP[3].rotate90CounterClockwise();
-	_obscureBMP[4].bitmapFromFile(op[4]);
-	_obscureBMP[5].bitmapFromFile(op[5]);
+	_obscureBMP[4].bitmapFromFile(op[4], &ofarr[4]);
+	_obscureBMP[5].bitmapFromFile(op[5], &ofarr[5]);
 
 	glGenTextures(1, &_cubeMapID);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _cubeMapID);
 
+
 	for (int i = 0; i < 6; i++)
 	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, _bmp[i].width(), _bmp[i].height(), 0, GL_RGB, GL_UNSIGNED_BYTE, _bmp[i].pixelBuffer());
+		//int mode;
+		//if (farr[i] == 4)
+		//	mode = GL_RGBA;
+		//else
+		//	mode = GL_RGB;
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, _bmp[i].width(), _bmp[i].height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, _bmp[i].pixelBuffer());
+		//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mode, 128, 128, 0, mode, GL_UNSIGNED_BYTE, _bmp[i].pixelBuffer());
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -108,7 +118,7 @@ Skybox::Skybox(char* fp[6], char* op[6])
 
 	for (int i = 0; i < 6; i++)
 	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, _obscureBMP[i].width(), _obscureBMP[i].height(), 0, GL_RGB, GL_UNSIGNED_BYTE, _obscureBMP[i].pixelBuffer());
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, _obscureBMP[i].width(), _obscureBMP[i].height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, _obscureBMP[i].pixelBuffer());
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

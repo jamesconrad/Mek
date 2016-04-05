@@ -88,6 +88,7 @@
     <ClInclude Include="RayVsTriangle.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="ReverbNode.h" />
+    <ClInclude Include="SaveFunctions.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Interpolation.h" />
     <ClInclude Include="ShieldVariables.h" />

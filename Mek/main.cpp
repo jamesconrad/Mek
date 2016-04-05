@@ -37,6 +37,7 @@
 #include "NavMesh.h"
 #include "RayVsOBB.h"
 #include "AISpawner.h"
+#include "SaveFunctions.h"
 
 //enable or disable the code slim wrote that steals console output
 #define HIJACKCONSOLE false
@@ -83,6 +84,7 @@ glm::vec3 red = glm::vec3(1.0f, 0, 0);
 glm::vec3 menuItem2Colour = glm::vec3(0.68, 0.91, 1.0);
 glm::vec3 menuItem1Colour = glm::vec3(0.0, 0.4, 1.0);
 glm::vec3 spotLightColour = glm::vec3(158, 64, 60);
+unsigned int scoreInsertionIndex = 0;
 std::vector<unsigned int> scoreTable;
 std::vector<string> sndNames;
 std::vector<unsigned int> survivalScoreTable;
@@ -241,15 +243,33 @@ void wonGame()
 	gameState = VICTORYSCREEN;
 	if (isPlayingSearchAndDestroy)
 	{
-		scoreTable.push_back(score);
-		sort(scoreTable.begin(), scoreTable.end());
-		std::reverse(scoreTable.begin(), scoreTable.end());
+		for (scoreInsertionIndex = 0; scoreInsertionIndex < scoreTable.size(); scoreInsertionIndex++)
+		{
+			if (scoreTable[scoreInsertionIndex] < score)
+				break;
+		}
+		if (scoreInsertionIndex == 0)
+			scoreTable.push_back(score);
+		else
+			scoreTable.insert(scoreTable.begin() + scoreInsertionIndex, score);
+		//scoreTable.push_back(score);
+		//sort(scoreTable.begin(), scoreTable.end());
+		//std::reverse(scoreTable.begin(), scoreTable.end());
 	}
 	else
 	{
-		survivalScoreTable.push_back(targetsKilled);
-		sort(survivalScoreTable.begin(), survivalScoreTable.end());
-		std::reverse(survivalScoreTable.begin(), survivalScoreTable.end());
+		for (scoreInsertionIndex = 0; scoreInsertionIndex < survivalScoreTable.size(); scoreInsertionIndex++)
+		{
+			if (scoreTable[scoreInsertionIndex] < score)
+				break;
+		}
+		if (scoreInsertionIndex == 0)
+			survivalScoreTable.push_back(targetsKilled);
+		else
+			survivalScoreTable.insert(scoreTable.begin() + scoreInsertionIndex, targetsKilled);
+		//survivalScoreTable.push_back(targetsKilled);
+		//sort(survivalScoreTable.begin(), survivalScoreTable.end());
+		//std::reverse(survivalScoreTable.begin(), survivalScoreTable.end());
 	}
 	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));
 	Camera::getInstance().setNearAndFarPlanes(0.1f, 1024.f);
@@ -608,7 +628,7 @@ static void Render() {
 			{
 				char buffer[64];
 				_snprintf_s(buffer, 64, "%s %i", sndNames[i].c_str(), scoreTable[i]);
-				TextRendering::getInstance().printText2D(buffer, -0.9f, 0.75f - i / 16.f, 0.075f, fontColour);
+				TextRendering::getInstance().printText2D(buffer, -0.85f, 0.75f - i / 16.f, 0.075f, fontColour);
 			}
 
 			TextRendering::getInstance().printText2D("SURVIVAL", 0.15f, 0.875f, 0.09f, fontColour);
@@ -616,7 +636,7 @@ static void Render() {
 			{
 				char buffer[64];
 				_snprintf_s(buffer, 64, "%s %i", survivalNames[i].c_str(), survivalScoreTable[i]);
-				TextRendering::getInstance().printText2D(buffer, 0.25f, 0.75f - i / 16.f, 0.075f, fontColour);
+				TextRendering::getInstance().printText2D(buffer, 0.27f, 0.75f - i / 16.f, 0.075f, fontColour);
 			}
 		}
 		else
@@ -752,10 +772,11 @@ static void Render() {
 			_snprintf_s(scbuff, 64, "%i", targetsKilled);
 			TextRendering::getInstance().printText2D(scbuff, 0.55f, 0.5f, 0.07f, fontColour);
 		}
-		char name[3];
+		char name[4];
 		name[0] = 'A' + nameOffset[0];
 		name[1] = 'A' + nameOffset[1];
 		name[2] = 'A' + nameOffset[2];
+		name[3] = '\0';
 		switch (nameSelect)
 		{
 		case 0:
@@ -1459,7 +1480,7 @@ static void Update(float secondsElapsed) {
 				tempName.push_back('A' + nameOffset[0]);
 				tempName.push_back('A' + nameOffset[1]);
 				tempName.push_back('A' + nameOffset[2]);
-				sndNames.push_back(tempName);
+				sndNames.insert(sndNames.begin() + scoreInsertionIndex, tempName);
 			}
 			else
 			{
@@ -1467,7 +1488,7 @@ static void Update(float secondsElapsed) {
 				tempName.push_back('A' + nameOffset[0]);
 				tempName.push_back('A' + nameOffset[1]);
 				tempName.push_back('A' + nameOffset[2]);
-				survivalNames.push_back(tempName);
+				survivalNames.insert(survivalNames.begin() + scoreInsertionIndex, tempName);
 			}
 		}
 		if (characterSpaceInterpIsIncreasing)
@@ -1475,7 +1496,7 @@ static void Update(float secondsElapsed) {
 		else if (!characterSpaceInterpIsIncreasing)
 			characterSpaceInterp -= secondsElapsed;
 
-		if (characterSpaceInterp > 0.7f)
+		if (characterSpaceInterp > 0.5f)
 			characterSpaceInterpIsIncreasing = false;
 		else if (characterSpaceInterp < 0.f)
 			characterSpaceInterpIsIncreasing = true;
@@ -1566,6 +1587,7 @@ void AppMain() {
 
 	// create all the instances in the 3D scene based on the gWoodenCrate asset
 	CreateInstances();
+	loadScoreBoard(scoreTable, sndNames, survivalScoreTable, survivalNames);
 
 	framebuff[0] = new Framebuffer();
 	framebuff[0]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
@@ -1616,8 +1638,10 @@ void AppMain() {
 	ground = new Terrain();
 	ground->LoadHeightMap("testhm.png", 1, 5, 0.8);
 	ground->InitRender();
-	char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
-	char* Osb[6] = { "ri-O.png", "le-O.png", "to-O.png", "bo-O.png", "ba-O.png", "fr-O.png" };
+	//char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
+	char* sb[6] = { "Right V2.png", "Left V2.png", "Top V2.png", "Top V2.png", "Back V2.png", "FrTest.png" };
+	//char* Osb[6] = { "Right V3", "Left V3.png", "Top V2.png", "Top V3.png", "Back V3.png", "fr-O.png" };
+	char* Osb[6] = { "Right V3.png", "Left V3.png", "Top V2.png", "Top V2.png", "Back V3.png", "Front V3.png" };
 	sky = new Skybox(sb, Osb);
 
 	//skyObs = new Skybox(Osb);
@@ -2080,6 +2104,8 @@ void AppMain() {
 		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) == GLFW_RELEASE)
 			escapeHasBeenPressed = false;
 	}
+
+	saveScoreBoard(scoreTable, sndNames, survivalScoreTable, survivalNames);
 
 	// clean up and exit
 	glfwTerminate();
