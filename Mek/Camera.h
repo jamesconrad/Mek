@@ -45,13 +45,13 @@ public:
 		return instance;
 	}
 
+	float _horizontalAngle;
+	float _verticalAngle;
 private:
 
 	Camera();
 
 	glm::vec3 _position;
-	float _horizontalAngle;
-	float _verticalAngle;
 	float _fieldOfView;
 	float _nearPlane;
 	float _farPlane;

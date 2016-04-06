@@ -8,18 +8,18 @@
 inline void saveScoreBoard(std::vector<unsigned int> &_sndScores, std::vector<std::string> &_sndNames, std::vector<unsigned int> &_survivalScores, std::vector<std::string> &_survivalNames)
 {
 	std::ofstream myFile;
-	myFile.open("ScoreTable.sav", std::ios::out);
-
-	for (unsigned int i = 0; i < _sndScores.size(); i++)
+	myFile.open("ScoreTable.sav", fstream::out);
+	
+	for (unsigned int i = 0; i < _sndNames.size(); i++)
 	{
 		myFile << _sndNames[i].c_str() << " " << _sndScores[i] << std::endl;
 	}
 
 	myFile << "Surv Names:" << std::endl;
 
-	for (unsigned int i = 0; i < _survivalScores.size(); i++)
+	for (unsigned int i = 0; i < _survivalNames.size(); i++)
 	{
-		myFile << _sndNames[i].c_str() << " " << _survivalScores[i] << std::endl;
+		myFile << _survivalNames[i].c_str() << " " << _survivalScores[i] << std::endl;
 	}
 	myFile.close();
 

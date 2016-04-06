@@ -11,12 +11,13 @@ FramebufferEffects::FramebufferEffects(Framebuffer* fb, Framebuffer* wb0, Frameb
 	pixsizeY = 1.f / (_size.y);
 }
 
-FramebufferEffects::FramebufferEffects(Framebuffer* fbwbwb[4])
+FramebufferEffects::FramebufferEffects(Framebuffer* fbwbwb[5])
 {
 	_fb = fbwbwb[0];
 	_wb[0] = fbwbwb[1];
 	_wb[1] = fbwbwb[2];
 	_wb[2] = fbwbwb[3];
+	_wb[3] = fbwbwb[4];
 
 	_size = glm::vec2(_wb[0]->Width(), _wb[0]->Height());
 	pixsizeX = 1.f / (_size.x / 2.f);
@@ -179,7 +180,7 @@ void FramebufferEffects::GodRays(glm::vec3 &sunLocation, glm::vec3 &playerLocati
 
 	glm::mat4 thing = Camera::getInstance().projection() * Camera::getInstance().view();
 	Program::getInstance().setUniform("mvp", thing);
-
+	
 	_fb->Bind();
 	Program::getInstance().bind("pass");
 	_wb[2]->PassTextureToPreBoundShader("tex0", 0);

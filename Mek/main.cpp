@@ -92,6 +92,7 @@ std::vector<string> survivalNames;
 float characterSpaceInterp = 0.0f;
 float characterSpaceInterpIsIncreasing = true;
 unsigned int score;
+int enemiesAlive = 0;
 
 float ammoInterp = 0.0f;
 float noammoInterp = 0.0f;
@@ -126,7 +127,7 @@ bool BackPaused = false;
 
 //Model* testmodel;
 bool isTutorial = false;
-Framebuffer* framebuff[4];
+Framebuffer* framebuff[5];
 FramebufferEffects* framebuffeffects;
 
 bool numpadPress[9];
@@ -215,7 +216,13 @@ GLfloat gDegreesRotated = 0.0f;
 
 GameObject* model;
 Model* gModel;
+Model* playerArms;
+glm::vec3 leftArmFiringPosition = { 12.f, -2.7f, -5.f };
+glm::vec3 rightArmFiringPosition = { 12.f, -2.2f, 5.f };
 ComponentCollision* gCol;
+
+GameObject* ammoPlane;
+Model* gAmmoPlane;
 
 float tElap = 0;
 
@@ -249,7 +256,7 @@ void wonGame()
 	{
 		for (scoreInsertionIndex = 0; scoreInsertionIndex < scoreTable.size(); scoreInsertionIndex++)
 		{
-			if (scoreTable[scoreInsertionIndex] < score)
+			if (scoreTable[scoreInsertionIndex] > score)
 				break;
 		}
 		if (scoreInsertionIndex == 0)
@@ -264,7 +271,7 @@ void wonGame()
 	{
 		for (scoreInsertionIndex = 0; scoreInsertionIndex < survivalScoreTable.size(); scoreInsertionIndex++)
 		{
-			if (scoreTable[scoreInsertionIndex] < score)
+			if (scoreTable[scoreInsertionIndex] > targetsKilled)
 				break;
 		}
 		if (scoreInsertionIndex == 0)
@@ -560,6 +567,9 @@ static void DrawScene(int shadowMapTexID)
 			//cc->renderHitbox();
 		}
 	}
+	playerArms->render();
+	gAmmoPlane->set_RenderedTexture(framebuff[4]->GetTextureID(0));
+	gAmmoPlane->render();
 
 	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
@@ -587,6 +597,14 @@ static void DrawScene(int shadowMapTexID)
 }
 // draws a single frame
 static void Render() {
+	framebuff[4]->Bind(); // rendering the ammo texture
+	glClearColor(0, 1, 0, 0.0); // green
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	char amBuff2[8];
+	_snprintf_s(amBuff2, 8, "%i", *currentAmmo);
+	TextRendering::getInstance().printText2D(amBuff2, 0.0f, 0.0f, 0.001f, fontColour);
+
 	framebuff[0]->Bind();
 
 
@@ -701,7 +719,7 @@ static void Render() {
         else
         {
             char buffer[8];
-            _snprintf_s(buffer, 8, "%i", maxNumOfTargets);
+            _snprintf_s(buffer, 8, "%i", enemiesAlive);
             TextRendering::getInstance().printText2D(buffer, -0.70f, -0.8f, 0.125f, fontColour);
         }
 		if (isPlayingSearchAndDestroy)
@@ -1029,6 +1047,39 @@ static void Update(float secondsElapsed) {
 		c->getOwner()->dir = glm::rotateX(c->getOwner()->dir, -rInput.y);
 		c->getOwner()->dir = glm::rotateY(c->getOwner()->dir, rInput.x);
 		cam->offsetOrientation(-rInput.y, rInput.x);
+		
+
+		playerArms->getOwner()->pos = Camera::getInstance().position();
+		playerArms->getOwner()->pos += Camera::getInstance().forward() * 0.34f;
+		playerArms->getOwner()->pos -= Camera::getInstance().up() * 1.1f;
+		playerArms->getOwner()->dir = glm::rotateY(Camera::getInstance().right(), 90.f);
+		float angle = glm::angle(playerArms->getOwner()->dir, glm::vec3(0.f, 0.f, -1.f));
+		float rightAngle = glm::dot(playerArms->getOwner()->dir, glm::vec3(-1.f, 0.f, 0.f));
+		glm::mat4 rotation;
+		if (rightAngle >= 0)
+			rotation = glm::mat4(glm::rotate(angle + 90.f, glm::vec3(0, 1, 0)));
+		else
+		{
+			rotation = glm::mat4(glm::rotate(-angle + 90.f, glm::vec3(0, 1, 0)));
+			angle = -angle;
+		}
+		playerArms->rotMatrix = rotation;
+
+		playerArms->getOwner()->dir = glm::rotateY(Camera::getInstance().forward(), -angle);
+		float angle2 = glm::angle(playerArms->getOwner()->dir, glm::vec3(0.f, 0.f, -1.f));
+		float rightAngle2 = glm::dot(playerArms->getOwner()->dir, glm::vec3(0.f, -1.f, 0.f));
+		//glm::mat4 rotation2;
+		if (rightAngle2 >= 0)
+			rotation = rotation * glm::mat4(glm::rotate(-angle2, glm::vec3(0, 0, 1)));
+		else
+			rotation = rotation * glm::mat4(glm::rotate(angle2, glm::vec3(0, 0, 1)));
+		playerArms->rotMatrix = rotation;// *glm::mat4(glm::rotate(180.f, glm::vec3(0.f, 1.0f, 0.f)));
+		//playerArms->rotMatrix = glm::rotate(glm::mat4(), -Camera::getInstance()._horizontalAngle + 90.f, Camera::getInstance().up());
+		//playerArms->rotMatrix = glm::rotate(glm::mat4(), Camera::getInstance()._horizontalAngle, Camera::getInstance().forward());
+		ammoPlane->pos = Camera::getInstance().forward() * 0.5f - Camera::getInstance().up() * 0.15f + Camera::getInstance().right() * 0.22f + Camera::getInstance().position();
+		gAmmoPlane->rotMatrix = rotation * glm::mat4(glm::rotate(glm::mat4(), 80.f, glm::vec3(0, 0, 1)));
+
+
 		//End Camera code
 
 		for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
@@ -1043,7 +1094,9 @@ static void Update(float secondsElapsed) {
 
 			if (currentWeapon == machineGun)
 			{
-				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 25, 25, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+				p = glm::vec3(rotation * glm::vec4((leftArmFiringPosition * 0.1f), 1.0)) + p;
+				pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.00f, 0.030f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.00f, 0.03f))), 25, 25, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+				pr->go->scale = glm::vec3(0.3f); 
 				ObjectManager::instance().pMap.push_back(pr);
 				*currentAmmo = *currentAmmo - 1;
 			}
@@ -1051,23 +1104,30 @@ static void Update(float secondsElapsed) {
 			{
 				if (*currentAmmo >= shotgun)
 				{
+					p = glm::vec3(rotation * glm::vec4((rightArmFiringPosition * 0.1f), 1.0)) + p;
+
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr->go->scale = glm::vec3(0.3f);
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr->go->scale = glm::vec3(0.3f);
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr->go->scale = glm::vec3(0.3f);
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr->go->scale = glm::vec3(0.3f);
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.2f, 0.2f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.2f, 0.2f))), 30, 15, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr->go->scale = glm::vec3(0.3f);
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo = *currentAmmo - 1;
 				}
@@ -1076,8 +1136,10 @@ static void Update(float secondsElapsed) {
 			{
 				if (*currentAmmo >= bfg)
 				{
+					p = glm::vec3(rotation * glm::vec4((rightArmFiringPosition * 0.1f), 1.0)) + p;
+
 					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 25, 80, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
-					pr->go->scale = glm::vec3(1.5f);
+					pr->go->scale = glm::vec3(1.4f);
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo -= bfg;
 				}
@@ -1220,6 +1282,7 @@ static void Update(float secondsElapsed) {
 			currentEnemyToUpdate = 0;
 		}
 
+		enemiesAlive = 0;
 		for (int i = 0, s = targets.size(); i < s; i++)
 		{
 			if (targets[i]->canSeePlayer(model->pos)){
@@ -1287,6 +1350,7 @@ static void Update(float secondsElapsed) {
 					ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
 					targets[i]->fireTimeTolerance = randomClampedFloat(0.5f, 2.f);
 				}
+				enemiesAlive++;
 			}
 		}
 	    if (targetSpawner1.isActive)
@@ -1435,6 +1499,9 @@ static void Update(float secondsElapsed) {
 			if (nameOffset[nameSelect] < 0)
 				nameOffset[nameSelect] = 25;
 			currentlyPressedKey = 'w';
+			characterSpaceInterp = 0.7f;
+			characterSpaceInterpIsIncreasing = false;
+			
 		}
 		if ((glfwGetKey(gWindow, 'S')) && currentlyPressedKey == 'n')
 		{
@@ -1442,6 +1509,8 @@ static void Update(float secondsElapsed) {
 			if (nameOffset[nameSelect] > 25)
 				nameOffset[nameSelect] = 0;
 			currentlyPressedKey = 's';
+			characterSpaceInterp = 0.7f;
+			characterSpaceInterpIsIncreasing = false;
 		}
 
 		if ((glfwGetKey(gWindow, 'A')) && currentlyPressedKey == 'n')
@@ -1607,6 +1676,9 @@ void AppMain() {
 	framebuff[3] = new Framebuffer();
 	framebuff[3]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuff[3]->CreateColorTexture(4, SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[4] = new Framebuffer();
+	framebuff[4]->CreateDepthTexture(256, 256);
+	framebuff[4]->CreateColorTexture(1, 256, 256);
 	framebuffeffects = new FramebufferEffects(framebuff);
 	framebuffeffects->LoadBloomShaders();
 	framebuffeffects->LoadFXAAShaders();
@@ -1645,7 +1717,7 @@ void AppMain() {
 	ground->LoadHeightMap("testhm.png", 1, 5, 0.8);
 	ground->InitRender();
 	//char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
-	char* sb[6] = { "Right V2.png", "Left V2.png", "Top V2.png", "Top V2.png", "Back V2.png", "FrTest.png" };
+	char* sb[6] = { "SkyBoxTest_Right.png", "SkyBoxTest_Left.png", "SkyBoxTest_Top.png", "SkyBoxTest_Bottom.png", "SkyBoxTest_Back.png", "SkyBoxTest_Front.png" };
 	//char* Osb[6] = { "Right V3", "Left V3.png", "Top V2.png", "Top V3.png", "Back V3.png", "fr-O.png" };
 	char* Osb[6] = { "Right V3.png", "Left V3.png", "Top V2.png", "Top V2.png", "Back V3.png", "Front V3.png" };
 	sky = new Skybox(sb, Osb);
@@ -1660,6 +1732,21 @@ void AppMain() {
 	gModel = new Model();
 	gModel->setOwner(model);
 	gModel->loadModel("models/TallCube.dae");
+	arms = new GameObject(616);
+	arms->SetName("PlayerArms");
+	playerArms = new Model();
+	playerArms->setOwner(arms);
+	playerArms->loadModel("models/MEchArms2.dae");
+	arms->AddComponent(GRAPHICS, playerArms);
+
+	ammoPlane = new GameObject(617);
+	ammoPlane->SetName("PlayerArms");
+	gAmmoPlane = new Model();
+	gAmmoPlane->setOwner(ammoPlane);
+	gAmmoPlane->loadModel("models/AmmoPlane.dae");
+	ammoPlane->AddComponent(GRAPHICS, gAmmoPlane);
+	ammoPlane->scale = glm::vec3(0.05f);
+
 	Component* gp = gModel;
 	model->AddComponent(GRAPHICS, gp);
 	gCol = new ComponentCollision();

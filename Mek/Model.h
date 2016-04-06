@@ -65,6 +65,8 @@ public:
 
 	glm::mat4 rotMatrix;
 
+	void set_RenderedTexture(GLuint _passedTexture);
+
 	
 private:
 	struct Entry

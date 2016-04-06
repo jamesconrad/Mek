@@ -83,6 +83,8 @@ public:
 		unsigned int numindices,
 		unsigned int numvertices);
 
+	GLuint renderedTexture = 0;
+	inline void setRenderedTexture(GLuint &_passedTexture){ renderedTexture = _passedTexture; }
 
 private:
 	struct Tex
@@ -100,5 +102,6 @@ private:
 	unsigned int _numindices;
 	unsigned int _numvertices;
 	Tex* _textures;
+
 	unsigned int _numtex;
 };

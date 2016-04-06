@@ -89,6 +89,11 @@ void Render::draw(bool basevertex, unsigned int baseIndex, unsigned int baseVert
 		glBindTexture(GL_TEXTURE_2D, _textures[i].texture->object());
 		Program::getInstance().setUniform(_textures[i].target, i);
 	}
+	if (renderedTexture != 0)
+	{
+		
+		glBindTexture(GL_TEXTURE_2D, renderedTexture);
+	}
 	if (_indexed && basevertex)
 		glDrawElementsBaseVertex(GL_TRIANGLES, _numindices, GL_UNSIGNED_INT, (void*)(sizeof(unsigned int)*baseIndex), baseVertex);
 	else if (_indexed)
