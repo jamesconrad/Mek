@@ -5,13 +5,16 @@ layout (location = 1) in vec2 TexCoord;
 layout (location = 2) in vec3 Normal;
 layout (location = 3) in ivec4 BoneIDs;
 layout (location = 4) in vec4 Weights;
+layout (location = 5) in vec3 Tangent;
+layout (location = 6) in vec3 Bitangent;
 
 out vec2 TexCoord0;
 out vec3 Normal0;
 out vec3 WorldPos0;
 out vec3 FragPos;
 out vec4 FragPosLightSpace;
-
+out vec3 Tangent0;
+out vec3 Bitangent0;
 out vec4 Debug0;
 out ivec4 Debug1;
 out float depth;
@@ -37,9 +40,10 @@ void main()
     //gl_Position  = gWVP * PosL;
     gl_Position  = gWVP * vec4(Position, 1.0);
 	TexCoord0    = TexCoord;
-    vec4 NormalL = /*BoneTransform */ vec4(Normal, 0.0);
-    Normal0      = (gWorld * NormalL).xyz;
-    WorldPos0    = (gWorld * vec4(Position,0.0)).xyz;
+    Normal0 = (gWorld * vec4(Normal,0.0)).xyz;
+	Tangent0 = (gWorld * vec4(Tangent,0.0)).xyz;
+	Bitangent0 = (gWorld * vec4(Bitangent,0.0)).xyz;
+    WorldPos0 = (gWorld * vec4(Position,0.0)).xyz;
 
 	FragPos = vec3(gWorld * vec4(Position, 1.0));
 	FragPosLightSpace = depthMVP * vec4(FragPos, 1.0);

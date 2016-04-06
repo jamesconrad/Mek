@@ -40,7 +40,7 @@
 #include "SaveFunctions.h"
 
 //enable or disable the code slim wrote that steals console output
-#define HIJACKCONSOLE true
+#define HIJACKCONSOLE false
 
 enum game_state { GAME, MENU, VICTORYSCREEN };
 float hitTimer = 0.0;
@@ -557,7 +557,7 @@ static void DrawScene(int shadowMapTexID)
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			//cc->renderHitbox();
+			cc->renderHitbox();
 		}
 	}
 
@@ -1683,7 +1683,7 @@ void AppMain() {
 	//PROPER INIT
 	for (int i = 0; i < 24; i++)
 	{
-		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12 && i != 19)
+		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
 			Model *cModel = new Model();

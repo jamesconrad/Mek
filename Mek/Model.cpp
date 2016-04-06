@@ -1,3 +1,8 @@
+
+//NOTE:
+//Model Loading + Animation aided with tutorial at:
+//http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html
+
 #include "Model.h"
 #include "Interpolation.h"
 
@@ -96,18 +101,92 @@ void Model::loadScene(aiScene* scene)
 	boneweight.resize(numVertices);
 	indices.reserve(numIndices);
 
+	std::vector<glm::vec3> tangents;
+	std::vector<glm::vec3> bitangents;
+	std::vector<int> numAffectors;
+	tangents.resize(numVertices);
+	bitangents.resize(numVertices);
+	numAffectors.resize(numVertices);
+
 	for (unsigned int i = 0, s = _entries.size(); i < s; i++)
 	{ //For each mesh
 		const aiMesh* mesh = scene->mMeshes[i];
+		int offset = 0;
+		if (i > 0)
+			offset += scene->mMeshes[i - 1]->mNumVertices;
 		//Lets do the indices first
 		for (int j = 0; j < mesh->mNumFaces; j++)
 		{
-			indices.push_back(mesh->mFaces[j].mIndices[0]);
-			indices.push_back(mesh->mFaces[j].mIndices[1]);
-			indices.push_back(mesh->mFaces[j].mIndices[2]);
+			int i0 = mesh->mFaces[j].mIndices[0];
+			int i1 = mesh->mFaces[j].mIndices[1];
+			int i2 = mesh->mFaces[j].mIndices[2];
+			indices.push_back(i0);
+			indices.push_back(i1);
+			indices.push_back(i2);
+//TANGENT CALCULATION-----------------------------------------------------------------------
+			glm::vec3 tang;
+			glm::vec3 bitang;
+			//retrieve the face vertices
+			glm::vec3 v0 = glm::vec3(mesh->mVertices[i0].x, mesh->mVertices[i0].y, mesh->mVertices[i0].z);
+			glm::vec3 v1 = glm::vec3(mesh->mVertices[i1].x, mesh->mVertices[i1].y, mesh->mVertices[i1].z);
+			glm::vec3 v2 = glm::vec3(mesh->mVertices[i2].x, mesh->mVertices[i2].y, mesh->mVertices[i2].z);
+			//and uvs
+			glm::vec2 uv0 = glm::vec2(mesh->mTextureCoords[0][i0].x, mesh->mTextureCoords[0][i0].y);
+			glm::vec2 uv1 = glm::vec2(mesh->mTextureCoords[0][i1].x, mesh->mTextureCoords[0][i1].y);
+			glm::vec2 uv2 = glm::vec2(mesh->mTextureCoords[0][i2].x, mesh->mTextureCoords[0][i2].y);
+			//calculate edges
+			glm::vec3 e1 = v1 - v0;
+			glm::vec3 e2 = v2 - v0;
+			glm::vec2 duv1 = uv1 - uv0;
+			glm::vec2 duv2 = uv2 - uv0;
+
+			//        |edges|*|inverse|*| inverse scale |  
+			//[T,B] = [e1,e2]*|v2 ,-u2|*(1/(u1v2 - u2v1))
+			//				  |-v1, u1|
+			//To simplify math, the inverse scale is held off until
+			//after the matrix math is done
+
+			float uvInvScale = 1 / (duv1.x * duv2.y - duv2.x * duv1.y);
+
+			//calculate nonscaled tangent
+			tang.x = duv2.y * e1.x - duv1.y * e2.x;
+			tang.y = duv2.y * e1.y - duv1.y * e2.y;
+			tang.z = duv2.y * e1.z - duv1.y * e2.z;
+			//scale tangent by uv inverse matrix scale component
+			tang *= uvInvScale;
+			tang = glm::normalize(tang);
+
+			//calculate nonscaled bitangent
+			bitang.x = -duv2.x * e1.x + duv1.x * e2.x;
+			bitang.y = -duv2.x * e1.y + duv1.x * e2.y;
+			bitang.z = -duv2.x * e1.z + duv1.x * e2.z;
+			//scale by uv inverse matrix scale component
+			bitang *= uvInvScale;
+			bitang = glm::normalize(bitang);
+
+			//add vectors together to be averaged later
+			tangents[i0 + offset] += tang;
+			tangents[i1 + offset] += tang;
+			tangents[i2 + offset] += tang;
+
+			bitangents[i0 + offset] += bitang;
+			bitangents[i1 + offset] += bitang;
+			bitangents[i2 + offset] += bitang;
+
+			//increment affectors for division later 
+			//(saves us the hard part of checking connected vertices)
+			numAffectors[i0 + offset] += 1;
+			numAffectors[i1 + offset] += 1;
+			numAffectors[i2 + offset] += 1;
 		}
 		for (unsigned int j = 0; j < mesh->mNumVertices; j++)
-		{ //For each vertex
+		{ 
+			//average the tangent and bitangent
+			tangents[j + offset] /= numAffectors[j];
+			bitangents[j + offset] /= numAffectors[j];
+//END TANGENT CALCULATION-------------------------------------------------------------------
+
+			//For each vertex
 			position.push_back(glm::vec3(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z));
 			normal.push_back(glm::vec3(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z));
 			texcoord.push_back(mesh->HasTextureCoords(0) ? 
@@ -160,13 +239,18 @@ void Model::loadScene(aiScene* scene)
 					//	textured = true;
 					//	break;
 					//}
-					std::string tmpfp(_fp);
-					tmpfp = tmpfp.substr(7, tmpfp.size() - 10);
-					tmpfp += "png";
+					std::string modelname(_fp);
 					std::string filepath("Textures/");
-					filepath += tmpfp;
-					if (_render->createTexture((char*)filepath.c_str(), "gColorMap", (TextureFlag)type))
+					std::string extension(".png");
+					modelname = modelname.substr(7, modelname.size() - 11);
+					std::string texturepath = filepath + modelname + extension;
+					std::string normalpath = filepath + modelname + "N" + extension;
+					if (_render->createTexture((char*)texturepath.c_str(), "gColorMap", (TextureFlag)type))
 					{
+						if (!_render->createTexture((char*)normalpath.c_str(), "normalMap", (TextureFlag)type))
+						{
+							_render->createTexture((char*)"Textures/missingnormal.png", "normalMap", (TextureFlag)type);
+						}
 						textured = true;
 						break;
 					}
@@ -205,8 +289,10 @@ void Model::loadScene(aiScene* scene)
 		glm::vec3 pos;			//0 * 4 = 0
 		glm::vec3 normal;		//3 * 4 = 12
 		glm::vec2 uv;			//6 * 4 = 24
-		float weight[4];		//8 * 4 = 32
-		unsigned int boneid[4];	//12 * 4 = 48, after weights to prevent having to deal with swap in data type
+		glm::vec3 tangent;		//8 * 4 = 32
+		glm::vec3 bitangent;	//11 *4 = 44
+		float weight[4];		//14 *4 = 56
+		unsigned int boneid[4];	//18 *4 = 72, after weights to prevent having to deal with swap in data type
 	};
 	std::vector<VertexData> vert;
 	vert.resize(position.size());
@@ -215,6 +301,8 @@ void Model::loadScene(aiScene* scene)
 		vert[i].pos = position[i];
 		vert[i].normal = normal[i];
 		vert[i].uv = texcoord[i];
+		vert[i].tangent = tangents[i];
+		vert[i].bitangent = bitangents[i];
 		if (i < boneweight.size())
 		{//if this fails we do not have any bones, ouch
 			memcpy(vert[i].boneid, boneweight[i].bone, sizeof(unsigned int) * 4);
@@ -242,6 +330,15 @@ layout (location = 4) in vec4 Weights;
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, vsize * vert.size(), vert.data(), GL_STATIC_DRAW);
 	
+	//numfloat offset
+	//vert		0 
+	//norm		3 
+	//uvs		6 
+	//tangent	8 
+	//bitangent	11
+	//weights	14
+	//boneids	18
+
 	//vertices
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vsize, 0);
@@ -251,12 +348,18 @@ layout (location = 4) in vec4 Weights;
 	//uvs
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, vsize, (void*)(6*fsize));
+	//tangents
+	glEnableVertexAttribArray(5);
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, vsize, (void*)(8 * fsize));
+	//bitangents
+	glEnableVertexAttribArray(6);
+	glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, vsize, (void*)(11 * fsize));
 	//weights
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, vsize, (void*)(8*fsize));
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, vsize, (void*)(14*fsize));
 	//boneids
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 4, GL_UNSIGNED_INT, GL_FALSE, vsize, (void*)(12*fsize));
+	glVertexAttribPointer(4, 4, GL_UNSIGNED_INT, GL_FALSE, vsize, (void*)(18*fsize));
 
 	//Pass the preset data to render
 	_render->forceOverride(vao, vbo, 2, NULL, true, numIndices, numVertices);
@@ -353,6 +456,12 @@ void Model::interpolateRotation(glm::quat& out, float animTime, aiNodeAnim* anim
 	unsigned int nextKey = findRotationKey(animTime, animNode);
 
 	float animLength = (float)animNode->mRotationKeys[nextKey].mTime - animNode->mRotationKeys[currentKey].mTime;
+	//if animLength is 0, we have an issue
+	if (animLength == 0)
+	{
+		printf("HUGE PROBLEM WITH ANIMATION, ROTATION LENGTH = 0, OVERRIDE WITH 0.5\n");
+		animLength = 0.5;
+	}
 	//scale t inbwetween 0 and 1 for lerp
 	float t = (animTime - (float)animNode->mRotationKeys[currentKey].mTime) / animLength;
 	aiQuaternion& current = animNode->mRotationKeys[currentKey].mValue;
@@ -433,7 +542,15 @@ void Model::calcFinalTransform(float animTime, aiAnimation* anim, aiNode* node, 
 			rotat = slerp(rotat, rotat2, factor);
 		}
 
-		nodetransform = glm::translate(glm::mat4(), trans) * glm::mat4_cast(rotat) * glm::scale(glm::mat4(), scale);
+		glm::mat4 t = glm::translate(glm::mat4(), trans);
+		glm::mat4 r = glm::toMat4(rotat);
+		glm::mat4 s = glm::scale(glm::mat4(), scale);
+
+		nodetransform *= glm::translate(glm::mat4(), trans) * glm::toMat4(rotat);// * glm::scale(glm::mat4(), scale);
+		printf("%f, %f, %f, %f\n", nodetransform[0][0], nodetransform[0][1], nodetransform[0][2], nodetransform[0][3]);
+		printf("%f, %f, %f, %f\n", nodetransform[1][0], nodetransform[1][1], nodetransform[1][2], nodetransform[1][3]);
+		printf("%f, %f, %f, %f\n", nodetransform[2][0], nodetransform[2][1], nodetransform[2][2], nodetransform[2][3]);
+		printf("%f, %f, %f, %f\n", nodetransform[3][0], nodetransform[3][1], nodetransform[3][2], nodetransform[3][3]);
 	}
 
 	glm::mat4 globaltransform = parent * nodetransform;
@@ -488,7 +605,7 @@ void Model::render()
 	if (_animated)
 	{
 		Program::getInstance().bind("anim");
-		Program::getInstance().setUniformMatrix4("gBones", &_finalFrameTransform[0][0][0], MAX_BONES);
+		Program::getInstance().setUniformMatrix4("gBones[0]", &_finalFrameTransform[0][0][0], MAX_BONES);
 		Program::getInstance().setUniform("gWVP", WVP);
 		Program::getInstance().setUniform("gWorld", W);
 		//Program::getInstance().updateLighting("anim");
