@@ -353,6 +353,12 @@ void Model::interpolateRotation(glm::quat& out, float animTime, aiNodeAnim* anim
 	unsigned int nextKey = findRotationKey(animTime, animNode);
 
 	float animLength = (float)animNode->mRotationKeys[nextKey].mTime - animNode->mRotationKeys[currentKey].mTime;
+	//if animLength is 0, we have an issue
+	if (animLength == 0)
+	{
+		printf("HUGE PROBLEM WITH ANIMATION, ROTATION LENGTH = 0, OVERRIDE WITH 0.5\n");
+		animLength = 0.5;
+	}
 	//scale t inbwetween 0 and 1 for lerp
 	float t = (animTime - (float)animNode->mRotationKeys[currentKey].mTime) / animLength;
 	aiQuaternion& current = animNode->mRotationKeys[currentKey].mValue;
@@ -433,7 +439,15 @@ void Model::calcFinalTransform(float animTime, aiAnimation* anim, aiNode* node, 
 			rotat = slerp(rotat, rotat2, factor);
 		}
 
-		nodetransform = glm::translate(glm::mat4(), trans) * glm::mat4_cast(rotat) * glm::scale(glm::mat4(), scale);
+		glm::mat4 t = glm::translate(glm::mat4(), trans);
+		glm::mat4 r = glm::toMat4(rotat);
+		glm::mat4 s = glm::scale(glm::mat4(), scale);
+
+		nodetransform *= glm::translate(glm::mat4(), trans) * glm::toMat4(rotat);// *glm::scale(glm::mat4(), scale);
+		printf("%f, %f, %f, %f\n", nodetransform[0][0], nodetransform[0][1], nodetransform[0][2], nodetransform[0][3]);
+		printf("%f, %f, %f, %f\n", nodetransform[1][0], nodetransform[1][1], nodetransform[1][2], nodetransform[1][3]);
+		printf("%f, %f, %f, %f\n", nodetransform[2][0], nodetransform[2][1], nodetransform[2][2], nodetransform[2][3]);
+		printf("%f, %f, %f, %f\n", nodetransform[3][0], nodetransform[3][1], nodetransform[3][2], nodetransform[3][3]);
 	}
 
 	glm::mat4 globaltransform = parent * nodetransform;
