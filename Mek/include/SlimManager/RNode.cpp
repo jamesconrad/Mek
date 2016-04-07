@@ -26,8 +26,8 @@ void RNode::Init(SoundSystem* _fsystem,std::string _name,bool _isDoor, Preset* _
 
 //update functions
 void RNode::Update(){
-	
 	UpdateDistanceToSystem();
+	UpdateFacingSystem();
 }
 void RNode::UpdateDistanceToSystem(){
 	//std::cout << m_name << " " << m_distanceToSystem << std::endl;
@@ -38,6 +38,20 @@ void RNode::UpdateDistanceToSystem(){
 	float z = sp.z - ssp.z;
 	float distance = sqrt(abs(pow(x, 2) + pow(y, 2) + pow(z, 2)));
 	m_distanceToSystem = distance;
+}
+void RNode::UpdateFacingSystem(){
+	glm::vec3 npos = FVECToGLM3(GetRNodePos());
+	glm::vec3 spos = FVECToGLM3(m_SoundSystemPtr->GetSystemPosition());
+	glm::vec3 sfor = FVECToGLM3(m_SoundSystemPtr->GetSystemFor());
+
+	glm::vec3 dif = npos - spos;
+	float d = glm::dot(sfor, dif);
+	if (d >= 0){
+		m_facingSystem = true;
+	}
+	else{
+		m_facingSystem = false;
+	}
 }
 //set functions
 void RNode::SetLinks(std::vector<RNode*> _nodes){
@@ -66,6 +80,7 @@ void RNode::PrintNode(){
 	std::cout << "*************NODE INFO*******************" << std::endl;
 	if (this != NULL){
 		std::cout << m_name << "  iD?: " << m_isDoor << " prN: " << m_preset->GetPresetName() << " dToS: " << m_distanceToSystem << " m: " << m_minDistance << " M: " << m_maxDistance << std::endl << std::flush;
+		std::cout << "Facing System: " << m_facingSystem << std::endl;
 		if (m_path.size() != NULL){
 			PrintFMODVector(m_reverbPos);
 			std::cout << "*************PATH INFO*******************" << std::endl;

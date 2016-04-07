@@ -20,6 +20,7 @@ public:
 	//update functions
 	void Update();
 	void UpdateDistanceToSystem();
+	void UpdateFacingSystem();
 	
 	//set functions
 	inline void SetRNodePos(glm::vec3 _pos){m_reverbPos = Glm3ToFVEC(_pos);}
@@ -46,7 +47,7 @@ public:
 	inline float GetDistanceToSystem () const { return m_distanceToSystem; }
 	inline FMOD_VECTOR& GetRNodePos(){ return m_reverbPos; }
 	inline std::vector<path>& GetPath(){ return m_path; }
-	inline 
+	inline bool GetFacingSystem(){ return m_facingSystem; }
 	RNode* FindSystemRNode();
 	//display functions
 	void PrintNode();
@@ -61,6 +62,7 @@ private:
 	std::string m_name;
 	bool m_isDoor;
 	bool m_destruct;
+	bool m_facingSystem;
 	float m_minDistance;
 	float m_maxDistance;
 	float m_distanceToSystem;

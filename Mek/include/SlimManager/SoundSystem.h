@@ -13,6 +13,7 @@
 #include "fmod\fmod.hpp"
 #include "fmod\fmod_errors.h"
 #include "../../lib/glm\glm.hpp"
+#include "../../lib/glm/gtx/transform.hpp"
 	static void ERRCHECK(FMOD_RESULT m_result)
 	{
 		if (m_result != FMOD_OK)
@@ -23,6 +24,10 @@
 	}
 	static FMOD_VECTOR Glm3ToFVEC(glm::vec3 _vec){
 		FMOD_VECTOR vec{ _vec.x, _vec.y, _vec.z };
+		return vec;
+	}
+	static glm::vec3 FVECToGLM3(FMOD_VECTOR _vec){
+		glm::vec3 vec{ _vec.x, _vec.y, _vec.z };
 		return vec;
 	}
 	static void PrintFMODVector(FMOD_VECTOR _vec){
@@ -59,6 +64,7 @@ public:
 	inline FMOD::System* GetSystemPtr(){ return m_SystemPtr; }
 	inline SoundSystem* GetSoundSystem() { return this; }
 	inline FMOD_VECTOR GetSystemPosition(){ return m_systemPos; }
+	inline FMOD_VECTOR GetSystemFor(){ return m_systemForward; }
 	//inline RNodeManager* GetRNodeManager(){ return m_RNodeManagerPtr; }
 
 	//display functions

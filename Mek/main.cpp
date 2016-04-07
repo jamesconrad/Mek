@@ -1836,7 +1836,7 @@ void AppMain() {
 			else if (i == 1)
 			{
 				gObject->SetName("Water Tower");
-				cModel->loadModel("models/Watertower-LP.dae");
+				cModel->loadModel("models/Water Tower.dae");
 
 				gObject->scale = glm::vec3(3, 3, 3);
 				gObject->pos = glm::vec3(-112.75, 0, 105);
@@ -1844,10 +1844,10 @@ void AppMain() {
 			else if (i == 2)
 			{
 				gObject->SetName("MenuScene");
-				cModel->loadModel("models/1.dae");
+				cModel->loadModel("models/Warehouse.dae");
 
 				gObject->scale = glm::vec3(1, 1, 1);// glm::vec3(1.6, 1.6, 1.6);
-				gObject->pos = glm::vec3(50, 0, 145);
+				gObject->pos = glm::vec3(30, 0, 130);
 			}
 			else if (i == 3)
 			{
@@ -1860,7 +1860,7 @@ void AppMain() {
 			else if (i == 4)
 			{
 				gObject->SetName("Middle Plus");
-				cModel->loadModel("models/Shiping Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, -73);
@@ -1892,7 +1892,7 @@ void AppMain() {
 			else if (i == 8)
 			{
 				gObject->SetName("Middle Plus");
-				cModel->loadModel("models/Shiping Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-5, 0, -20);
@@ -1900,7 +1900,7 @@ void AppMain() {
 			else if (i == 9)
 			{
 				gObject->SetName("Container 2");
-				cModel->loadModel("models/Shiping Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, 73);
@@ -1933,7 +1933,7 @@ void AppMain() {
 			else if (i == 13)
 			{
 				gObject->SetName("Container 2");
-				cModel->loadModel("models/Shiping Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(-55, 0, -47);
@@ -1941,7 +1941,7 @@ void AppMain() {
 			else if (i == 14)
 			{
 				gObject->SetName("Container 90");
-				cModel->loadModel("models/Shiping Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(-94.87, 0, -125.5);
@@ -1974,7 +1974,7 @@ void AppMain() {
 			else if (i == 18)
 			{
 				gObject->SetName("Middle Plus North");
-				cModel->loadModel("models/Shiping Container.dae");
+				cModel->loadModel("models/Shipping Container.dae");
 
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-110, 0, -149);
