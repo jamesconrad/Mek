@@ -3,7 +3,9 @@
 //#include "PresetManager.h"
 #include "SoundSystem.h"
 #include "PresetManager.h"
+class RNode;
 struct path{
+	RNode* node;
 	std::string name;
 	float distance;
 	float volume;
@@ -30,6 +32,7 @@ public:
 	inline void SetPath(std::vector<path> _path){ m_path = _path; }
 	inline void AddLink(RNode* _link){ m_links.push_back(_link); }
 	inline void AddStringLink(std::string _stringLink){ m_stringLinks.push_back(_stringLink); }
+	inline void SetDestruct(bool _destruct){ m_destruct = _destruct; }
 	void SetLinks(std::vector<RNode*> _nodes);
 
 	//get functions

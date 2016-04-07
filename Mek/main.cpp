@@ -147,7 +147,8 @@ bool RunEnemy = true;
 bool RunDash = true;
 bool RunSlowTime = true;
 Manager* manager = new Manager;
-
+Sound* s_pWalk = new Sound;
+Sound* s_sReload = new Sound;
 bool isReverb = true;
 void Tutorial(){
 	//system("CLS");
@@ -184,12 +185,18 @@ void FreqBand(){
 	//cm.Init(100, 50);//Resize the console window to 100 by 50 characters
 	//cm.SetTitle("Frequency Bands");
 }
-void InitManager(){
-	manager->Init();
+void InitSounds(){
+	manager->GetSoundManager()->PlayAndPause("Player", "Walk",true);
+
 	manager->GetSoundManager()->FindAndPlay("Background", "two");
-	glm::vec3 pos{ 5.0,12.0,14.0 };
+	glm::vec3 pos{ 5.0, 12.0, 14.0 };
 	manager->GetSoundManager()->FindSound("Background", "two")->SetSoundPosition(pos);
 	manager->GetSoundManager()->FindAndPlay("Load", "one");
+}
+void InitManager(){
+	manager->Init();
+
+	InitSounds();
 }
 void LoadShaders(char* vertFilename, char* fragFilename)
 {
@@ -842,9 +849,8 @@ float shotcd = 0;
 // update the scene based on the time elapsed since last update
 static void Update(float secondsElapsed) {
 
-	manager->Update();
 	if (HIJACKCONSOLE){
-		manager->GetSoundManager()->FindSound("Background", "two")->PrintSoundInformation();
+		
 	}
 	Tutorial();
 	
@@ -861,7 +867,10 @@ static void Update(float secondsElapsed) {
 	fmy.y = 0;
 	bool shoot = false;
 
+	glm::vec3 ppos = cam->position();
 	manager->SetSystemPFU(cam->position(),cam->forward(),cam->up());
+	manager->GetSoundManager()->GetOwnerList("Player")->UpdateListPosition(cam->position());
+	manager->Update();
 	
 	ComponentInput* c = static_cast<ComponentInput*>(model->GetComponent(CONTROLLER));
 	if (c->Refresh())
@@ -1061,6 +1070,17 @@ static void Update(float secondsElapsed) {
 
 		cam->offsetPosition(model->pos - cam->position());
 
+//<>*********************MORE SOUND ***************************************
+		if (ppos != cam->position()){
+			manager->GetSoundManager()->FindSound("Player", "Walk")->PauseSound(false);
+		}
+		else{
+			manager->GetSoundManager()->FindSound("Player", "Walk")->PauseSound(true);
+		}
+//</>*********************MORE SOUND ***************************************
+
+
+
 		c->getOwner()->dir = glm::rotateX(c->getOwner()->dir, -rInput.y);
 		c->getOwner()->dir = glm::rotateY(c->getOwner()->dir, rInput.x);
 		cam->offsetOrientation(-rInput.y, rInput.x);
@@ -1155,7 +1175,7 @@ static void Update(float secondsElapsed) {
 				{
 					p = glm::vec3(rotation * glm::vec4((rightArmFiringPosition * 0.1f), 1.0)) + p;
 
-					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 25, 80, 10, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					pr = new Projectile(p, glm::normalize(f + glm::vec3(randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f), randomClampedFloat(-0.015f, 0.015f))), 25, 80, 10, manager->GetSoundManager()->FindSound("Player", "rpg"));
 					pr->go->scale = glm::vec3(1.4f);
 					ObjectManager::instance().pMap.push_back(pr);
 					*currentAmmo -= bfg;
@@ -1170,6 +1190,9 @@ static void Update(float secondsElapsed) {
 
 		if (machineGunReloadTimer > 0.0f)
 		{
+			if (!manager->GetSoundManager()->FindSound("Player", "sreload")->GetIsPlaying()){
+				manager->GetSoundManager()->FindAndPlay("Player", "sreload");
+			}
 			machineGunReloadTimer += secondsElapsed;
 			if (machineGunReloadTimer > 2.f)
 			{
@@ -1180,6 +1203,9 @@ static void Update(float secondsElapsed) {
 		}
 		if (shotgunReloadTimer > 0.0f)
 		{
+			if (!manager->GetSoundManager()->FindSound("Player", "mreload")->GetIsPlaying()){
+				manager->GetSoundManager()->FindAndPlay("Player", "mreload");
+			}
 			shotgunReloadTimer += secondsElapsed;
 			if (shotgunReloadTimer > 2.f)
 			{
@@ -1796,6 +1822,7 @@ void AppMain() {
 			Model *cModel = new Model();
 			ComponentCollision *cCollision = new ComponentCollision();
 			Component *c;
+			float groundMod = 0;
 
 			if (i == 0)
 			{
@@ -1968,8 +1995,10 @@ void AppMain() {
 				gObject->SetName("Wall");
 				cModel->loadModel("models/wallz2.dae");
 
-				gObject->scale = glm::vec3(5.0);
-				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
+				gObject->scale = glm::vec3(0.30,1,0.30);
+				//gObject->pos = glm::vec3(84.727f, 0, -154.085f);
+				gObject->pos = glm::vec3(0, 0, 0);
+				groundMod = -5;
 			}
 			else if (i == 21)
 			{
@@ -2025,7 +2054,7 @@ void AppMain() {
 			}
 
 			gObject->pos /= 10.f;
-			gObject->pos.y = ground->HeightAtLocation(gObject->pos);
+			gObject->pos.y = ground->HeightAtLocation(gObject->pos) + groundMod;
 
 			cModel->setOwner(gObject);
 			c = cModel;
