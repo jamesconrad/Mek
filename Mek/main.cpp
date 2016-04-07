@@ -574,7 +574,7 @@ static void DrawScene(int shadowMapTexID)
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			cc->renderHitbox();
+			//cc->renderHitbox();
 		}
 	}
 	playerArms->render();
@@ -659,20 +659,20 @@ static void Render() {
 	{
 		if (showHighScores)
 		{
-			TextRendering::getInstance().printText2D("S N D", -0.7f, 0.875f, 0.09f, fontColour);
+			TextRendering::getInstance().printText2D("S N D", -0.7f, 0.875f, 0.09f, menuItem1Colour, red);
 			for (int i = 0, s = scoreTable.size(); i < s && i < 5; i++)
 			{
 				char buffer[64];
 				_snprintf_s(buffer, 64, "%s %i", sndNames[i].c_str(), scoreTable[i]);
-				TextRendering::getInstance().printText2D(buffer, -0.85f, 0.75f - i / 16.f, 0.075f, fontColour);
+				TextRendering::getInstance().printText2D(buffer, -0.85f, 0.75f - i / 16.f, 0.075f, menuItem1Colour, red);
 			}
 
-			TextRendering::getInstance().printText2D("SURVIVAL", 0.15f, 0.875f, 0.09f, fontColour);
+			TextRendering::getInstance().printText2D("SURVIVAL", 0.15f, 0.875f, 0.09f, menuItem1Colour, red);
 			for (int i = 0, s = survivalScoreTable.size(); i < s && i < 5; i++)
 			{
 				char buffer[64];
 				_snprintf_s(buffer, 64, "%s %i", survivalNames[i].c_str(), survivalScoreTable[i]);
-				TextRendering::getInstance().printText2D(buffer, 0.27f, 0.75f - i / 16.f, 0.075f, fontColour);
+				TextRendering::getInstance().printText2D(buffer, 0.27f, 0.75f - i / 16.f, 0.075f, menuItem1Colour, red);
 			}
 		}
 		else
@@ -1816,7 +1816,7 @@ void AppMain() {
 	//PROPER INIT
 	for (int i = 0; i < 24; i++)
 	{
-		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12)
+		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12 && i != 19)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
 			Model *cModel = new Model();
