@@ -1,15 +1,36 @@
 #version 430
 
-const int MAX_POINT_LIGHTS = 16;
-const int MAX_SPOT_LIGHTS = 16;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 Depth;
+layout(location = 2) out vec4 Normal;
+layout(location = 3) out vec4 LightObscurers;
 
 in vec2 TexCoord0;
 in vec3 Normal0;
 in vec3 WorldPos0;
+in vec3 Tangent0;
+in vec3 Bitangent0;
 in vec3 FragPos;
 in vec4 FragPosLightSpace;
 
+const int MAX_POINT_LIGHTS = 16;
+const int MAX_SPOT_LIGHTS = 16;
+vec3 warmColour = vec3(0.05, 0.0, 0.0);
+float alphaWarm = 0.1;
+vec3 coolColour = vec3(0.0, 0.0, 0.05);
+float alphaCool = 0.8;
+
+uniform int gNumPointLights;
+uniform int gNumSpotLights;
+uniform sampler2D gColorMap;
+uniform sampler2D normalMap;
 uniform sampler2D shadowMap;
+uniform vec3 gEyeWorldPos;
+uniform float gMatSpecularIntensity;
+uniform float gSpecularPower;
+//Uniforms had to be included below.
+//uniform PointLight gPointLights[MAX_POINT_LIGHTS]; //a ball of light
+//uniform SpotLight gSpotLights[MAX_SPOT_LIGHTS]; //a flashlight
 
 struct VSOutput
 {
@@ -18,18 +39,11 @@ struct VSOutput
     vec3 WorldPos;
 };
 
-
 struct BaseLight
 {
     vec3 Color;
     float AmbientIntensity;
     float DiffuseIntensity;
-};
-
-struct DirectionalLight
-{
-    BaseLight Base;
-    vec3 Direction;
 };
 
 struct Attenuation
@@ -53,17 +67,9 @@ struct SpotLight
     float Cutoff;
 };
 
-uniform int gNumPointLights;
-uniform int gNumSpotLights;
-uniform DirectionalLight gDirectionalLight; //the "sun"
+
 uniform PointLight gPointLights[MAX_POINT_LIGHTS]; //a ball of light
 uniform SpotLight gSpotLights[MAX_SPOT_LIGHTS]; //a flashlight
-uniform sampler2D gColorMap;
-uniform vec3 gEyeWorldPos;
-uniform vec3 EyeViewVec;
-uniform float gMatSpecularIntensity;
-
-uniform float gSpecularPower;
 
 //New code by Jordan Culver
 vec3 PointLambert(VSOutput In, PointLight Light)
@@ -184,17 +190,6 @@ float getRimFresnelTerm(VSOutput In)
 	return fres;
 }
 
-
-layout(location = 0) out vec4 FragColor;
-layout(location = 1) out vec4 Depth;
-layout(location = 2) out vec4 Normal;
-layout(location = 3) out vec4 LightObscurers;
-
-vec3 warmColour = vec3(0.05, 0.0, 0.0);
-float alphaWarm = 0.1;
-vec3 coolColour = vec3(0.0, 0.0, 0.05);
-float alphaCool = 0.8;
-
 vec3 getGoochColour(VSOutput In, vec3 coolColour, vec3 warmColour, PointLight Light)
 {
 	vec3 lightVector = normalize(Light.Position - In.WorldPos);
@@ -210,8 +205,13 @@ void main()
 
     VSOutput In;
     In.TexCoord = TexCoord0;
-    In.Normal   = normalize(Normal0);
+    //In.Normal   = normalize(Normal0); //we use normal maps now
     In.WorldPos = WorldPos0;
+
+	mat3 TBN = mat3(normalize(Tangent0),normalize(Bitangent0),normalize(Normal0));
+	In.Normal = texture2D(normalMap, TexCoord0).rgb;
+	In.Normal = normalize(In.Normal * 2.0 - 1.0);   
+	In.Normal = normalize(TBN * In.Normal);
 
 	//vec3 specularMask; = vec3(texture(gSpecularMap, In.TexCoord.xy));
 

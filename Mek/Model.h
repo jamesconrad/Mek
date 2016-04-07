@@ -122,7 +122,7 @@ private:
 	Assimp::Importer _importer;
 
 	unsigned int _numBones;
-	std::map<char*, unsigned int> _boneMap;
+	std::map<std::string, unsigned int> _boneMap;
 	std::vector<BoneInfo> _boneInfo;
 	std::vector<Entry> _entries;
 
