@@ -14,7 +14,7 @@ uniform vec3 playerPositionInWorld;
 uniform vec3 cameraForwardVector;
 
 float exposure = 0.017;
-float decay = 1.0;
+float decay = 0.985;
 float density = 1.7;
 float weight = 3.0;
 int numSamples = 100;
