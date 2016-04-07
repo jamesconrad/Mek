@@ -55,7 +55,7 @@ void SoundManager::Init(SoundSystem* _system, std::vector<RNode*> _rnodes, std::
 				sound->Create(m_SoundSystemPtr, pname, is2d, isloop);
 				m_soundList.push_back(sound);
 			}
-
+			m_SoundSystemPtr->Update();
 			bool Found = false;
 			if (m_uOwners.size() == NULL){//if uOwner vector is empty push back first sound loaded form txt file
 				m_uOwners.push_back(sound->GetSoundOwner());
@@ -203,7 +203,6 @@ void SoundManager::Sort(){ //vector of unique owners
 		p++;//goes to next unique owner
 	}
 
-std:cout << m_oList.size();
 }
 void SoundManager::UpdateSoundRNode(){
 	for (int c = 0; c < m_soundList.size(); c++){
@@ -224,7 +223,6 @@ void SoundManager::FastForwardAll(bool _fastForward){
 void SoundManager::Update(){
 	for (int c = 0; c < m_soundList.size(); c++){
 		m_soundList[c]->Update();
-		UpdateSoundRNode();
 	}
 }
 void SoundManager::PrintList(){

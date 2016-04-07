@@ -15,6 +15,7 @@ public:
 	void PrintRNodes();
 	//set functions
 	void SetRNodePos(std::string _name ,glm::vec3 _pos);
+	void SetDestructAll(bool _destruct);
 	//get functtions
 	RNode* FindNode(std::string _nodeName);
 	void FindSystemRNode();
@@ -28,5 +29,7 @@ private:
 	std::vector<RNode*> m_nodes;
 	PresetManager* m_PManagerPtr;
 	RNode* m_systemRNode;
+
+	bool m_setPath;
 };
 #endif

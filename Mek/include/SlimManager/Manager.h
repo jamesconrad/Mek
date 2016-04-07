@@ -1,5 +1,6 @@
 #ifndef MANAGER_H
 #define MANAGER_H
+#include <ctime>
 #include "SoundManager.h"
 #include "PresetManager.h"
 #include "RNodeManager.h"
@@ -22,7 +23,7 @@ public:
 	inline void SetSystemPosition(glm::vec3 _pos){ m_SoundSystemPtr.SetPosition(_pos); }
 	inline void SetSystemForward(glm::vec3 _pos){ m_SoundSystemPtr.SetForward(_pos); }
 	inline void SetSystemUp(glm::vec3 _pos){ m_SoundSystemPtr.SetUp(_pos); }
-	inline void SetSystemPFU(glm::vec3 _pos, glm::vec3 _for, glm::vec3 _up){ m_SoundSystemPtr.SetPosition(_pos); m_SoundSystemPtr.SetForward(_pos); m_SoundSystemPtr.SetUp(_pos); }
+	void SetSystemPFU(glm::vec3 _pos, glm::vec3 _for, glm::vec3 _up);
 	void UpdateSounds();
 	void UpdateRNodes();
 	void UpdateSystemRNode();

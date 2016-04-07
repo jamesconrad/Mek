@@ -26,7 +26,7 @@ public:
 	inline void SetMinMaxDistance(float _min, float _max) { SetMinDistance(_min); SetMaxDistance(_max); }
 	inline void SetVolume(float _v){ m_activeVolume = _v; }
 	inline void SetSoundRNode(RNode* _node){ m_rnode = _node; }
-	inline void SetSystemRNode(RNode* _node){ m_systemRNode = _node; m_Node = true; }
+	inline void SetSystemRNode(RNode* _node){ m_systemRNode = _node;}
 	inline void SetOminmax(float _omin, float _omax){ m_minDistance = _omin; m_maxDistance = m_maxDistance = _omax; }
 	void SetSoundPosition(glm::vec3 _pos);
 	void FastForward(bool _fastForward);
