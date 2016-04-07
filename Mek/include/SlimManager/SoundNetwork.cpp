@@ -74,7 +74,7 @@ void Network::printLinks()
 
 void Network::printNodes()
 	{
-		system("CLS");
+		//system("CLS");
 		// loop to output name of nodes in order they were added to the array
 		for (int i = 0; i < nodeCount; i++)
 		{
@@ -187,11 +187,19 @@ std::vector<path> Network::bellmanFord(std::string _source){
 		path path;
 		path.name = nodeNames[c];
 		path.distance = distances[c];
+		for (int c = 0; c < nodes.size(); c++){
+			if (path.name == nodes[c]->GetRNodeName()){
+				path.node = nodes[c]->GetRNode();
+				break;
+			}
+		}
 		d = distances[c];
 		if (d == 0)
 		 path.volume = 1;
 		else{
-			//std::cout << d << " ";
+			if (d > 5){
+				v = 0.9;
+			}
 			v = (1 / d) * 10;
 			if (v > 1){
 				v = 1;

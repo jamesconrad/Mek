@@ -23,7 +23,7 @@ Target::Target(char* fp, float t, SoundList* _oList)
 	
 	oList = _oList;
 	//oList->PlayAndPauseAll();
-	movingsound = (oList->FindSound("Moving"))->Play();
+	//movingsound = (oList->FindSound("Moving"))->Play();
 	//oList->FindSound("Moving")->Pause();
 	ObjectManager::instance().addObject(go);
 

@@ -1,6 +1,7 @@
 #include "RNodeManager.h"
 
 void RNodeManager::Init(SoundSystem* _system, std::string _filePath, std::string _fileName, PresetManager* _presets){
+	m_setPath = true;
 	m_SoundSystemPtr = _system;
 	m_PManagerPtr = _presets;
 	std::ifstream m_file;
@@ -58,6 +59,11 @@ void RNodeManager::PrintRNodes(){
 void RNodeManager::SetRNodePos(std::string _name, glm::vec3 _pos){
 	FindNode(_name)->SetRNodePos(_pos);
 }
+void RNodeManager::SetDestructAll(bool _destruct){
+	for(int c = 0; c < m_nodes.size(); c++){
+		m_nodes[c]->SetDestruct(_destruct);
+	}
+}
 //get functions
 RNode* RNodeManager::FindNode(std::string _nodeName){
 	for (int c = 0; c < m_nodes.size(); c++){
@@ -79,19 +85,14 @@ void RNodeManager::FindSystemRNode(){
 	}
 }
 void RNodeManager::UpdateRNodes(){
-	RNode* systemRNode = new RNode;
 	for (int c = 0; c < m_nodes.size(); c++){
 		m_nodes[c]->Update();
 		FindSystemRNode();
-		m_nodes[c]->SetLinks(m_nodes);
+		if (m_setPath){
+			m_nodes[c]->SetLinks(m_nodes);
+		}
 	}
-	
-	//if (systemRNode != NULL){
-	//	std::cout << "Found System Node!: " << std::endl;
-	//	systemRNode->PrintNode();
-	//}
-	delete systemRNode;
-	systemRNode = NULL;
+	m_setPath=false;
 }
 void RNodeManager::UpdatePath(){
 	for (int c = 0; c < m_nodes.size(); c++){

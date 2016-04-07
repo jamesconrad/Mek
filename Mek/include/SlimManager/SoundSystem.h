@@ -9,10 +9,10 @@
 #include <string>
 #include <vector>
 
-#include "..\fmod\fmod.hpp"
-#include "..\fmod\fmod_errors.h"
-#include "..\lib\glm\glm.hpp"
 
+#include "fmod\fmod.hpp"
+#include "fmod\fmod_errors.h"
+#include "../../lib/glm\glm.hpp"
 	static void ERRCHECK(FMOD_RESULT m_result)
 	{
 		if (m_result != FMOD_OK)
@@ -51,7 +51,7 @@ public:
 	//set functions
 	inline void SetPosition(glm::vec3 _pos){ m_systemPos = Glm3ToFVEC(_pos); }
 	inline void SetForward(glm::vec3 _for){ m_systemForward = Glm3ToFVEC(_for); }
-	inline void SetUp(glm::vec3 _up){ m_systemPos = Glm3ToFVEC(_up); }
+	inline void SetUp(glm::vec3 _up){ m_systemUp = Glm3ToFVEC(_up); }
 
 	void AddSoundToList(Sound* _sound);
 	
@@ -77,7 +77,6 @@ private:
 	FMOD_VECTOR m_systemVel;
 	FMOD_VECTOR m_systemPos;
 	FMOD_VECTOR m_systemForward;
-	FMOD_VECTOR m_systemUp;
-	
+	FMOD_VECTOR m_systemUp;	
 };
 #endif
