@@ -8,7 +8,7 @@ class Skybox
 {
 public:
 	//easy way of use is Skybox({"Right", "Left", "Top", "Bottom", "Back", "Front"});
-	Skybox(char* fp[6], char* op[6]);
+	Skybox(char* fp[6], char* op[6], char* sp[6]);
 
 	void render(bool ObsucityMap);
 
@@ -18,4 +18,6 @@ private:
 	Bitmap _bmp[6];
 	GLuint _obscureMapID;
 	Bitmap _obscureBMP[6];
+	GLuint _staticMapID;
+	Bitmap _staticBMP[6];
 };

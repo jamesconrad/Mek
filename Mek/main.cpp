@@ -552,8 +552,10 @@ static void DrawSceneShadowPass()
 
 static void DrawScene(int shadowMapTexID)
 {
-
-	sky->render(false);
+	if (gameState == GAME)
+		sky->render(true);
+	else
+		sky->render(false);
 	//	skyObs->render(true);
 	ground->Render(shadowMapTexID);
 	//animatedMechGC->render(); //Source of the glError 1282
@@ -628,13 +630,14 @@ static void Render() {
 	{
 		framebuffeffects->Toon(false);
 		framebuffeffects->GodRays(glm::vec3(-8.f, 9.f, 10.f), model->pos, Camera::getInstance().forward());
+		framebuffeffects->Bloom(4);
 	}
 	else if (gameState == MENU || VICTORYSCREEN)
 	{
 		framebuffeffects->Toon(true);
 	}
 	//if (numpadPress[1])
-	framebuffeffects->Bloom(4);
+
 	//if (numpadPress[2])
 	framebuffeffects->FXAA();
 
@@ -1732,11 +1735,12 @@ void AppMain() {
 	ground = new Terrain();
 	ground->LoadHeightMap("testhm.png", 1, 5, 0.8);
 	ground->InitRender();
-	//char* sb[6] = { "ri.png", "le.png", "to.png", "bo.png", "ba.png", "fr.png" };
-	char* sb[6] = { "SkyBoxTest_Right.png", "SkyBoxTest_Left.png", "SkyBoxTest_Top.png", "SkyBoxTest_Bottom.png", "SkyBoxTest_Back.png", "SkyBoxTest_Front.png" };
+	char* sb[6] = { "SkyBoxRight.png", "SkyBoxRight.png", "SkyBoxTop.png", "SkyBoxBottom.png", "SkyBoxRight.png", "SkyBoxRight.png" };
+	//char* sb[6] = { "SkyBoxTest_Right.png", "SkyBoxTest_Left.png", "SkyBoxTest_Top.png", "SkyBoxTest_Bottom.png", "SkyBoxTest_Back.png", "SkyBoxTest_Front.png" };
 	//char* Osb[6] = { "Right V3", "Left V3.png", "Top V2.png", "Top V3.png", "Back V3.png", "fr-O.png" };
-	char* Osb[6] = { "Right V3.png", "Left V3.png", "Top V2.png", "Top V2.png", "Back V3.png", "Front V3.png" };
-	sky = new Skybox(sb, Osb);
+	char* Osb[6] = { "JustABlackImage.png", "JustABlackImage.png", "JustABlackImage.png", "JustABlackImage.png", "SunBlack.png", "JustABlackImage.png" };
+	char* Ssb[6] = { "SkyBoxTest_Right.png", "SkyBoxTest_Left.png", "SkyBoxTest_Top.png", "SkyBoxTest_Bottom.png", "SkyBoxTest_Back.png", "SkyBoxTest_Front.png" };
+	sky = new Skybox(sb, Osb, Ssb);
 
 	//skyObs = new Skybox(Osb);
 	//MODEL INITS

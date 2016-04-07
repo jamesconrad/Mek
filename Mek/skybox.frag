@@ -8,13 +8,15 @@ layout(location = 3) out vec4 LightObscurers;
 
 uniform samplerCube skybox;
 uniform samplerCube obsbox;
+uniform samplerCube stabox;
+uniform vec3 doStatic;
 
 void main()
 {
 	colour = texture(skybox, uvw);
 
-	Depth = colour;
-	Normal = colour;
+	Normal = texture(stabox, uvw) * doStatic.x;
+	Depth = Normal;
 	LightObscurers = texture(obsbox, uvw);
 	//These two are the correct ones
 	//Depth = vec4(0, 0, 0, 1.0);
