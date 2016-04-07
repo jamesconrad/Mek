@@ -188,8 +188,8 @@ void FreqBand(){
 void InitSounds(){
 	manager->GetSoundManager()->PlayAndPause("Player", "Walk",true);
 
-	manager->GetSoundManager()->FindAndPlay("Background", "two");
-	glm::vec3 pos{ 5.0, 12.0, 14.0 };
+	manager->GetSoundManager()->PlayAndPause("Background", "two",true);
+	glm::vec3 pos{ 3.9,12.8717,12.4732 };
 	manager->GetSoundManager()->FindSound("Background", "two")->SetSoundPosition(pos);
 	manager->GetSoundManager()->FindAndPlay("Load", "one");
 }
@@ -302,6 +302,7 @@ void wonGame()
 }
 void startGame()
 {
+	manager->GetSoundManager()->PlayAndPause("Background", "two", false);
 	manager->GetSoundManager()->PlayAndPause("Background", "one",false);
 	manager->GetSoundManager()->PauseSound("Load", "one",true);
 	gameState = GAME; // GAME
