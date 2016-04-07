@@ -285,7 +285,7 @@ void wonGame()
 		if (survivalScoreTable.size() == 0)
 			survivalScoreTable.push_back(targetsKilled);
 		else
-			survivalScoreTable.insert(scoreTable.begin() + scoreInsertionIndex, targetsKilled);
+			survivalScoreTable.insert(survivalScoreTable.begin() + scoreInsertionIndex, targetsKilled);
 		//survivalScoreTable.push_back(targetsKilled);
 		//sort(survivalScoreTable.begin(), survivalScoreTable.end());
 		//std::reverse(survivalScoreTable.begin(), survivalScoreTable.end());
