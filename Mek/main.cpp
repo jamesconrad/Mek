@@ -569,8 +569,6 @@ static void DrawScene(int shadowMapTexID)
 		}
 	}
 	playerArms->render();
-	gAmmoPlane->set_RenderedTexture(framebuff[4]->GetTextureID(0));
-	gAmmoPlane->render();
 
 	for (unsigned int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
@@ -592,6 +590,8 @@ static void DrawScene(int shadowMapTexID)
 			//targets[i]->cc->renderHitbox();
 		}
 	}
+	gAmmoPlane->set_RenderedTexture(framebuff[4]->GetTextureID(0));
+	gAmmoPlane->render();
 	//gCol->renderHitbox();
 
 	//testmodel->render();
@@ -750,12 +750,12 @@ static void Render() {
 				}
 			}
 		}
-		char amBuff[8];
-		_snprintf_s(amBuff, 8, "AMMO:%i", *currentAmmo);
-		if (*currentAmmo > 0)
-			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, glm::normalize(fontColour), *currentAmmo / 10.f));
-		else if (*currentAmmo == 0)
-			TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, white, noammoInterp));
+		//char amBuff[8];
+		//_snprintf_s(amBuff, 8, "AMMO:%i", *currentAmmo);
+		//if (*currentAmmo > 0)
+		//	TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, glm::normalize(fontColour), *currentAmmo / 10.f));
+		//else if (*currentAmmo == 0)
+		//	TextRendering::getInstance().printText2D(amBuff, 0.3f, -0.8f, 0.1f, glm::mix(red, white, noammoInterp));
 		ShieldBack->render();
 		ShieldFront->cutoffPercent(shieldHealth / maxShieldHealth);
 		ShieldFront->render();
@@ -785,6 +785,17 @@ static void Render() {
 		if (isPlayingSearchAndDestroy)
 		{
 			char victoryAndScore[] = "VICTORY! YOUR SCORE: ";
+			if (enemiesAlive > 0)
+			{
+				victoryAndScore[0] = 'D';
+				victoryAndScore[1] = 'E';
+				victoryAndScore[2] = 'F';
+				victoryAndScore[3] = 'E';
+				victoryAndScore[4] = 'A';
+				victoryAndScore[5] = 'T';
+				victoryAndScore[6] = '.';
+				victoryAndScore[7] = ' ';
+			}
 			TextRendering::getInstance().printText2D(victoryAndScore, -0.9f, 0.5f, 0.07f, fontColour);
 			char scbuff[64];
 			_snprintf_s(scbuff, 64, "%i", score);
@@ -1316,6 +1327,8 @@ static void Update(float secondsElapsed) {
 				}
 				if (targets[i]->go->health < 100)
 					targets[i]->hasSpottedPlayer = true;
+				if (targets[i]->hasSpottedPlayer)
+					targets[i]->go->dir = glm::normalize(model->pos - targets[i]->go->pos);
 
 				//if (shoot)
 				//{
@@ -1343,9 +1356,9 @@ static void Update(float secondsElapsed) {
 				{
 					targets[i]->fireTimer = 0.f;
 					if (targets[i]->firingfromRightBarrel)
-						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 20, 10, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 20, 20, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					else
-						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 20, 10, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 20, 20, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
 					targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
 					targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
 					targets[i]->weaponProjectile->go->SetName("EnemyProjectile");

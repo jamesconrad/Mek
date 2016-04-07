@@ -221,6 +221,7 @@ void main()
 	//vec3 H = normalize(L+V);
 
 	vec3 Albedo = vec3(texture(gColorMap, In.TexCoord.xy));
+	float transparency = texture(gColorMap, In.TexCoord.xy).a;
 
 	vec3 kCool = coolColour + alphaWarm * Albedo;
 	vec3 kWarm = warmColour + alphaCool * Albedo;
@@ -257,9 +258,9 @@ void main()
 	float ShadowCoeff = 1;
 	if (texture2D(shadowMap, FragPosLightSpace.xy).r < FragPosLightSpace.z)
 		ShadowCoeff = 0.25;
-	FragColor = vec4((((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights)) /* ShadowCoeff*/, 1.0);
-	Depth = vec4(vec3(vertDepth), 1.0);
-	Normal = vec4(vec3(In.Normal), 1.0);
-	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0);
+	FragColor = vec4((((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights)) /* ShadowCoeff*/, 1.0) * transparency;
+	Depth = vec4(vec3(vertDepth), 1.0) * transparency;
+	Normal = vec4(vec3(In.Normal), 1.0) * transparency;
+	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0) * transparency;
 	//FragColor = vec4((Albedo + goochColour), 1.0);
 }
