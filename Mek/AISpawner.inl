@@ -35,6 +35,6 @@ inline void TargetSpawner::update(std::vector<Target *> &targets, float deltaTim
 	if (spawnTimer <= 0)
 	{
 		spawnNewTarget(targets);
-		spawnTimer = randomClampedFloat(3.0f, 5.0f);
+		spawnTimer = randomClampedFloat(2.0f, 3.0f);
 	}
 }

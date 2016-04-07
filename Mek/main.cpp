@@ -1400,8 +1400,8 @@ static void Update(float secondsElapsed) {
 		}
 	    if (targetSpawner1.isActive)
         {
-            targetSpawner1.update(targets, isUsingBulletTime ? secondsElapsed : secondsElapsed * timeFactor);
-			targetSpawner2.update(targets, isUsingBulletTime ? secondsElapsed : secondsElapsed * timeFactor);
+			targetSpawner1.update(targets, isUsingBulletTime ? secondsElapsed * timeFactor : secondsElapsed);
+			targetSpawner2.update(targets, isUsingBulletTime ? secondsElapsed * timeFactor : secondsElapsed);
         }
 
 

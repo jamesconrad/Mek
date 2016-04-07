@@ -15,7 +15,7 @@ public:
 public:
 	bool isActive = false;
 	float spawnTimer = 0.0f;
-	float maxSpawnTimer = 5.0f;
+	float maxSpawnTimer = 3.0f;
 	glm::vec3 position = glm::vec3(0.f, 0.f, -47.f * 0.1f);
 
 private:
