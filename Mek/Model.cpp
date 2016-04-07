@@ -184,6 +184,8 @@ void Model::loadScene(aiScene* scene)
 			//average the tangent and bitangent
 			tangents[j + offset] /= numAffectors[j];
 			bitangents[j + offset] /= numAffectors[j];
+			tangents[j + offset] = glm::normalize(tangents[j + offset]);
+			bitangents[j + offset] = glm::normalize(bitangents[j + offset]);
 //END TANGENT CALCULATION-------------------------------------------------------------------
 
 			//For each vertex

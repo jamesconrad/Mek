@@ -1792,6 +1792,7 @@ void AppMain() {
 			Model *cModel = new Model();
 			ComponentCollision *cCollision = new ComponentCollision();
 			Component *c;
+			float groundMod = 0;
 
 			if (i == 0)
 			{
@@ -1964,8 +1965,10 @@ void AppMain() {
 				gObject->SetName("Wall");
 				cModel->loadModel("models/wallz2.dae");
 
-				gObject->scale = glm::vec3(5.0);
-				gObject->pos = glm::vec3(84.727f, 0, -154.085f);
+				gObject->scale = glm::vec3(0.30,1,0.30);
+				//gObject->pos = glm::vec3(84.727f, 0, -154.085f);
+				gObject->pos = glm::vec3(0, 0, 0);
+				groundMod = -5;
 			}
 			else if (i == 21)
 			{
@@ -2021,7 +2024,7 @@ void AppMain() {
 			}
 
 			gObject->pos /= 10.f;
-			gObject->pos.y = ground->HeightAtLocation(gObject->pos);
+			gObject->pos.y = ground->HeightAtLocation(gObject->pos) + groundMod;
 
 			cModel->setOwner(gObject);
 			c = cModel;
