@@ -79,6 +79,7 @@ int nameOffset[3] = { 0, 0, 0 };
 bool isPlayingSearchAndDestroy = true;
 Interpolation camInterp;
 glm::vec3 fontColour = glm::vec3(117, 176, 221);
+glm::vec3 ammoColour = glm::vec3(0.f, 0.f, 1.f);
 glm::vec3 white = glm::vec3(1.0, 1.0, 1.0);
 glm::vec3 red = glm::vec3(1.0f, 0, 0);
 glm::vec3 menuItem2Colour = glm::vec3(0.68, 0.91, 1.0);
@@ -598,15 +599,17 @@ static void DrawScene(int shadowMapTexID)
 // draws a single frame
 static void Render() {
 	framebuff[4]->Bind(); // rendering the ammo texture
+	glViewport(0, 0, 256, 256);
 	glClearColor(0, 1, 0, 0.0); // green
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glDisable(GL_DEPTH_TEST);
 	char amBuff2[8];
 	_snprintf_s(amBuff2, 8, "%i", *currentAmmo);
-	TextRendering::getInstance().printText2D(amBuff2, 0.0f, 0.0f, 0.001f, fontColour);
-
+	TextRendering::getInstance().printText2D(amBuff2, *currentAmmo > 9 ? -0.9f : -0.2f, -0.8f, 1.2f, ammoColour);
+	glEnable(GL_DEPTH_TEST);
 	framebuff[0]->Bind();
-
+	glViewport(0, 0, SCREEN_SIZE.x, SCREEN_SIZE.y);
 
 
 	// clear everything
