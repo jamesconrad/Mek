@@ -29,7 +29,7 @@ inline void TargetSpawner::spawnNewTarget(std::vector<Target *> &targets)
 	}
 }
 
-inline void TargetSpawner::update(std::vector<Target *> &targets, float &deltaTime)
+inline void TargetSpawner::update(std::vector<Target *> &targets, float deltaTime)
 {
 	spawnTimer -= deltaTime;
 	if (spawnTimer <= 0)

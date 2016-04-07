@@ -257,10 +257,10 @@ void wonGame()
 	{
 		for (scoreInsertionIndex = 0; scoreInsertionIndex < scoreTable.size(); scoreInsertionIndex++)
 		{
-			if (scoreTable[scoreInsertionIndex] > score)
+			if (scoreTable[scoreInsertionIndex] < score)
 				break;
 		}
-		if (scoreInsertionIndex == 0)
+		if (scoreTable.size() == 0)
 			scoreTable.push_back(score);
 		else
 			scoreTable.insert(scoreTable.begin() + scoreInsertionIndex, score);
@@ -272,10 +272,10 @@ void wonGame()
 	{
 		for (scoreInsertionIndex = 0; scoreInsertionIndex < survivalScoreTable.size(); scoreInsertionIndex++)
 		{
-			if (scoreTable[scoreInsertionIndex] > targetsKilled)
+			if (scoreTable[scoreInsertionIndex] < targetsKilled)
 				break;
 		}
-		if (scoreInsertionIndex == 0)
+		if (survivalScoreTable.size() == 0)
 			survivalScoreTable.push_back(targetsKilled);
 		else
 			survivalScoreTable.insert(scoreTable.begin() + scoreInsertionIndex, targetsKilled);
@@ -1371,8 +1371,8 @@ static void Update(float secondsElapsed) {
 		}
 	    if (targetSpawner1.isActive)
         {
-            targetSpawner1.update(targets, secondsElapsed);
-			targetSpawner2.update(targets, secondsElapsed);
+            targetSpawner1.update(targets, isUsingBulletTime ? secondsElapsed : secondsElapsed * timeFactor);
+			targetSpawner2.update(targets, isUsingBulletTime ? secondsElapsed : secondsElapsed * timeFactor);
         }
 
 

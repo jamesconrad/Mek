@@ -10,7 +10,7 @@ public:
 	~TargetSpawner(){};
 	inline void activate();
 	inline void deactivate();
-	inline void update(std::vector<Target *> &targetsVector, float &deltaTime);
+	inline void update(std::vector<Target *> &targetsVector, float deltaTime);
 
 public:
 	bool isActive = false;
