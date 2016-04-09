@@ -215,7 +215,7 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 }
 // constants
 //const glm::vec2 SCREEN_SIZE(1920, 1080);
-const glm::vec2 SCREEN_SIZE(1280, 800);
+const glm::vec2 SCREEN_SIZE(1920, 1080);
 
 // globals
 GLFWwindow* gWindow = NULL;
@@ -279,7 +279,7 @@ void wonGame()
 	{
 		for (scoreInsertionIndex = 0; scoreInsertionIndex < survivalScoreTable.size(); scoreInsertionIndex++)
 		{
-			if (scoreTable[scoreInsertionIndex] < targetsKilled)
+			if (survivalScoreTable[scoreInsertionIndex] < targetsKilled)
 				break;
 		}
 		if (survivalScoreTable.size() == 0)
@@ -796,7 +796,7 @@ static void Render() {
 		if (isPlayingSearchAndDestroy)
 		{
 			char victoryAndScore[] = "VICTORY! YOUR SCORE: ";
-			if (enemiesAlive > 0)
+			if (enemiesAlive > 1)
 			{
 				victoryAndScore[0] = 'D';
 				victoryAndScore[1] = 'E';
@@ -807,18 +807,18 @@ static void Render() {
 				victoryAndScore[6] = '.';
 				victoryAndScore[7] = ' ';
 			}
-			TextRendering::getInstance().printText2D(victoryAndScore, -0.9f, 0.5f, 0.07f, fontColour);
+			TextRendering::getInstance().printText2D(victoryAndScore, -0.9f, 0.5f, 0.07f, menuItem1Colour, red);
 			char scbuff[64];
 			_snprintf_s(scbuff, 64, "%i", score);
-			TextRendering::getInstance().printText2D(scbuff, 0.5f, 0.5f, 0.07f, fontColour);
+			TextRendering::getInstance().printText2D(scbuff, 0.5f, 0.5f, 0.07f, menuItem1Colour, red);
 		}
 		else
 		{
 			char victoryAndScore[] = "TARGETS KILLED: ";
-			TextRendering::getInstance().printText2D(victoryAndScore, -0.6f, 0.5f, 0.07f, fontColour);
+			TextRendering::getInstance().printText2D(victoryAndScore, -0.6f, 0.5f, 0.07f, menuItem1Colour, red);
 			char scbuff[64];
 			_snprintf_s(scbuff, 64, "%i", targetsKilled);
-			TextRendering::getInstance().printText2D(scbuff, 0.55f, 0.5f, 0.07f, fontColour);
+			TextRendering::getInstance().printText2D(scbuff, 0.55f, 0.5f, 0.07f, menuItem1Colour, red);
 		}
 		char name[4];
 		name[0] = 'A' + nameOffset[0];
@@ -839,7 +839,7 @@ static void Render() {
 		default:
 			break;
 		}
-		TextRendering::getInstance().printText2D(name, -0.4, 0.0f, 0.333f, fontColour);
+		TextRendering::getInstance().printText2D(name, -0.4, 0.0f, 0.333f, menuItem1Colour, red);
 	}
 	glEnable(GL_DEPTH_TEST);
 
@@ -892,6 +892,9 @@ static void Update(float secondsElapsed) {
 			lInput.x = -1;
 		else if (glfwGetKey(gWindow, 'D'))
 			lInput.x = 1;
+
+		if (glfwGetKey(gWindow, 'Q'))
+			shieldHealth = maxShieldHealth;
 
 		IsDashing = false;
 		if (glfwGetKey(gWindow, ' ') && dashingHitZero == false && gameState == GAME)
@@ -1817,7 +1820,7 @@ void AppMain() {
 	//PROPER INIT
 	for (int i = 0; i < 24; i++)
 	{
-		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12 && i != 19)
+		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12 && i != 22)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
 			Model *cModel = new Model();
@@ -1984,12 +1987,12 @@ void AppMain() {
 			else if (i == 19)
 			{
 				gObject->SetName("Fountain");
-				cModel->loadModel("models/MechWalk.dae");
+				cModel->loadModel("models/Fountain.dae");
 
 				gObject->scale = glm::vec3(1.5);
 				gObject->pos = glm::vec3(0, 0, 0);
-				cModel->setActiveAnimation(cModel->getScene()->mAnimations[0]);
-				cModel->animate(0.5);
+				//cModel->setActiveAnimation(cModel->getScene()->mAnimations[0]);
+				//cModel->animate(0.5);
 			}
 			else if (i == 20)
 			{

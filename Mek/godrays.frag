@@ -13,11 +13,11 @@ uniform vec3 lightPositionInWorld;
 uniform vec3 playerPositionInWorld;
 uniform vec3 cameraForwardVector;
 
-float exposure = 0.017;
-float decay = 0.985;
-float density = 1.7;
-float weight = 3.0;
-int numSamples = 100;
+float exposure = 0.008;
+float decay = 0.99;
+float density = 1.0;
+float weight = 5.0;
+int numSamples = 50;
 
 in vec2 uv;
 
@@ -670,6 +670,6 @@ void main()
 
 	colour.rgb *= exposure;
 	pToLDotF = max(pToLDotF, 0);
-	colour.rgb = colour.rgb * pToLDotF + texture2D(rgbTexture, uv.xy).rgb; 
+	//colour.rgb = colour.rgb * pToLDotF + texture2D(rgbTexture, uv.xy).rgb; 
 	colour.a = 1.0;
 }

@@ -260,7 +260,7 @@ void main()
 		ShadowCoeff = 0.25;
 	FragColor = vec4((((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights)) /* ShadowCoeff*/, 1.0) * transparency;
 	Depth = vec4(vec3(vertDepth), 1.0) * transparency;
-	Normal = vec4(vec3(In.Normal), 1.0) * transparency;
+	Normal = vec4(vec3(In.Normal * 0.5 + 0.5), 1.0) * transparency;
 	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0) * transparency;
 	//FragColor = vec4((Albedo + goochColour), 1.0);
 }

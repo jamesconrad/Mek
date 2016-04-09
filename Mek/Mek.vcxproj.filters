@@ -278,6 +278,9 @@
     <ClInclude Include="SaveFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleEmmiter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragment-shader.frag">
@@ -374,6 +377,9 @@
     </None>
     <None Include="AISpawner.inl">
       <Filter>Inline Files</Filter>
+    </None>
+    <None Include="AddTwoTextures.frag">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
 </Project>

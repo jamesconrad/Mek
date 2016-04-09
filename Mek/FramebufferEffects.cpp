@@ -61,6 +61,9 @@ void FramebufferEffects::LoadGodRayShaders()
 {
 	Program::getInstance().createShader("godrays", GL_VERTEX_SHADER, "shaders/pass.vert");
 	Program::getInstance().createShader("godrays", GL_FRAGMENT_SHADER, "shaders/godrays.frag");
+
+	Program::getInstance().createShader("addTwo", GL_VERTEX_SHADER, "shaders/pass.vert");
+	Program::getInstance().createShader("addTwo", GL_FRAGMENT_SHADER, "shaders/AddTwoTextures.frag");
 }
 
 void FramebufferEffects::Bloom(unsigned int numGaussPasses)
@@ -164,7 +167,8 @@ void FramebufferEffects::Toon(bool doCraziness)
 
 void FramebufferEffects::GodRays(glm::vec3 &sunLocation, glm::vec3 &playerLocation, glm::vec3 &cameraForward)
 {
-	_wb[2]->Bind();
+	_wb[0]->Bind();
+	glViewport(0, 0, _wb[0]->Width(), _wb[0]->Height());
 	Program::getInstance().bind("godrays");
 	_fb->PassTextureToPreBoundShader("tex0", 3);
 	_fb->PassTextureToPreBoundShader("rgbTexture", 0);
@@ -176,11 +180,35 @@ void FramebufferEffects::GodRays(glm::vec3 &sunLocation, glm::vec3 &playerLocati
 	Program::getInstance().setUniform("lightPositionInWorld", sunLocation + glm::vec3(-1500, 500, 2300));
 	Program::getInstance().setUniform("playerPositionInWorld", playerLocation);
 	Program::getInstance().setUniform("cameraForwardVector", cameraForward);
-	_wb[2]->RenderQuad();
+	_wb[0]->RenderQuad();
 
 	glm::mat4 thing = Camera::getInstance().projection() * Camera::getInstance().view();
 	Program::getInstance().setUniform("mvp", thing);
+
+	for (int i = 0; i < 2; i++)
+	{
+		_wb[1]->Bind();
+		//_wb[1]->Clear();
+		Program::getInstance().bind("gblurH");
+		Program::getInstance().setUniform("pixsize", pixsizeX);
+		_wb[0]->PassTextureToPreBoundShader("tex", 0);
+		_wb[1]->RenderQuad();
+
+		_wb[0]->Bind();
+		//_wb[0]->Clear();
+		Program::getInstance().bind("gblurV");
+		Program::getInstance().setUniform("pixsize", pixsizeY);
+		_wb[1]->PassTextureToPreBoundShader("tex", 0);
+		_wb[0]->RenderQuad();
+	}
 	
+	_wb[2]->Bind();
+	glViewport(0, 0, _wb[2]->Width(), _wb[2]->Height());
+	Program::getInstance().bind("addTwo");
+	_wb[0]->PassTextureToPreBoundShader("tex0", 0);
+	_fb->PassTextureToPreBoundShader("tex1", 0);
+	_wb[2]->RenderQuad();
+
 	_fb->Bind();
 	Program::getInstance().bind("pass");
 	_wb[2]->PassTextureToPreBoundShader("tex0", 0);
