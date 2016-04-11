@@ -570,7 +570,6 @@ static void DrawScene(int shadowMapTexID)
 	for (unsigned int i = 0, s = goVec.size(); i < s; i++)
 	{
 		Model* cg = static_cast<Model*>(goVec[i]->GetComponent(GRAPHICS));
-		cg->setShadowMapID(shadowMapTexID);
 		cg->render();
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
@@ -1724,7 +1723,7 @@ void AppMain() {
 	framebuff[2]->CreateColorTexture(1, SCREEN_SIZE.x / 2, SCREEN_SIZE.y / 2);
 	framebuff[3] = new Framebuffer();
 	framebuff[3]->CreateDepthTexture(SCREEN_SIZE.x, SCREEN_SIZE.y);
-	framebuff[3]->CreateColorTexture(4, SCREEN_SIZE.x, SCREEN_SIZE.y);
+	framebuff[3]->CreateColorTexture(6, SCREEN_SIZE.x, SCREEN_SIZE.y);
 	framebuff[4] = new Framebuffer();
 	framebuff[4]->CreateDepthTexture(256, 256);
 	framebuff[4]->CreateColorTexture(1, 256, 256);
@@ -1734,6 +1733,8 @@ void AppMain() {
 	framebuffeffects->loadToonShaders();
 	framebuffeffects->LoadShadowMapShaders();
 	framebuffeffects->LoadGodRayShaders();
+
+	Model::setShadowMapFramebuffer(framebuff[3]);
 
 	// setup Camera::getInstance()
 	Camera::getInstance().setPosition(glm::vec3(1050, 50, 0));

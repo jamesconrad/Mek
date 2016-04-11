@@ -1,6 +1,7 @@
 #include "Terrain.h"
 #include "Program.h"
 #include "lib\glm\gtc\matrix_transform.hpp"
+#include "Model.h"
 
 #include "RayVsTriangle.h"
 
@@ -143,19 +144,22 @@ void Terrain::Render(int shadowMapID)
 	//Program::getInstance().setUniform("u", u);
 	//Program::getInstance().setUniform("d", d);
 	glBindVertexArray(_vao);
-	
-	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
-	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
-	glm::mat4 depthMVP = depthProj * depthView;
-	glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-		);
-	depthMVP = biasMatrix*depthMVP;
-	Program::getInstance().setUniform("depthMVP", depthMVP);
+
+	float cascadeClip[] = { Camera::getInstance().nearPlane(), 256, 512, Camera::getInstance().farPlane() };
+	printf("Clip: ");
+	for (int i = 0; i < 3; i++)
+	{
+		glm::mat4 projection = Camera::getInstance().projection();
+		glm::vec4 view = glm::vec4(0, 0, cascadeClip[i + 1], 1);
+		glm::vec4 clip = projection * view;
+		std::string loc("clipEnd");
+		loc += '0' + i;
+		Program::getInstance().setUniform((char*)loc.c_str(), clip.z);
+		printf("%f, ", clip.z);
+	}
+	printf("\n");
+
+	Program::getInstance().setUniformMatrix4("depthMVP", &Model::shadowOrthoMatrices[0][0][0], 3);
 
 	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, _textures[0]->object());
@@ -170,8 +174,14 @@ void Terrain::Render(int shadowMapID)
 	glBindTexture(GL_TEXTURE_2D, _textures[3]->object());
 	Program::getInstance().setUniform("terrainG3", 3);
 	glActiveTexture(GL_TEXTURE0 + 4);
-	glBindTexture(GL_TEXTURE_2D, shadowMapID);
-	Program::getInstance().setUniform("shadowMap", 4);
+	glBindTexture(GL_TEXTURE_2D, Model::shadowMapFramebuffer->GetTextureID(0));
+	Program::getInstance().setUniform("shadowMap0", 4);
+	glActiveTexture(GL_TEXTURE0 + 5);
+	glBindTexture(GL_TEXTURE_2D, Model::shadowMapFramebuffer->GetTextureID(4));
+	Program::getInstance().setUniform("shadowMap1", 5);
+	glActiveTexture(GL_TEXTURE0 + 6);
+	glBindTexture(GL_TEXTURE_2D, Model::shadowMapFramebuffer->GetTextureID(5));
+	Program::getInstance().setUniform("shadowMap2", 6);
 
 	glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);

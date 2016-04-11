@@ -1,7 +1,8 @@
 #pragma once
 // engine includes
-#include "GameObject.h"
 #include "Render.h"
+#include "GameObject.h"
+#include "Framebuffer.h"
 
 // assimp includes
 #include "include\assimp\Importer.hpp"
@@ -54,7 +55,8 @@ public:
 	void loadScene(aiScene* scene);
 	void render();
 	void renderShadowPass();
-	void setShadowMapID(int id);
+	static void setShadowMapFramebuffer(Framebuffer* fb); 
+	static void calcShadowOrthoMatrices();
 
 	void setActiveAnimation(aiAnimation* animation);
 	void setActiveAnimation(aiAnimation* anim1, aiAnimation* anim2, float factor);
@@ -67,7 +69,9 @@ public:
 
 	void set_RenderedTexture(GLuint _passedTexture);
 
-	
+
+	static Framebuffer* shadowMapFramebuffer;
+	static glm::mat4 shadowOrthoMatrices[3];
 private:
 	struct Entry
 	{
@@ -112,9 +116,7 @@ private:
 	bool _animBlending;
 	aiAnimation* _activeAnim[3];
 	float _blendFactor;
-
-	static int shadowMapTexID;
-
+	
 	bool _animated;
 	Render* _render;
 

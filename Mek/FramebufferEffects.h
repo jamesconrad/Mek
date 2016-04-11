@@ -29,6 +29,7 @@ public:
 private:
 	Framebuffer* _fb;
 	Framebuffer* _wb[4];
+	Framebuffer* _sb;
 	glm::vec2 _size;
 	float pixsizeX;
 	float pixsizeY;

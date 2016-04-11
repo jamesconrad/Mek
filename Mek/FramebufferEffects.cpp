@@ -1,4 +1,5 @@
 #include "FramebufferEffects.h"
+#include "Model.h"
 
 FramebufferEffects::FramebufferEffects(Framebuffer* fb, Framebuffer* wb0, Framebuffer* wb1)
 {
@@ -120,6 +121,7 @@ void FramebufferEffects::PrepShadowMap()
 	glClearColor(1, 1, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
+	Model::calcShadowOrthoMatrices();
 	//glViewport(0, 0, _size.x, _size.y);
 }
 

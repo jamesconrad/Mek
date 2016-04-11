@@ -24,10 +24,16 @@ uniform int gNumPointLights;
 uniform int gNumSpotLights;
 uniform sampler2D gColorMap;
 uniform sampler2D normalMap;
-uniform sampler2D shadowMap;
 uniform vec3 gEyeWorldPos;
 uniform float gMatSpecularIntensity;
 uniform float gSpecularPower;
+
+uniform mat4 depthMVP[3];
+
+uniform sampler2D shadowMap0;
+uniform sampler2D shadowMap1;
+uniform sampler2D shadowMap2;
+
 //Uniforms had to be included below.
 //uniform PointLight gPointLights[MAX_POINT_LIGHTS]; //a ball of light
 //uniform SpotLight gSpotLights[MAX_SPOT_LIGHTS]; //a flashlight
@@ -256,7 +262,7 @@ void main()
 	RimHighlights += clamp(dot(In.Normal,WorldUp), 0.0, 1.0) * RimFresnel * ConstantAmbient; /** (ConstantAmbient * normalize(gEyeWorldPos - In.WorldPos));*/
 	
 	float ShadowCoeff = 1;
-	if (texture2D(shadowMap, FragPosLightSpace.xy).r < FragPosLightSpace.z)
+	if (texture2D(shadowMap0, FragPosLightSpace.xy).r < FragPosLightSpace.z)
 		ShadowCoeff = 0.25;
 	FragColor = vec4((((goochColour) * (Lambert + ConstantAmbient)) + (SpecularHighlights + RimHighlights)) /* ShadowCoeff*/, 1.0) * transparency;
 	Depth = vec4(vec3(vertDepth), 1.0) * transparency;

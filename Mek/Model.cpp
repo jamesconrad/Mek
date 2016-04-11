@@ -8,7 +8,8 @@
 
 #define BUFFER_OFFSET(i) (char*)0 + (i)
 
-int Model::shadowMapTexID = 0;
+Framebuffer* Model::shadowMapFramebuffer = 0;
+glm::mat4 Model::shadowOrthoMatrices[3];
 
 void Model::update()
 {
@@ -27,9 +28,9 @@ void CopyaiMat(const aiMatrix4x4& from, glm::mat4 &to)
 	to[2][3] = from.d3; to[3][3] = from.d4;
 }
 
-void Model::setShadowMapID(int id)
+void Model::setShadowMapFramebuffer(Framebuffer* fb)
 {
-	shadowMapTexID = id;
+	shadowMapFramebuffer = fb;
 }
 
 const aiScene* Model::getScene()
@@ -593,6 +594,54 @@ glm::mat4 rotationMatrix(glm::vec3 &dir, glm::vec3 &baseDir, glm::vec3 &right)
 	return rotation;
 }
 
+void Model::calcShadowOrthoMatrices()
+{
+	glm::mat4 inverseCameraView = glm::inverse(Camera::getInstance().view());
+	glm::mat4 lightMatrix = glm::lookAt(glm::vec3(0), glm::normalize(glm::vec3(-1358, 409, 2310)), glm::vec3(0, 1, 0));
+	const float PI = 3.14159;
+	float aspectRatio = Camera::getInstance().viewportAspectRatio();
+	float fov = Camera::getInstance().fieldOfView();
+	float tanfov = tanf(fov / 2) * (PI/180);
+	float tanviewfov = tanf((fov * aspectRatio) / 2) * (PI/180);
+
+	float cascadeClip[] = { Camera::getInstance().nearPlane(), 64, 256, Camera::getInstance().farPlane() };
+
+	for (int i = 0; i < 3; i++)//3 because thats how many cascades we have
+	{
+		float xn = cascadeClip[i] * tanfov;
+		float xf = cascadeClip[i + 1] * tanfov;
+		float yn = cascadeClip[i] * tanviewfov;
+		float yf = cascadeClip[i + 1] * tanviewfov;
+		glm::vec4 corners[] = {
+			//near
+			glm::vec4(xn,yn,cascadeClip[i],1),
+			glm::vec4(-xn,yn,cascadeClip[i],1),
+			glm::vec4(xn,-yn,cascadeClip[i],1),
+			glm::vec4(-xn,-yn,cascadeClip[i],1),
+			//far
+			glm::vec4(xf,yf,cascadeClip[i + 1],1),
+			glm::vec4(-xf,yf,cascadeClip[i + 1],1),
+			glm::vec4(xf,-yf,cascadeClip[i + 1],1),
+			glm::vec4(-xf,-yf,cascadeClip[i + 1],1) };
+		
+		glm::vec3 min(99999999999); //very large number to gaurentee the first value will be less than this
+		glm::vec3 max(-99999999999); //same thing as above just opposite
+		for (int j = 0; j < 8; j++)//for each corner
+		{
+			glm::vec4 worldPos = inverseCameraView * corners[j];//view -> world
+			corners[j] = lightMatrix * worldPos;//world -> light
+			corners[j].x < min.x ? min.x = corners[j].x : min.x;
+			corners[j].x > max.x ? max.x = corners[j].x : max.x;
+			corners[j].y < min.y ? min.y = corners[j].y : min.y;
+			corners[j].y > max.y ? max.y = corners[j].y : max.y;
+			corners[j].z < min.z ? min.z = corners[j].z : min.z;
+			corners[j].z > max.z ? max.z = corners[j].z : max.z;
+		}
+
+		shadowOrthoMatrices[i] = glm::ortho(min.x, max.x, min.y, max.y, min.z, max.z);
+	}
+}
+
 void Model::render()
 {
 	glm::mat4 W;// = _transform;
@@ -625,24 +674,38 @@ void Model::render()
 
 	int nt = _render->numTextures() + 1;
 	glActiveTexture(GL_TEXTURE0 + nt);
-	glBindTexture(GL_TEXTURE_2D, shadowMapTexID);
-	Program::getInstance().setUniform("shadowMap", nt);
-	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
+	glBindTexture(GL_TEXTURE_2D, shadowMapFramebuffer->GetTextureID(0));
+	glActiveTexture(GL_TEXTURE0 + nt + 1);
+	glBindTexture(GL_TEXTURE_2D, shadowMapFramebuffer->GetTextureID(4));
+	glActiveTexture(GL_TEXTURE0 + nt + 2);
+	glBindTexture(GL_TEXTURE_2D, shadowMapFramebuffer->GetTextureID(5));
+	Program::getInstance().setUniform("shadowMap0", nt);
+	Program::getInstance().setUniform("shadowMap1", nt + 1);
+	Program::getInstance().setUniform("shadowMap2", nt + 2);
+	//glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
+	//
+	//// Compute the MVP matrix from the light's point of view
+	//glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
+	//glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
+	//glm::mat4 depthMVP = depthProj * depthView;
+	//glm::mat4 biasMatrix(
+	//	0.5, 0.0, 0.0, 0.0,
+	//	0.0, 0.5, 0.0, 0.0,
+	//	0.0, 0.0, 0.5, 0.0,
+	//	0.5, 0.5, 0.5, 1.0
+	//	);
+	//depthMVP = biasMatrix*depthMVP;
 
-	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
-	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
-	glm::mat4 depthMVP = depthProj * depthView;
-	glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-		);
-	depthMVP = biasMatrix*depthMVP;
-	Program::getInstance().setUniform("depthMVP", depthMVP);
+	glm::mat4 depthModel;
+	//depthModel = glm::translate(depthModel, _owner->pos);
+	//depthModel *= rotationMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
+	//depthModel = glm::scale(depthModel, 0.1f * _owner->scale);
 
-	Program::getInstance().setUniform("depthMVP", depthMVP);
+	glm::mat4 LVP[3];
+	for (int i = 0; i < 3; i++)
+		LVP[i] = depthModel * shadowOrthoMatrices[i];
+
+	Program::getInstance().setUniformMatrix4("depthMVP", &LVP[0][0][0], 3);
 
 	for (int i = 0, s = _entries.size(); i < s; i++)
 	{
@@ -658,20 +721,19 @@ void Model::renderShadowPass()
 	//	Program::getInstance().setUniformMatrix4("BoneTransform", &_finalFrameTransform[0][0][0], MAX_BONES);
 	//}
 
-	glm::vec3 lightInvDir = glm::vec3(0.0f, -1.0f, -1.0f) * -1.f;
-
-	// Compute the MVP matrix from the light's point of view
-	glm::mat4 depthProj = glm::ortho<float>(-32, 32, -32, 32, -8, 8);
-	glm::mat4 depthView = glm::lookAt(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0), glm::vec3(0, 1, 0));
-
 	glm::mat4 depthModel;
 	depthModel = glm::translate(depthModel, _owner->pos);
-	//depthModel = glm::rotate(depthModel, _owner->rot);
+	depthModel *= rotationMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
 	depthModel = glm::scale(depthModel, 0.1f * _owner->scale);
-	glm::mat4 depthMVP = depthProj * depthView * depthModel;
 
+	glm::mat4 LVP[3];
+	for (int i = 0; i < 3; i++)
+		LVP[i] = shadowOrthoMatrices[i] * depthModel;
 
-	Program::getInstance().setUniform("LVP", depthMVP);
+	//Program::getInstance().setUniformMatrix4("LVP", &LVP[0][0][0], 3);
+	Program::getInstance().setUniform("LVP0", LVP[0]);
+	Program::getInstance().setUniform("LVP1", LVP[1]);
+	Program::getInstance().setUniform("LVP2", LVP[2]);
 
 	for (int i = 0, s = _entries.size(); i < s; i++)
 	{

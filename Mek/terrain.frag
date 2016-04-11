@@ -4,7 +4,12 @@ uniform sampler2D terrainG0;
 uniform sampler2D terrainG1;
 uniform sampler2D terrainG2;
 uniform sampler2D terrainG3;
-uniform sampler2D shadowMap;
+uniform sampler2D shadowMap0;
+uniform sampler2D shadowMap1;
+uniform sampler2D shadowMap2;
+uniform float clipEnd0;
+uniform float clipEnd1;
+uniform float clipEnd2;
 //uniform vec3 u;
 //uniform vec3 d;
 
@@ -17,8 +22,8 @@ in vec3 p;
 in vec3 n;
 in float h;
 
-in vec4 fpls;
-
+in vec4 fpls[3];
+in float clipZ;
 in float vertDepth;
 
 void main()
@@ -70,9 +75,52 @@ void main()
 	//if (p.x > d.x && p.x < u.x)
 	//	if (p.z > u.z && p.z < d.z)
 	//		colour.r = 1;
-	
-	if (texture2D(shadowMap, fpls.xy).r < fpls.z)
-		colour.xyz = colour.xyz * 0.25;
+	int cascade;
+	if (clipZ < clipEnd0)
+	{
+		cascade = 0;
+		vec3 proj = fpls[cascade].xyz / fpls[cascade].w;
+		uv.x = 0.5 * proj.x + 0.5; //done with uv above so lets steal it
+		uv.y = 0.5 * proj.y + 0.5;
+		float z = 0.5 * proj.z + 0.5;
+
+		float depth = texture2D(shadowMap0, fpls[cascade].xy).r;
+
+		if (depth < z + 0.00001)
+			colour.xyz = colour.xyz * 0.25;
+		colour.r += 0.5;
+	}
+	else if (clipZ < clipEnd1)
+	{
+		cascade = 1;
+		vec3 proj = fpls[cascade].xyz / fpls[cascade].w;
+		uv.x = 0.5 * proj.x + 0.5; //done with uv above so lets steal it
+		uv.y = 0.5 * proj.y + 0.5;
+		float z = 0.5 * proj.z + 0.5;
+
+		float depth = texture2D(shadowMap0, fpls[cascade].xy).r;
+
+		if (depth < z + 0.00001)
+			colour.xyz = colour.xyz * 0.25;
+	}
+	else if (clipZ < clipEnd2)
+	{
+		cascade = 2;
+		vec3 proj = fpls[cascade].xyz / fpls[cascade].w;
+		uv.x = 0.5 * proj.x + 0.5; //done with uv above so lets steal it
+		uv.y = 0.5 * proj.y + 0.5;
+		float z = 0.5 * proj.z + 0.5;
+
+		float depth = texture2D(shadowMap0, fpls[cascade].xy).r;
+
+		if (depth < z + 0.00001)
+			colour.xyz = colour.xyz * 0.25;
+		colour.b += 0.5;
+	}
+	else
+	{
+		colour.xyz = vec3(1,0,0);
+	}
 
 	depth = vec4(vec3(0), 1.0);
 	normals = vec4(vec3(n), 1.0);
