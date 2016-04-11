@@ -666,7 +666,7 @@ void Model::renderShadowPass()
 
 	glm::mat4 depthModel;
 	depthModel = glm::translate(depthModel, _owner->pos);
-	//depthModel = glm::rotate(depthModel, _owner->rot);
+	depthModel *= rotationMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
 	depthModel = glm::scale(depthModel, 0.1f * _owner->scale);
 	glm::mat4 depthMVP = depthProj * depthView * depthModel;
 
