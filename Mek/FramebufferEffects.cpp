@@ -20,8 +20,8 @@ FramebufferEffects::FramebufferEffects(Framebuffer* fbwbwb[5])
 	_wb[3] = fbwbwb[4];
 
 	_size = glm::vec2(_wb[0]->Width(), _wb[0]->Height());
-	pixsizeX = 1.f / (_size.x / 2.f);
-	pixsizeY = 1.f / (_size.y / 2.f);
+	pixsizeX = 1.f / (_size.x / 4.f);
+	pixsizeY = 1.f / (_size.y / 4.f);
 }
 
 void FramebufferEffects::LoadBloomShaders()

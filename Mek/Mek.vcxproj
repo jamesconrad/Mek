@@ -83,7 +83,6 @@
     <ClInclude Include="MenuSelectionVariables.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="NavMesh.h" />
-    <ClInclude Include="ParticleEmmiter.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="RayVsTriangle.h" />

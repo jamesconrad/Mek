@@ -278,9 +278,6 @@
     <ClInclude Include="SaveFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleEmmiter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragment-shader.frag">

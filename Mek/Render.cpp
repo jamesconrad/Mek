@@ -34,12 +34,13 @@ int Render::numTextures()
 void Render::createVBOs(VBOData* data, unsigned int num)
 {
 	glBindVertexArray(_vao);
+	_vbo = new unsigned int[num];
 	glGenBuffers(num, _vbo);
 	_numvbo = num;
 
 	for (int i = 0; i < num; i++)
 	{
-		if (data[i].target != GL_ELEMENT_ARRAY_BUFFER)
+		if (data[i].target == GL_ELEMENT_ARRAY_BUFFER)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vbo[i]);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, data[i].elementSize * data[i].numElements, data[i].data, GL_STATIC_DRAW);

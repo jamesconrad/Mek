@@ -1768,7 +1768,7 @@ void AppMain() {
 	char* sb[6] = { "SkyBoxRight.png", "SkyBoxRight.png", "SkyBoxTop.png", "SkyBoxBottom.png", "SkyBoxRight.png", "SkyBoxRight.png" };
 	//char* sb[6] = { "SkyBoxTest_Right.png", "SkyBoxTest_Left.png", "SkyBoxTest_Top.png", "SkyBoxTest_Bottom.png", "SkyBoxTest_Back.png", "SkyBoxTest_Front.png" };
 	//char* Osb[6] = { "Right V3", "Left V3.png", "Top V2.png", "Top V3.png", "Back V3.png", "fr-O.png" };
-	char* Osb[6] = { "JustABlackImage.png", "JustABlackImage.png", "JustABlackImage.png", "JustABlackImage.png", "SunBlack.png", "JustABlackImage.png" };
+	char* Osb[6] = { "JustABlackImage.png", "JustABlackImage.png", "JustABlackImage.png", "JustABlackImage.png", "SunYellow.png", "JustABlackImage.png" };
 	char* Ssb[6] = { "SkyBoxTest_Right.png", "SkyBoxTest_Left.png", "SkyBoxTest_Top.png", "SkyBoxTest_Bottom.png", "SkyBoxTest_Back.png", "SkyBoxTest_Front.png" };
 	sky = new Skybox(sb, Osb, Ssb);
 
