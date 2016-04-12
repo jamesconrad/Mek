@@ -6,13 +6,13 @@ void Manager::Init(){
 	std::string pathName = "../debug/media/";
 	m_SoundSystemPtr.Init();
 
-	m_PresetManagerPtr.Init(pathName, "presets.txt");
+	//m_PresetManagerPtr.Init(pathName, "presets.txt");
 	
-	m_RNManagerPtr.Init(&m_SoundSystemPtr, pathName, "nodes.txt", &m_PresetManagerPtr);
+	//m_RNManagerPtr.Init(&m_SoundSystemPtr, pathName, "nodes.txt", &m_PresetManagerPtr);
 
 	m_SoundManagerPtr.Init(&m_SoundSystemPtr, m_RNManagerPtr.GetNodes(), pathName, "sounds.txt");
 
-	m_RNManagerPtr.PrintRNodes();
+	//m_RNManagerPtr.PrintRNodes();
 }
 
 //display fucntions

@@ -215,7 +215,7 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 }
 // constants
 //const glm::vec2 SCREEN_SIZE(1920, 1080);
-const glm::vec2 SCREEN_SIZE(1024, 768);
+const glm::vec2 SCREEN_SIZE(1920, 1080);
 
 // globals
 GLFWwindow* gWindow = NULL;
@@ -303,7 +303,7 @@ void wonGame()
 void startGame()
 {
 	manager->GetSoundManager()->PlayAndPause("Background", "two", false);
-	manager->GetSoundManager()->PlayAndPause("Background", "one",true);
+	manager->GetSoundManager()->PlayAndPause("Background", "one",false);
 	manager->GetSoundManager()->PauseSound("Load", "one",true);
 	gameState = GAME; // GAME
 	if (!PTUT){
@@ -342,6 +342,7 @@ void startGame()
 	hitInvulnTimer = 0.0f;
 	maxInvulnTime = 0.5f;
 	targetsKilled = 0;
+	maxNumOfTargets = 6;
 	for (int i = 0, s = maxNumOfTargets; i < s; i++)
 	{
 		if (randomClampedFloat(0, 2) > 1.f)
@@ -921,8 +922,6 @@ static void Update(float secondsElapsed) {
 		else if (glfwGetKey(gWindow, 'D'))
 			lInput.x = 1;
 
-		if (glfwGetKey(gWindow, 'Q'))
-			shieldHealth = maxShieldHealth;
 
 		IsDashing = false;
 		if (glfwGetKey(gWindow, ' ') && dashingHitZero == false && gameState == GAME)
@@ -1707,7 +1706,7 @@ void AppMain() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", NULL /*glfwGetPrimaryMonitor()*/, NULL);
+	gWindow = glfwCreateWindow((int)SCREEN_SIZE.x, (int)SCREEN_SIZE.y, "Mek", /*NULL*/ glfwGetPrimaryMonitor(), NULL);
 	if (!gWindow)
 		throw std::runtime_error("glfwCreateWindow failed. Can your hardware handle OpenGL 4.3?");
 
@@ -2281,10 +2280,10 @@ void AppMain() {
 		}
 
 		//exit program if escape key is pressed
-		if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) && showHighScores == false && escapeHasBeenPressed == false){
-			glfwSetWindowShouldClose(gWindow, GL_TRUE);
-		}
-		else if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) && showHighScores == true)
+	//if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) && showHighScores == false && escapeHasBeenPressed == false){
+	//	glfwSetWindowShouldClose(gWindow, GL_TRUE);
+	//}
+			if (glfwGetKey(gWindow, GLFW_KEY_ESCAPE) && showHighScores == true)
 		{
 			showHighScores = false;
 			escapeHasBeenPressed = true;
