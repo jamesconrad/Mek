@@ -59,7 +59,7 @@ private:
 	FMOD::Reverb *m_freverb;
 	Preset* m_preset;
 	FMOD_VECTOR m_reverbPos;
-	std::string m_name;
+	std::string m_name = "";
 	bool m_isDoor;
 	bool m_destruct;
 	bool m_facingSystem;

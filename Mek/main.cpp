@@ -397,7 +397,7 @@ void LoadTargets()
 	targets.reserve(50);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
@@ -521,7 +521,7 @@ void LoadTargets()
 		tar->interp.buildCurve();
 		targets.push_back(tar);
 	}
-    for (unsigned int i = 6; i < 45; i++)
+    for (unsigned int i = 6; i < 50; i++)
     {
 		Target* tar = new Target("models/Mek.fbx", "models/Mek2b.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
         tar->interp.state = LINEAR;
@@ -1391,7 +1391,7 @@ static void Update(float secondsElapsed) {
 				if (targets[i]->hasSpottedPlayer)
 				{
 					targets[i]->go->dir = glm::normalize(model->pos - targets[i]->go->pos);
-					//targets[i]->hvygo->dir = targets[i]->go->dir;
+					targets[i]->hvygo->dir = targets[i]->go->dir;
 				}
 
 				//if (shoot)
@@ -1871,7 +1871,7 @@ void AppMain() {
 	//PROPER INIT
 	for (int i = 0; i < 24; i++)
 	{
-		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12 && i != 22)
+		if (i != 12 && i != 20 && i != 22)
 		{
 			GameObject *gObject = new GameObject(goVec.size());
 			Model *cModel = new Model();
@@ -1923,10 +1923,11 @@ void AppMain() {
 			else if (i == 5)
 			{
 				gObject->SetName("North Wall");
-				cModel->loadModel("models/Container_Wal_LPl.dae");
+				cModel->loadModel("models/WallA.dae");
 
-				gObject->scale = glm::vec3(1);
-				gObject->pos = glm::vec3(100, 0, 165);
+				gObject->scale = glm::vec3(1.5, 4.0, 1.0);
+				gObject->pos = glm::vec3(0);
+				groundMod = -8;
 			}
 			else if (i == 6)
 			{
@@ -1947,10 +1948,11 @@ void AppMain() {
 			else if (i == 8)
 			{
 				gObject->SetName("Middle Plus");
-				cModel->loadModel("models/Shipping Container.dae");
+				cModel->loadModel("models/WallB.dae");
 
-				gObject->scale = glm::vec3(1);
-				gObject->pos = glm::vec3(-5, 0, -20);
+				gObject->scale = glm::vec3(1.0, 4.0, 1.5);
+				gObject->pos = glm::vec3(0);
+				groundMod = -8;
 			}
 			else if (i == 9)
 			{
@@ -1964,18 +1966,20 @@ void AppMain() {
 			else if (i == 10)
 			{
 				gObject->SetName("South Wall");
-				cModel->loadModel("models/Container_Wal_LPl.dae");
+				cModel->loadModel("models/WallC.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
-				gObject->pos = glm::vec3(-100, 0, 165);
+				gObject->scale = glm::vec3(1.5, 4.0, 1.0);
+				gObject->pos = glm::vec3(0);
+				groundMod = -8;
 			}
 			else if (i == 11)
 			{
 				gObject->SetName("East Wall");
-				cModel->loadModel("models/Container_Wal_LP90.dae");
+				cModel->loadModel("models/WallD.dae");
 
-				gObject->scale = glm::vec3(0.7, 0.70, 0.70);
-				gObject->pos = glm::vec3(50, 0, 145);
+				gObject->scale = glm::vec3(1.0, 4.0, 1.5);
+				gObject->pos = glm::vec3(0);
+				groundMod = -8;
 			}
 			else if (i == 12)
 			{
@@ -2114,7 +2118,7 @@ void AppMain() {
 			cModel->setOwner(gObject);
 			c = cModel;
 			gObject->AddComponent(GRAPHICS, c);
-			if (i != 2){
+			if (i != 200){
 				gObject->AddComponent(PHYSICS, cCollision);
 				cCollision->setOwner(gObject);
 				cCollision->setCollisionMask(cModel->getScene());
