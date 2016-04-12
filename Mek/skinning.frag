@@ -28,6 +28,7 @@ uniform sampler2D shadowMap;
 uniform vec3 gEyeWorldPos;
 uniform float gMatSpecularIntensity;
 uniform float gSpecularPower;
+uniform float textureCutoff;
 //Uniforms had to be included below.
 //uniform PointLight gPointLights[MAX_POINT_LIGHTS]; //a ball of light
 //uniform SpotLight gSpotLights[MAX_SPOT_LIGHTS]; //a flashlight
@@ -262,5 +263,12 @@ void main()
 	Depth = vec4(vec3(vertDepth), 1.0) * transparency;
 	Normal = vec4(vec3(In.Normal * 0.5 + 0.5), 1.0) * transparency;
 	LightObscurers = vec4(0.0, 0.0, 0.0, 1.0) * transparency;
+	if (In.TexCoord.x > textureCutoff)
+	{
+		FragColor.a = 0.0;
+		Depth.a = 0.0;
+		Normal.a = 0.0;
+		LightObscurers.a = 0.0;
+	}
 	//FragColor = vec4((Albedo + goochColour), 1.0);
 }

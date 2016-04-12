@@ -67,6 +67,7 @@ public:
 
 	void set_RenderedTexture(GLuint _passedTexture);
 
+	float cut = 1.0f;
 	
 private:
 	struct Entry

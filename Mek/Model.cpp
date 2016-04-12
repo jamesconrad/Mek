@@ -598,7 +598,7 @@ void Model::render()
 	glm::mat4 W;// = _transform;
 	//W = glm::rotate(W, _owner->rot);
 	W = glm::translate(W, _owner->pos);
-	if (getOwner()->GetName() != "PlayerArms")
+	if (getOwner()->GetName() != "PlayerArms" && getOwner()->GetName() != "HealthBar")
 		rotMatrix = rotationMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
 	W *= rotMatrix;
 	W = glm::scale(W, 0.1f * _owner->scale);
@@ -620,6 +620,12 @@ void Model::render()
 		Program::getInstance().setUniform("gWorld", W);
 		Program::getInstance().setUniform("gEyeWorldPos", Camera::getInstance().position());
 		Program::getInstance().setUniform("EyeViewVec", Camera::getInstance().forward());
+		if (_owner->GetName() == "HealthBar")
+		{
+			Program::getInstance().setUniform("textureCutoff", cut);
+		}
+		else
+			Program::getInstance().setUniform("textureCutoff", 1.0f);
 		Program::getInstance().updateLighting("skinning");
 	}
 
