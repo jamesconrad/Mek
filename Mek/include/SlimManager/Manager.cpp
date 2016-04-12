@@ -12,6 +12,7 @@ void Manager::Init(){
 
 	m_SoundManagerPtr.Init(&m_SoundSystemPtr, m_RNManagerPtr.GetNodes(), pathName, "sounds.txt");
 
+	m_RNManagerPtr.PrintRNodes();
 }
 
 //display fucntions
@@ -38,19 +39,28 @@ void Manager::UpdateSounds(){
 }
 void Manager::UpdateSystemRNode(){
 	bool found = false;
+	float d = 99999;
 	float ds;
 	float m;
 	RNode* node = new RNode;
 	for (int c = 0; c < m_RNManagerPtr.GetNodes().size(); c++){
 		ds = m_RNManagerPtr.GetNodes()[c]->GetDistanceToSystem();
-		m = m_RNManagerPtr.GetNodes()[c]->GetMaxDistance();
+		m = m_RNManagerPtr.GetNodes()[c]->GetMinDistance();
 		if (m_systemRNode == NULL) m_systemRNode = m_RNManagerPtr.GetNodes()[c];
 		if (ds < m){
-			if (ds <= m){
 				node = m_RNManagerPtr.GetNodes()[c]->GetRNode();
 				found = true;
-			}
 		}
+		//if(ds < m/2){
+		//	for (int c = 0; c < m_systemRNode->GetLinks().size(); c++){
+		//		for (int j = 0; j < m_systemRNode->GetPath().size(); j++){
+		//			if ((m_systemRNode->GetStringLinks()[c] == m_systemRNode->GetPath()[j].node->GetRNodeName())){
+		//				if (DistanceBetween2FVECTORS(m_syst))
+		//			}
+		//		}
+		//	}
+		//
+		//}
 	}
 	if (found){
 		m_systemRNode = node;

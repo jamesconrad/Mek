@@ -45,7 +45,7 @@ void RNodeManager::Init(SoundSystem* _system, std::string _filePath, std::string
 		}
 	}
 	UpdateRNodes();
-	m_networkPtr.init(m_nodes);
+	m_networkPtr.Init(m_nodes);
 	UpdatePath();
 }
 
@@ -97,7 +97,7 @@ void RNodeManager::UpdateRNodes(){
 void RNodeManager::UpdatePath(){
 	for (int c = 0; c < m_nodes.size(); c++){
 		std::string nodeName = m_nodes[c]->GetRNodeName();
-		m_nodes[c]->SetPath(m_networkPtr.bellmanFord(nodeName));
+		m_nodes[c]->SetPath(m_networkPtr.BellmanFord(nodeName));
 	}
 }
 RNodeManager::~RNodeManager(){
