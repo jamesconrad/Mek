@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2016-04-12T05:21:20Z</created><keywords></keywords><modified>2016-04-12T05:21:20Z</modified><revision></revision><subject></subject><title></title><unit meter="0.010000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
+  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2016-04-12T09:36:47Z</created><keywords></keywords><modified>2016-04-12T09:36:47Z</modified><revision></revision><subject></subject><title></title><unit meter="0.010000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
   <library_images>
-    <image id="file1-image" name="file1"><init_from>file://C:\Users\100488896\Documents\UOIT WORK\Semester 2\Graphics\UV Textures\mekt.png</init_from></image>
+    <image id="file2-image" name="file2"><init_from>file://</init_from></image>
   </library_images>
   <library_materials>
     <material id="lambert2" name="lambert2">
@@ -21,7 +21,7 @@
               <color sid="ambient">0.000000  0.000000 0.000000 1.000000</color>
             </ambient>
             <diffuse>
-              <texture texture="file1-image" texcoord="CHANNEL0">
+              <texture texture="file2-image" texcoord="CHANNEL0">
                 <extra>
                   <technique profile="MAYA">
                     <wrapU sid="wrapU0">TRUE</wrapU>
@@ -873,12 +873,12 @@
 0.000000 0.433816 0.901002
 0.000000 0.433816 0.901002
 0.000000 0.433816 0.901002
-0.000000 0.958536 0.284970
-0.000000 0.958536 0.284970
-0.000000 0.958536 0.284970
-0.000000 0.958536 0.284970
-0.000000 0.958536 0.284970
-0.000000 0.958536 0.284970
+0.000000 0.958537 0.284970
+0.000000 0.958537 0.284970
+0.000000 0.958537 0.284970
+0.000000 0.958537 0.284970
+0.000000 0.958537 0.284970
+0.000000 0.958537 0.284970
 0.000000 0.945688 -0.325076
 0.000000 0.945688 -0.325076
 0.000000 0.945688 -0.325076
@@ -1581,12 +1581,12 @@
 0.000000 0.433816 -0.901002
 0.000000 0.433816 -0.901002
 0.000000 0.433816 -0.901002
-0.000000 0.958536 -0.284970
-0.000000 0.958536 -0.284970
-0.000000 0.958536 -0.284970
-0.000000 0.958536 -0.284970
-0.000000 0.958536 -0.284970
-0.000000 0.958536 -0.284970
+0.000000 0.958537 -0.284970
+0.000000 0.958537 -0.284970
+0.000000 0.958537 -0.284970
+0.000000 0.958537 -0.284970
+0.000000 0.958537 -0.284970
+0.000000 0.958537 -0.284970
 0.000000 0.945688 0.325076
 0.000000 0.945688 0.325076
 0.000000 0.945688 0.325076

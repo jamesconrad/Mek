@@ -1895,6 +1895,8 @@ void AppMain() {
 
 				gObject->scale = glm::vec3(3, 3, 3);
 				gObject->pos = glm::vec3(-112.75, 0, 105);
+
+				groundMod = -2;
 			}
 			else if (i == 2)
 			{
@@ -1908,6 +1910,8 @@ void AppMain() {
 				c = cModel;
 				gObject->AddComponent(GRAPHICS, c);
 				goVec.push_back(gObject);
+
+				groundMod = -0.5;
 			}
 			else if (i == 3)
 			{
@@ -1924,6 +1928,8 @@ void AppMain() {
 
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, -73);
+
+				groundMod = -0.1;
 			}
 			else if (i == 5)
 			{
@@ -1956,7 +1962,7 @@ void AppMain() {
 				cModel->loadModel("models/WallB.dae");
 
 				gObject->scale = glm::vec3(1.0, 4.0, 1.5);
-				gObject->pos = glm::vec3(0);
+				gObject->pos = glm::vec3(0.0, 0.0, -35.0);
 				groundMod = -8;
 			}
 			else if (i == 9)
@@ -1967,6 +1973,7 @@ void AppMain() {
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-14, 0, 73);
 				gObject->rot = glm::vec3(0, 65.44f, 0);
+				groundMod = -0.04;
 			}
 			else if (i == 10)
 			{
@@ -2001,6 +2008,8 @@ void AppMain() {
 
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(-55, 0, -47);
+
+				groundMod = -0.1;
 			}
 			else if (i == 14)
 			{
@@ -2010,6 +2019,8 @@ void AppMain() {
 				gObject->scale = glm::vec3(0.70, 0.70, 0.70);
 				gObject->pos = glm::vec3(-94.87, 0, -125.5);
 				gObject->rot = glm::vec3(0, -48.489f, 0);
+
+				groundMod = -0.1;
 			}
 			else if (i == 15)
 			{
@@ -2043,6 +2054,8 @@ void AppMain() {
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(-110, 0, -149);
 				gObject->rot = glm::vec3(0, -48.5f, 0);
+
+				groundMod = -0.1;
 			}
 			else if (i == 19)
 			{
