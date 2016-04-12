@@ -113,34 +113,48 @@ void Sound::UpdateRNode(std::vector<RNode*> _rnodes){
 //update functions
 void Sound::UpdateSoundSettings(){
 	if (m_rnode){
-		if (m_rnode->GetDistanceToSystem() < m_rnode->GetMaxDistance()){
-			m_activeMaxDistance = m_maxDistance;
-			m_activeMinDistance = m_minDistance;
+		if (m_rnode->GetRNodeName() == m_systemRNode->GetRNodeName()){
+			std::cout << "System in Sound Node" << " " << m_rnode->GetDistanceToSystem() <<m_rnode->GetRNodeName() << std::endl;
 			m_activePos = m_soundPos;
-			m_activeVolume = 1.0f;
+			m_activeVolume = 1;
+			m_activeMinDistance = m_minDistance;
+			m_activeMaxDistance = m_maxDistance;
+			
 		}
-		if (m_rnode->GetRNodeName() != m_systemRNode->GetRNodeName()){
-			//std::cout << "Find Path " << std::endl;
+		if (m_systemRNode->GetDistanceToSystem() < m_systemRNode->GetMinDistance() / 2){
+				std::cout << "Looking for closer Node from node! " << m_systemRNode->GetRNodeName() << std::endl;
+				if (FindCloserNode() != NULL){
+					m_activePos = FindCloserNode()->GetRNodePos();
+					m_activeVolume = 1;
+					m_activeMinDistance = FindCloserNode()->GetMinDistance();
+					m_activeMaxDistance = FindCloserNode()->GetMaxDistance();
+					for (int c = 0; c < m_rnode->GetPath().size(); c++){
+						if (m_rnode->GetPath()[c].node->GetRNodeName() == FindCloserNode()->GetRNodeName()){
+							if (DistanceBetween2FVECTORS(m_rnode->GetRNodePos(), FindCloserNode()->GetRNodePos()) < 11)
+								m_activeVolume = 0.9;
+							else{
+								m_activeVolume = m_rnode->GetPath()[c].volume;
+							}
+						}
+					}
+				}
+			}
+		if(m_rnode->GetRNodeName()!=m_systemRNode->GetRNodeName()){
+			std::cout << "System NOT in Sound Node" << " " << m_rnode->GetDistanceToSystem() << m_rnode->GetRNodeName() << std::endl;
+			m_activePos = m_systemRNode->GetRNodePos();
+			m_activeVolume = 1;
+			m_activeMinDistance = m_systemRNode->GetMinDistance();
+			m_activeMaxDistance = m_systemRNode->GetMaxDistance();
 			for (int c = 0; c < m_rnode->GetPath().size(); c++){
-				if (m_rnode->GetPath()[c].name == m_systemRNode->GetRNodeName()){
-					if ((m_rnode->GetPath()[c].distance < GetMaxDistance())){
-						//std::cout << "Playing at! " << m_rnode->GetPath()[c].name << std::endl;
-						float d = m_rnode->GetPath()[c].distance;
-						m_activePos = m_rnode->GetPath()[c].node->GetRNodePos();
-						//m_activeMinDistance = m_minDistance - m_rnode->GetPath()[c].distance;
-						m_activeMaxDistance = m_maxDistance - m_rnode->GetPath()[c].distance;
+				if (m_rnode->GetPath()[c].node->GetRNodeName() == m_systemRNode->GetRNodeName()){
+					if (DistanceBetween2FVECTORS(m_rnode->GetRNodePos(), m_systemRNode->GetRNodePos()) < 11)
+						m_activeVolume = 0.9;
+					else{
 						m_activeVolume = m_rnode->GetPath()[c].volume;
-					}					
-					break;
+					}
 				}
 			}
 		}
-	}
-	else{
-		m_activeMaxDistance = m_maxDistance;
-		m_activeMinDistance = m_minDistance;
-		m_activePos = m_soundPos;
-		m_activeVolume = 1.0f;
 	}
 }
 void Sound::UpdateDistanceToSystem(){
@@ -173,7 +187,30 @@ void Sound::UpdateRNode(){
 		m_rnode = NULL;
 	}
 }
+RNode* Sound::FindCloserNode(){
+	float d = 99999;
+	bool Found = false;
+	RNode* node = new RNode;
+	for (int c = 0; c < m_systemRNode->GetLinks().size(); c++){
+		if (m_rnode == m_systemRNode)
+			break;
+		for (int j = 0; j < m_systemRNode->GetPath().size(); j++){
+				if ((m_systemRNode->GetStringLinks()[c] == m_systemRNode->GetPath()[j].node->GetRNodeName())){
+					if (DistanceBetween2FVECTORS(m_activePos, m_systemRNode->GetPath()[j].node->GetRNodePos()) < d){
+						d = DistanceBetween2FVECTORS(m_activePos, m_systemRNode->GetPath()[j].node->GetRNodePos());
+						node = m_systemRNode->GetPath()[j].node->GetRNode();
+						Found = true;
+					}
+			}
+		}
 
+	}
+	if (Found){
+		return node;
+		std::cout << "Found next node " << node->GetRNodeName() << std::endl;
+	}
+
+}
 void Sound::Update(){
 	m_ChannelPtr->isPlaying(&m_isPlaying);
 	if (m_isPlaying){
@@ -181,6 +218,7 @@ void Sound::Update(){
 		if (m_mode & FMOD_3D){
 			UpdateRNode();
 			if (m_rnode != NULL) UpdateSoundSettings(); else m_activePos = m_soundPos;
+
 			m_ChannelPtr->setVolume(m_activeVolume);
 			if (m_result != FMOD_OK){
 				std::cout << "cFS->U Failed to set Active Volume in: " << GetFullName() << " "; ERRCHECK(m_result); std::cout << std::endl;

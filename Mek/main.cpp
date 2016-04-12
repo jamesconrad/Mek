@@ -40,7 +40,7 @@
 #include "SaveFunctions.h"
 
 //enable or disable the code slim wrote that steals console output
-#define HIJACKCONSOLE false
+#define HIJACKCONSOLE true
 
 enum game_state { GAME, MENU, VICTORYSCREEN };
 float hitTimer = 0.0;
@@ -215,7 +215,7 @@ void LoadShaders(char* vertFilename, char* fragFilename)
 }
 // constants
 //const glm::vec2 SCREEN_SIZE(1920, 1080);
-const glm::vec2 SCREEN_SIZE(1920, 1080);
+const glm::vec2 SCREEN_SIZE(1024, 768);
 
 // globals
 GLFWwindow* gWindow = NULL;
@@ -303,7 +303,7 @@ void wonGame()
 void startGame()
 {
 	manager->GetSoundManager()->PlayAndPause("Background", "two", false);
-	manager->GetSoundManager()->PlayAndPause("Background", "one",false);
+	manager->GetSoundManager()->PlayAndPause("Background", "one",true);
 	manager->GetSoundManager()->PauseSound("Load", "one",true);
 	gameState = GAME; // GAME
 	if (!PTUT){
@@ -851,7 +851,8 @@ float shotcd = 0;
 static void Update(float secondsElapsed) {
 
 	if (HIJACKCONSOLE){
-		
+		manager->GetSoundManager()->FindSound("Background", "two")->PrintSoundInformation();
+		//manager->DisplaySystemNode();
 	}
 	Tutorial();
 	
@@ -967,7 +968,7 @@ static void Update(float secondsElapsed) {
 		}
 		if (glfwGetKey(gWindow, 'O'))
 		{
-
+			
 		}
 		if (glfwGetKey(gWindow, 'I'))
 		{
@@ -1475,7 +1476,7 @@ static void Update(float secondsElapsed) {
 		{
 		    if (glfwGetKey(gWindow, '1'))
             {
-                maxNumOfTargets = 6;
+                maxNumOfTargets = 1;
                 isPlayingSearchAndDestroy = true;
                 startGame();
             }
@@ -2026,7 +2027,7 @@ void AppMain() {
 				c = cModel;
 				gObject->AddComponent(GRAPHICS, c);
 				goVec.push_back(gObject);
-				continue;
+				break;
 			}
 			else if (i == 23)
 			{

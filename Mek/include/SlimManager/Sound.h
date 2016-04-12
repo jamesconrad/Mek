@@ -43,7 +43,7 @@ public:
 	inline float GetMaxDistance(){ return m_activeMaxDistance; }
 	inline FMOD::Channel* GetSoundChannelPtr(){ return m_ChannelPtr; }
 	bool GetIsPlaying(){ return m_isPlaying; }
-
+	RNode* FindCloserNode();
 	//update functions
 	void UpdateRNode(std::vector<RNode*> _rnodes);
 	void UpdateSoundSettings();

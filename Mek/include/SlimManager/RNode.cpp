@@ -42,7 +42,7 @@ void RNode::UpdateDistanceToSystem(){
 void RNode::UpdateFacingSystem(){
 	glm::vec3 npos = FVECToGLM3(GetRNodePos());
 	glm::vec3 spos = FVECToGLM3(m_SoundSystemPtr->GetSystemPosition());
-	glm::vec3 sfor = FVECToGLM3(m_SoundSystemPtr->GetSystemFor());
+	glm::vec3 sfor = glm::vec3{ -m_SoundSystemPtr->GetSystemFor().x, -m_SoundSystemPtr->GetSystemFor().y, -m_SoundSystemPtr->GetSystemFor().z };
 
 	glm::vec3 dif = npos - spos;
 	float d = glm::dot(sfor, dif);
@@ -77,18 +77,18 @@ RNode* RNode::FindSystemRNode(){
 //get functions
 //display functions
 void RNode::PrintNode(){
-	std::cout << "*************NODE INFO*******************" << std::endl;
+	std::cout << "*************NODE INFO*******************" << std::endl << std::flush;
 	if (this != NULL){
-		std::cout << m_name << "  iD?: " << m_isDoor << " prN: " << m_preset->GetPresetName() << " dToS: " << m_distanceToSystem << " m: " << m_minDistance << " M: " << m_maxDistance << std::endl << std::flush;
-		std::cout << "Facing System: " << m_facingSystem << std::endl;
+		std::cout << m_name << "  iD?: " << m_isDoor << " prN: " << m_preset->GetPresetName() << " dToS: " << m_distanceToSystem << " m: " << m_minDistance << " M: " << m_maxDistance << std::endl << std::flush << std::flush;
+		std::cout << "Facing System: " << m_facingSystem << std::endl << std::flush;
 		if (m_path.size() != NULL){
 			PrintFMODVector(m_reverbPos);
-			std::cout << "*************PATH INFO*******************" << std::endl;
+			std::cout << "*************PATH INFO*******************" << std::endl << std::flush;
 			for (int c = 0; c < m_path.size(); c++){
-				std::cout << m_path[c].name << " " << m_path[c].distance <<  " " << m_path[c].volume << " -> " << std::flush;
+				std::cout << m_path[c].name << " " << m_path[c].distance << " " << m_path[c].volume << " -> " << std::flush << std::flush;
 			}
 		}
-		std::cout << std::endl << std::endl;
+		std::cout << std::endl << std::endl << std::flush;
 	}
 }
 

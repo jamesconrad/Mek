@@ -7,44 +7,37 @@
 #include "SoundSystem.h"
 #include "RNode.h"
 class ReverbNode;
-using namespace std;
-struct link // contains the general information about a link
-{
-	RNode* originNode;
-	RNode* linkNode;
-	string originCity; // origin of the link
-	string linkCity; // destination of the link
-	float distance; // distance (weight) of the link
-	bool active; // state of the link
+struct Link{
+	RNode* n_onode;
+	RNode* n_lnode;
+	std::string m_onode;
+	std::string m_lnode;
+	float m_distance;
+	bool m_active; // state of the link
 };
-struct BFlink
-{
+struct BFlink{
 
-	string origin; // name of origin
-	string destination; //  name of destination
-	int source; // integer value of origin
-	int dest; // integer value of destination
-	int distance; // distance
+	std::string m_origin;
+	std::string m_destination;
+	int m_source;
+	int m_dest;
+	int m_distance;
 };
-class Network
-{
+class Network{
 public:
 	Network(){}
-	void init(std::vector<RNode*> _nodes);
-	void printLinks();
-	void printNodes();
-	void weightChange();
-	std::vector<path> bellmanFord(std::string _source);
+	void Init(std::vector<RNode*> _nodes);
+	void PrintLinks();
+	void PrintNodes();
+	std::vector<path> BellmanFord(std::string _source);
 private:
-	std::vector<RNode*> nodes;
-	// global variables
-	int linkCount; // used to count number of links
-	link links[200]; // array of links (the graph #1)
-	int menuChoice; // variables used to navigate the user
-	// link variable
-	string nodeNames[200];
-	int nodeCount;
-	BFlink rip[200]; 
-	int ripCounter;
+	std::vector<RNode*> m_nodes;
+	int m_linkCount;
+	Link m_links[10];
+
+	std::string m_nodeNames[200];
+	int m_nodeCount;
+	BFlink m_rip[50]; 
+	int m_ripCounter;
 };
 #endif

@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include <fstream>
 
 #include "fmod\fmod.hpp"
 #include "fmod\fmod_errors.h"
@@ -31,7 +31,7 @@
 		return vec;
 	}
 	static void PrintFMODVector(FMOD_VECTOR _vec){
-		std::cout << "x: "<< _vec.x << " y: " << _vec.y << " z: " << _vec.z << std::endl << std::flush;
+		std::cout << "x: "<< _vec.x << " y: " << _vec.y << " z: " << _vec.z << std::endl << std::flush << std::flush;
 	}
 	static float DistanceBetween2FVECTORS(FMOD_VECTOR _vec1,FMOD_VECTOR _vec2){
 		FMOD_VECTOR sp = _vec1;
@@ -55,7 +55,7 @@ public:
 	void Update();
 	//set functions
 	inline void SetPosition(glm::vec3 _pos){ m_systemPos = Glm3ToFVEC(_pos); }
-	inline void SetForward(glm::vec3 _for){ m_systemForward = Glm3ToFVEC(_for); }
+	inline void SetForward(glm::vec3 _for){ m_systemForward = FMOD_VECTOR{ -_for.x, -_for.y, -_for.z}; }
 	inline void SetUp(glm::vec3 _up){ m_systemUp = Glm3ToFVEC(_up); }
 
 	void AddSoundToList(Sound* _sound);
