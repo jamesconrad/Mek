@@ -397,11 +397,11 @@ void LoadTargets()
 	targets.reserve(50);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
-		Target* tar = new Target("models/Mek.fbx", "models/Mek2.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", "models/Mek.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -521,9 +521,9 @@ void LoadTargets()
 		tar->interp.buildCurve();
 		targets.push_back(tar);
 	}
-    for (unsigned int i = 6; i < 50; i++)
+    for (unsigned int i = 6; i < 45; i++)
     {
-		Target* tar = new Target("models/Mek.fbx", "models/Mek2.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", "models/Mek.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
         tar->interp.state = LINEAR;
         randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
         randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
