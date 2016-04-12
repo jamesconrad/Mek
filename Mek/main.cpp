@@ -401,7 +401,7 @@ void LoadTargets()
 	{
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
-		Target* tar = new Target("models/Mek.fbx", "models/Mek.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", "models/Mek2b.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -523,7 +523,7 @@ void LoadTargets()
 	}
     for (unsigned int i = 6; i < 45; i++)
     {
-		Target* tar = new Target("models/Mek.fbx", "models/Mek.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", "models/Mek2b.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
         tar->interp.state = LINEAR;
         randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
         randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
