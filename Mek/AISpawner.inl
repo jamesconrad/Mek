@@ -17,13 +17,24 @@ inline void TargetSpawner::spawnNewTarget(std::vector<Target *> &targets)
 	{
 		if (targets[i]->alive == false)
 		{
+			if (randomClampedFloat(0, 2) > 1.f)
+			{
+				targets[i]->enemyType = STANDARD;
+				targets[i]->maxVelocity = 12.f;
+				targets[i]->go->health = 100.f;
+			}
+			else
+			{
+				targets[i]->enemyType = HEAVYHITTER;
+				targets[i]->maxVelocity = 5.0f;
+				targets[i]->go->health = 175.f;
+			}
 			targets[i]->go->scale = glm::vec3(1, 1, 1);
 			targets[i]->go->pos = position;
 			targets[i]->hasSpottedPlayer = false;
 			//targets[i]->update(0.166f, testNaveMesh);
 			targets[i]->hit = false;
 			targets[i]->alive = true;
-			targets[i]->go->health = 100.f;
 			return;
 		}
 	}

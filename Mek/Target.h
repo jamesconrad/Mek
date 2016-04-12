@@ -26,12 +26,18 @@ struct combatPosition
 	combatPositionType positionType;
 };
 
+enum EnemyType
+{
+	STANDARD = 0,
+	HEAVYHITTER,
+	MEDIC
+};
 
 class Target
 {
 public:
 	//Must manually set the interpolation vars through the public accessor
-	Target(char* fp, float tmod, SoundList* _list);
+	Target(char* fp, char* hvyfp, float tmod, SoundList* _list);
 	//should be called after the collision check
 	void update(float dTime, NavMesh &_mesh);
 	Interpolation interp;
@@ -41,6 +47,14 @@ public:
 	GameObject* go;
 	Model* cg;
 	ComponentCollision* cc;
+	GameObject* hvygo;
+	Model* hvycg;
+	ComponentCollision* hvycc;
+
+	GameObject* healthBar;
+	Model* healthBarCG;
+	glm::vec3 standardHealthPosition = glm::vec3(0, 1.5f, 0);
+	glm::vec3 heavyHealthPosition = glm::vec3(0, 2.0f, 0);
 
 	SoundList* oList;
 
@@ -92,6 +106,8 @@ public:
 	glm::vec3 steering;
 
 	bool selectedToDoCombatUpdate = false;
+
+	EnemyType enemyType = STANDARD;
 
 
 

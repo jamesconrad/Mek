@@ -344,6 +344,18 @@ void startGame()
 	targetsKilled = 0;
 	for (int i = 0, s = maxNumOfTargets; i < s; i++)
 	{
+		if (randomClampedFloat(0, 2) > 1.f)
+		{
+			targets[i]->enemyType = STANDARD;
+			targets[i]->maxVelocity = 12.f;
+			targets[i]->go->health = 100.f;
+		}
+		else
+		{
+			targets[i]->enemyType = HEAVYHITTER;
+			targets[i]->maxVelocity = 5.0f;
+			targets[i]->go->health = 175.f;
+		}
 		targets[i]->go->scale = glm::vec3(1, 1, 1);
 		targets[i]->hasSpottedPlayer = false;
 		int randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
@@ -353,7 +365,6 @@ void startGame()
 		targets[i]->generatePath(testNaveMesh);
 		targets[i]->hit = false;
 		targets[i]->alive = true;
-		targets[i]->go->health = 100.f;
 		targets[i]->go->dir = glm::vec3(1.f, 0.f, 0.f);
 	}
     for (int i = maxNumOfTargets; i < targets.size(); i++)
@@ -386,11 +397,11 @@ void LoadTargets()
 	targets.reserve(50);
 	float randomX, randomY;
 	//load in targets
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		//OwnerList temp = *SManager->GetOwnerList("Target");
 		//soundcopy.push_back(temp);
-		Target* tar = new Target("models/Mek.fbx", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", "models/Mek2.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
 
 		//last point needs to == first point
 
@@ -512,7 +523,7 @@ void LoadTargets()
 	}
     for (unsigned int i = 6; i < 50; i++)
     {
-		Target* tar = new Target("models/Mek.fbx", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
+		Target* tar = new Target("models/Mek.fbx", "models/Mek2.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
         tar->interp.state = LINEAR;
         randomX = randomClampedInt(0, testNaveMesh.TriangleSet.size() - 1);
         randomY = randomClampedInt(0, testNaveMesh.TriangleSet[randomX].size() - 1);
@@ -552,7 +563,10 @@ static void DrawSceneShadowPass()
 	{
 		if (targets[i]->alive)
 		{
-			targets[i]->cg->renderShadowPass();
+			if (targets[i]->enemyType == 0)
+				targets[i]->cg->renderShadowPass();
+			else if (targets[i]->enemyType == 1)
+				targets[i]->hvycg->renderShadowPass();
 			//targets[i]->cc->renderHitbox();
 		}
 	}
@@ -596,7 +610,19 @@ static void DrawScene(int shadowMapTexID)
 	{
 		if (targets[i]->alive)
 		{
-			targets[i]->cg->render();
+			if (targets[i]->enemyType == 0)
+			{
+				targets[i]->cg->render();
+				targets[i]->healthBar->pos = targets[i]->standardHealthPosition + targets[i]->go->pos;
+				targets[i]->healthBarCG->render();
+			}
+			else if (targets[i]->enemyType == 1)
+			{
+				targets[i]->hvycg->render();
+				targets[i]->healthBar->pos = targets[i]->heavyHealthPosition + targets[i]->go->pos;
+				targets[i]->healthBarCG->render();
+			}
+			
 			//targets[i]->cc->renderHitbox();
 		}
 	}
@@ -643,6 +669,7 @@ static void Render() {
 	else if (gameState == MENU || VICTORYSCREEN)
 	{
 		framebuffeffects->Toon(true);
+		framebuffeffects->Bloom(4);
 	}
 	//if (numpadPress[1])
 
@@ -661,7 +688,7 @@ static void Render() {
 		if (showHighScores)
 		{
 			TextRendering::getInstance().printText2D("S N D", -0.7f, 0.875f, 0.09f, menuItem1Colour, red);
-			for (int i = 0, s = scoreTable.size(); i < s && i < 5; i++)
+			for (int i = 0, s = scoreTable.size(); i < s && i < 30; i++)
 			{
 				char buffer[64];
 				_snprintf_s(buffer, 64, "%s %i", sndNames[i].c_str(), scoreTable[i]);
@@ -669,7 +696,7 @@ static void Render() {
 			}
 
 			TextRendering::getInstance().printText2D("SURVIVAL", 0.15f, 0.875f, 0.09f, menuItem1Colour, red);
-			for (int i = 0, s = survivalScoreTable.size(); i < s && i < 5; i++)
+			for (int i = 0, s = survivalScoreTable.size(); i < s && i < 30; i++)
 			{
 				char buffer[64];
 				_snprintf_s(buffer, 64, "%s %i", survivalNames[i].c_str(), survivalScoreTable[i]);
@@ -1362,7 +1389,10 @@ static void Update(float secondsElapsed) {
 				if (targets[i]->go->health < 100)
 					targets[i]->hasSpottedPlayer = true;
 				if (targets[i]->hasSpottedPlayer)
+				{
 					targets[i]->go->dir = glm::normalize(model->pos - targets[i]->go->pos);
+					//targets[i]->hvygo->dir = targets[i]->go->dir;
+				}
 
 				//if (shoot)
 				//{
@@ -1381,6 +1411,7 @@ static void Update(float secondsElapsed) {
 				{
 					targets[i]->alive = false;
 					targets[i]->go->pos = glm::vec3(50000.f);
+					targets[i]->hvygo->pos = glm::vec3(50000.f);
 					skull->play();
 					targetsKilled++;
 				}
@@ -1389,16 +1420,35 @@ static void Update(float secondsElapsed) {
 				if (targets[i]->fireTimer >= targets[i]->fireTimeTolerance && targets[i]->alive == true && targets[i]->hasSpottedPlayer)
 				{
 					targets[i]->fireTimer = 0.f;
-					if (targets[i]->firingfromRightBarrel)
-						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 20, 20, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
-					else
-						targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))) /* targets[i]->vecToPlayer*/, 20, 20, 7, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+					if (targets[i]->enemyType == 0)
+					{
+						if (targets[i]->firingfromRightBarrel)
+							targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))), 20, 20, 4, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+						else
+							targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))), 20, 20, 4, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+						targets[i]->weaponProjectile->go->scale = glm::vec3(1.5);
+					}
+					else if (targets[i]->enemyType == 1)
+					{
+						if (targets[i]->firingfromRightBarrel)
+							targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->rightGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))), 10, 50, 4, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+						else
+							targets[i]->weaponProjectile = new Projectile(targets[i]->go->pos + targets[i]->leftGunBarrel, glm::normalize((model->pos - targets[i]->go->pos) + glm::vec3(randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f), randomClampedFloat(-1.5f, 1.5f))), 10, 50, 4, manager->GetSoundManager()->FindSound("Player", "Projectile"));
+						targets[i]->weaponProjectile->go->scale = glm::vec3(0.9f);
+					}
 					targets[i]->firingfromRightBarrel = !targets[i]->firingfromRightBarrel;
 					targets[i]->weaponProjectile->go->scale = glm::vec3(1.1f);
 					targets[i]->weaponProjectile->go->SetName("EnemyProjectile");
 					targets[i]->weaponProjectile->handle = ObjectManager::instance().enemyPMap.size();
 					ObjectManager::instance().enemyPMap.push_back(targets[i]->weaponProjectile);
-					targets[i]->fireTimeTolerance = randomClampedFloat(0.5f, 2.f);
+					if (targets[i]->enemyType == 0)
+					{
+						targets[i]->fireTimeTolerance = randomClampedFloat(0.5f, 2.f);
+					}
+					else if (targets[i]->enemyType == 1)
+					{
+						targets[i]->fireTimeTolerance = randomClampedFloat(3.f, 4.f);
+					}
 				}
 				enemiesAlive++;
 			}

@@ -1,6 +1,6 @@
 #include "Target.h"
 
-Target::Target(char* fp, float t, SoundList* _oList)
+Target::Target(char* fp, char* hvyfp, float t, SoundList* _oList)
 {
 	tmod = t;
 	hit = false;
@@ -20,7 +20,29 @@ Target::Target(char* fp, float t, SoundList* _oList)
 	go->AddComponent(GRAPHICS, c);
 	c = cc;
 	go->AddComponent(PHYSICS, c);
-	
+
+	hvygo = new GameObject(0);
+	hvygo->SetName("Target");
+	hvycg = new Model();
+	hvycg->setOwner(hvygo);
+	hvycg->loadModel(hvyfp);
+	hvycc = new ComponentCollision();
+	hvycc->setOwner(hvygo);
+	hvycc->setCollisionMask(hvycg->getScene());
+	hvycc->createHitboxRender();
+	hvycc->type = STATIC;
+
+	hvygo->AddComponent(GRAPHICS, hvycg);
+	hvygo->AddComponent(PHYSICS, hvycc);
+	hvygo->scale = glm::vec3(1.3f);
+
+	healthBar = new GameObject(0);
+	healthBar->SetName("HealthBar");
+	healthBarCG = new Model();
+	healthBarCG->setOwner(healthBar);
+	healthBarCG->loadModel("models/HealthBar.dae");
+	healthBar->AddComponent(GRAPHICS, healthBarCG);
+
 	oList = _oList;
 	//oList->PlayAndPauseAll();
 	//movingsound = (oList->FindSound("Moving"))->Play();
@@ -63,11 +85,24 @@ void Target::update(float dTime, NavMesh &mesh)
 		glm::vec3 temp = glm::vec3((npos.x), (npos.y), (npos.z));
 		glm::vec3 temp2 = glm::vec3((pPos.x), (pPos.y), (pPos.z));
 
-		leftGunBarrel = glm::vec3(cg->rotMatrix * glm::vec4(-0.4f, 0.93f, -0.4f, 1.0f));
-		rightGunBarrel = glm::vec3(cg->rotMatrix * glm::vec4(-0.4f, 0.93f, 0.4f, 1.0f));
-
+		if (enemyType == STANDARD)
+		{
+			leftGunBarrel = glm::vec3(cg->rotMatrix * glm::vec4(-0.4f, 0.93f, -0.4f, 1.0f));
+			rightGunBarrel = glm::vec3(cg->rotMatrix * glm::vec4(-0.4f, 0.93f, 0.4f, 1.0f));
+			healthBarCG->rotMatrix = cg->rotMatrix;
+			healthBarCG->cut = go->health / 100.f;
+		}
+		else if (enemyType == HEAVYHITTER)
+		{
+			leftGunBarrel = glm::vec3(hvycg->rotMatrix * glm::vec4(-0.4f, 1.09f, -0.7f, 1.0f));
+			rightGunBarrel = glm::vec3(hvycg->rotMatrix * glm::vec4(-0.4f, 1.09f, 0.7f, 1.0f));
+			healthBarCG->rotMatrix = hvycg->rotMatrix;
+			healthBarCG->cut = go->health / 175.f;
+		}
 		//std::cout << "go->pos: " << go->pos.x << " " << go->pos.y << " " << go->pos.z << std::endl;
 		oList->UpdateListPosition(go->pos);
+		hvygo->pos = go->pos;
+		hvygo->dir = go->dir;
 		//movingsound->setPaused(false);
 		//if ((oList->FindSound("Moving")->GetDistanceToSystem()) > (oList->FindSound("Moving"))->GetMaxDistance()){
 		//	oList->FindSound("Moving")->GetSoundChannelPtr()->setPaused(true);
