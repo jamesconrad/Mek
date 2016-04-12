@@ -589,7 +589,7 @@ static void DrawScene(int shadowMapTexID)
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			cc->renderHitbox();
+			//cc->renderHitbox();
 		}
 	}
 	playerArms->render();

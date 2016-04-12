@@ -25,7 +25,7 @@ Projectile::Projectile(glm::vec3 p, glm::vec3 d, float v, float _d, float lifesp
 	go->AddComponent(PHYSICS, cc);
 	cg->setOwner(go);
 	cc->setOwner(go);
-
+	cg->setFilepath("models/SmallCube.dae");
 	cg->loadScene(scene);
 	cc->setCollisionMask(scene);
 	cc->type = PROJ;
