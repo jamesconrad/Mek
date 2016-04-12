@@ -1869,7 +1869,7 @@ void AppMain() {
 	targetSpawner2.position = targetSpawner2.position * 0.1f;
 
 	//PROPER INIT
-	for (int i = 0; i < 24; i++)
+	for (int i = 0; i < 23; i++)
 	{
 		if (i != 5 && i != 8 && i != 10 && i != 11 && i != 12 && i != 22)
 		{
@@ -1903,6 +1903,11 @@ void AppMain() {
 
 				gObject->scale = glm::vec3(1, 1, 1);// glm::vec3(1.6, 1.6, 1.6);
 				gObject->pos = glm::vec3(30, 0, 130);
+
+				cModel->setOwner(gObject);
+				c = cModel;
+				gObject->AddComponent(GRAPHICS, c);
+				goVec.push_back(gObject);
 			}
 			else if (i == 3)
 			{
@@ -2072,40 +2077,10 @@ void AppMain() {
 				gObject->scale = glm::vec3(1);
 				gObject->pos = glm::vec3(0.0147653f,13.6108f,7.22379f);
 				gObject->rot = glm::vec3(0, -90.f, 0);
-				arms = gObject;
 				cModel->setOwner(gObject);
 				c = cModel;
 				gObject->AddComponent(GRAPHICS, c);
 				goVec.push_back(gObject);
-				break;
-			}
-			else if (i == 23)
-			{
-				gObject->SetName("Sphere");
-				cModel->loadModel("models/sphere.dae");
-				gObject->scale = glm::vec3(1);
-				gObject->pos = glm::vec3(0, 15, 0);
-
-				cModel->setOwner(gObject);
-				c = cModel;
-				gObject->AddComponent(GRAPHICS, c);
-				goVec.push_back(gObject);
-				break;
-			}
-			else if (i == 24)
-			{
-				gObject->SetName("Guns");
-				cModel->loadModel("models/1.dae");
-
-				gObject->scale = glm::vec3(1);
-				//gObject->pos = glm::vec3(7, 14, 1.582f);
-				//gObject->rot = glm::vec3(0, -90.f, 0);
-				arms = gObject;
-				cModel->setOwner(gObject);
-				c = cModel;
-				gObject->AddComponent(GRAPHICS, c);
-				goVec.push_back(gObject);
-				break;
 			}
 
 			gObject->pos /= 10.f;
