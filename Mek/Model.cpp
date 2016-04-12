@@ -225,40 +225,54 @@ void Model::loadScene(aiScene* scene)
 	}
 	//All done with the vertex data!
 	bool textured = false;
-	for (unsigned int i = 0; i < scene->mNumMaterials; i++)
+	//for (unsigned int i = 0; i < scene->mNumMaterials; i++)
+	//{
+	//	const aiMaterial* mat = scene->mMaterials[i];
+	//
+	//	for (unsigned int type = 0; type < 12; type++)
+	//	{
+	//		if (mat->GetTextureCount((aiTextureType)type) > 0)
+	//		{
+	//			aiString fp;
+	//			if (mat->GetTexture((aiTextureType)type, 0, &fp, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+	//			{
+	//				//if (_render->createTexture((char*)fp.C_Str(), "gColorMap", (TextureFlag)type))//todo: fix
+	//				//{
+	//				//	textured = true;
+	//				//	break;
+	//				//}
+	//				std::string modelname(_fp);
+	//				std::string filepath("Textures/");
+	//				std::string extension(".png");
+	//				modelname = modelname.substr(7, modelname.size() - 11);
+	//				std::string texturepath = filepath + modelname + extension;
+	//				std::string normalpath = filepath + modelname + "N" + extension;
+	//				if (_render->createTexture((char*)texturepath.c_str(), "gColorMap", (TextureFlag)type))
+	//				{
+	//					if (!_render->createTexture((char*)normalpath.c_str(), "normalMap", (TextureFlag)type))
+	//					{
+	//						_render->createTexture((char*)"Textures/missingnormal.png", "normalMap", (TextureFlag)type);
+	//					}
+	//					textured = true;
+	//					break;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	std::string modelname(_fp);
+	std::string filepath("Textures/");
+	std::string extension(".png");
+	modelname = modelname.substr(7, modelname.size() - 11);
+	std::string texturepath = filepath + modelname + extension;
+	std::string normalpath = filepath + modelname + "N" + extension;
+	if (_render->createTexture((char*)texturepath.c_str(), "gColorMap", TextureFlag::DIFFUSE))
 	{
-		const aiMaterial* mat = scene->mMaterials[i];
-
-		for (unsigned int type = 0; type < 12; type++)
+		if (!_render->createTexture((char*)normalpath.c_str(), "normalMap", TextureFlag::NORMALS))
 		{
-			if (mat->GetTextureCount((aiTextureType)type) > 0)
-			{
-				aiString fp;
-				if (mat->GetTexture((aiTextureType)type, 0, &fp, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-				{
-					//if (_render->createTexture((char*)fp.C_Str(), "gColorMap", (TextureFlag)type))//todo: fix
-					//{
-					//	textured = true;
-					//	break;
-					//}
-					std::string modelname(_fp);
-					std::string filepath("Textures/");
-					std::string extension(".png");
-					modelname = modelname.substr(7, modelname.size() - 11);
-					std::string texturepath = filepath + modelname + extension;
-					std::string normalpath = filepath + modelname + "N" + extension;
-					if (_render->createTexture((char*)texturepath.c_str(), "gColorMap", (TextureFlag)type))
-					{
-						if (!_render->createTexture((char*)normalpath.c_str(), "normalMap", (TextureFlag)type))
-						{
-							_render->createTexture((char*)"Textures/missingnormal.png", "normalMap", (TextureFlag)type);
-						}
-						textured = true;
-						break;
-					}
-				}
-			}
+			_render->createTexture((char*)"Textures/missingnormal.png", "normalMap", TextureFlag::NORMALS);
 		}
+		textured = true;
 	}
 	//make sure we have a texture
 	if (!textured)

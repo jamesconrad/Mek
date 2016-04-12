@@ -521,7 +521,7 @@ void LoadTargets()
 		tar->interp.buildCurve();
 		targets.push_back(tar);
 	}
-    for (unsigned int i = 6; i < 50; i++)
+    for (unsigned int i = 6; i < 20; i++)
     {
 		Target* tar = new Target("models/Mek.fbx", "models/Mek2b.dae", 0.5, manager->GetSoundManager()->GetOwnerList("Target"));
         tar->interp.state = LINEAR;
@@ -589,7 +589,7 @@ static void DrawScene(int shadowMapTexID)
 		if (goVec[i]->HasComponent(PHYSICS))
 		{
 			ComponentCollision* cc = static_cast<ComponentCollision*>(goVec[i]->GetComponent(PHYSICS));
-			//cc->renderHitbox();
+			cc->renderHitbox();
 		}
 	}
 	playerArms->render();
@@ -1908,8 +1908,8 @@ void AppMain() {
 
 				cModel->setOwner(gObject);
 				c = cModel;
-				gObject->AddComponent(GRAPHICS, c);
-				goVec.push_back(gObject);
+				//gObject->AddComponent(GRAPHICS, c);
+				//goVec.push_back(gObject);
 
 				groundMod = -0.5;
 			}
