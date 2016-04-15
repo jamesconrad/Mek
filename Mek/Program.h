@@ -1,3 +1,5 @@
+//Program linking and Shader compiliation from:
+//http://www.tomdalling.com/blog/category/modern-opengl/
 #pragma once
 
 #include <vector>

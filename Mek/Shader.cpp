@@ -1,3 +1,5 @@
+//Program linking and Shader compiliation from:
+//http://www.tomdalling.com/blog/category/modern-opengl/
 #include "Shader.h"
 #include <stdexcept>
 #include <fstream>

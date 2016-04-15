@@ -1,3 +1,5 @@
+//Camera from:
+//http://www.tomdalling.com/blog/category/modern-opengl/
 
 #define _USE_MATH_DEFINES
 #include <cmath>

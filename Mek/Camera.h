@@ -1,3 +1,5 @@
+//Camera from:
+//http://www.tomdalling.com/blog/category/modern-opengl/
 #pragma once
 
 #include "lib\glm\glm.hpp"

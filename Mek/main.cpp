@@ -1,3 +1,6 @@
+//Window/GL creation from:
+//http://www.tomdalling.com/blog/category/modern-opengl/
+
 // third-party libraries
 #include "include\GL\glew.h"
 #include "include\GL\glfw3.h"
