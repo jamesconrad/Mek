@@ -67,7 +67,7 @@ private:
 	};
 
 	bool _hitboxRender = false;
-	unsigned int _vao, *_vbo;
+	unsigned int *_vao, *_vbo;
 	std::vector<gHitbox> gHitboxes;
 };
 

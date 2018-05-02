@@ -1,3 +1,5 @@
+//Camera from:
+//http://www.tomdalling.com/blog/category/modern-opengl/
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -88,6 +90,7 @@ void Camera::setViewportAspectRatio(float viewportAspectRatio) {
     _viewportAspectRatio = viewportAspectRatio;
 }
 
+
 glm::vec3 Camera::forward() const {
     glm::vec4 forward = glm::inverse(orientation()) * glm::vec4(0,0,-1,1);
     return glm::vec3(forward);
@@ -108,7 +111,7 @@ glm::mat4 Camera::matrix() const {
 }
 
 glm::mat4 Camera::projection() const {
-    return glm::perspective(glm::radians(_fieldOfView), _viewportAspectRatio, _nearPlane, _farPlane);
+    return glm::perspective(_fieldOfView, _viewportAspectRatio, _nearPlane, _farPlane);
 }
 
 glm::mat4 Camera::view() const {

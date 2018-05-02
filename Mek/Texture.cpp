@@ -1,6 +1,8 @@
-#include "Texture.h"
+﻿#include "Texture.h"
 #include <stdexcept>
 #include "include\IL\ilut.h"
+
+std::map<char*, Texture*> Texture::imgMap;
 
 static GLenum TextureFormatForBitmapFormat(Bitmap::Format format, bool srgb)
 {
@@ -14,8 +16,18 @@ static GLenum TextureFormatForBitmapFormat(Bitmap::Format format, bool srgb)
 	}
 }
 
-Texture::Texture(char* filepath, GLint minMagFiler, GLint wrapMode)
+Texture::Texture(char* filepath, bool mip, GLint minMagFiler, GLint wrapMode)
 {
+	if (imgMap.find(filepath) != imgMap.end())
+	{
+		//we found a copy of ourself
+		_object = imgMap.at(filepath)->_object;
+		_originalHeight = imgMap.at(filepath)->_originalHeight;
+		_originalWidth = imgMap.at(filepath)->_originalWidth;
+		return;
+	}
+	imgMap.emplace(filepath, this);
+
 	std::string debfp = "../Debug/";
 	debfp.append(filepath);
 	filepath = (char*)debfp.c_str();
@@ -33,21 +45,19 @@ Texture::Texture(char* filepath, GLint minMagFiler, GLint wrapMode)
 	
 	glGenTextures(1, &_object);
 	glBindTexture(GL_TEXTURE_2D, _object);
-	err = glGetError();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, imgType, _originalWidth, _originalHeight, 0, imgType, GL_UNSIGNED_BYTE, bmp.pixelBuffer());
+	if (mip)
+	{
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	}
+	else
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	err = glGetError();
-	glTexImage2D(GL_TEXTURE_2D,
-		0,
-		imgType,
-		_originalWidth,
-		_originalHeight,
-		0,
-		imgType,
-		GL_UNSIGNED_BYTE,
-		bmp.pixelBuffer());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

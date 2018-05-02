@@ -86,7 +86,8 @@ void ObjectManager::updateProjectile(float dTime)
 {
 	//Determine which targets to remove
 	std::vector<unsigned int> todel;
-	for (int i = 0, s = pMap.size(); i < s; i++)
+	unsigned short elementsDeleted = 0;
+	for (unsigned int i = 0, s = pMap.size(); i < s; i++)
 	{
 		pMap[i]->update(dTime);
 		if (pMap[i]->alive == false)
@@ -95,17 +96,56 @@ void ObjectManager::updateProjectile(float dTime)
 		}
 	}
 	//remove targets
-	for (int i = 0, s = todel.size(); i < s; i++)
+	for (unsigned int i = 0, s = todel.size(); i < s; i++)
 	{
-		free(pMap[todel[i]]);
-		pMap.erase(pMap.begin() + todel[i]);
+		free(pMap[todel[i] - elementsDeleted]);
+		pMap.erase(pMap.begin() + (todel[i] - elementsDeleted));
+		elementsDeleted++;
 	}
 	//redetermine handles
 	if (todel.size() > 0)
 	{
-		for (int i = 0, s = pMap.size(); i < s; i++)
+		for (unsigned int i = 0, s = pMap.size(); i < s; i++)
 		{
 			pMap[i]->go->handle = i;
+		}
+	}
+}
+
+void ObjectManager::addEnemyProjectile(Projectile* p)
+{
+	p->alive = true;
+	p->handle = enemyPMap.size();
+	p->go->handle = p->handle;
+	enemyPMap.push_back(p);
+}
+
+void ObjectManager::updateEnemyProjectile(float &dTime)
+{
+	//Determine which targets to remove
+	std::vector<unsigned int> todel;
+	unsigned short elementsDeleted = 0;
+	for (unsigned int i = 0, s = enemyPMap.size(); i < s; i++)
+	{
+		enemyPMap[i]->update(dTime);
+		if (enemyPMap[i]->alive == false)
+		{
+			todel.push_back(i);
+		}
+	}
+	//remove targets
+	for (unsigned int i = 0, s = todel.size(); i < s; i++)
+	{
+		free(enemyPMap[todel[i] - elementsDeleted]);
+		enemyPMap.erase(enemyPMap.begin() + (todel[i] - elementsDeleted));
+		elementsDeleted++;
+	}
+	//redetermine handles
+	if (todel.size() > 0)
+	{
+		for (unsigned int i = 0, s = enemyPMap.size(); i < s; i++)
+		{
+			enemyPMap[i]->go->handle = i;
 		}
 	}
 }

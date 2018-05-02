@@ -11,38 +11,64 @@
 #include "Camera.h"
 #include "Projectile.h"
 
+//#include "ShieldVariables.h"
+extern float shieldHealth;
+extern float maxShieldHealth;
+extern float shieldRechargeTimer;
+extern float shieldMaxTimer;
+extern float shieldRechargeAmount;
+
+extern bool  playerIsHit;
+extern float hitInvulnTimer;
+extern float maxInvulnTime;
+
+
 ComponentCollision::ComponentCollision()
 {
 	//collisionPackage = new CollisionPacket;
 	type = STATIC;
 }
 
+glm::mat4 rotMatrix(glm::vec3 &dir, glm::vec3 &baseDir, glm::vec3 &right)
+{
+	float angle = glm::angle(dir, baseDir);
+	float rightAngle = glm::dot(dir, right);
+	glm::mat4 rotation;
+	if (rightAngle >= 0)
+		rotation = glm::mat4(glm::rotate(angle, glm::vec3(0, 1, 0)));
+	else
+		rotation = glm::mat4(glm::rotate(angle * -1.f, glm::vec3(0, 1, 0)));
+	return rotation;
+}
+
 void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 {
-	if (bones)
-	{
-		BoneInfo* boneInfo = static_cast<BoneInfo*>(boneInfoLocation);
-
-		for (int i = 0, s = _cMesh.size(); i < s; i++)
-		{
-			boneInfo[i].FinalTransformation = glm::scale(boneInfo[i].FinalTransformation, glm::vec3(0.1, 0.1, 0.1));
-			_cMesh[i]->fmin = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->min, 0)) + _owner->pos);// *_owner->scale;
-			_cMesh[i]->fmax = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->max, 0)) + _owner->pos);// *_owner->scale;
-			_cMesh[i]->fuN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->uN, 0));
-			_cMesh[i]->frN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->rN, 0));
-			_cMesh[i]->ffN = glm::vec3(boneInfo[i].FinalTransformation *glm::vec4(_cMesh[i]->fN, 0));
-			_cMesh[i]->fc = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->centre, 0)) + _owner->pos);//  *_owner->scale;
-		}
-	}
-	else
-	{
+	//if (bones)
+	//{
+	//	BoneInfo* boneInfo = static_cast<BoneInfo*>(boneInfoLocation);
+	//
+	//	for (int i = 0, s = _cMesh.size(); i < s; i++)
+	//	{
+	//		boneInfo[i].FinalTransformation = glm::scale(boneInfo[i].FinalTransformation, glm::vec3(0.1, 0.1, 0.1));
+	//		_cMesh[i]->fmin = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->min, 0)) + _owner->pos);// *_owner->scale;
+	//		_cMesh[i]->fmax = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->max, 0)) + _owner->pos);// *_owner->scale;
+	//		_cMesh[i]->fuN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->uN, 0));
+	//		_cMesh[i]->frN = glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->rN, 0));
+	//		_cMesh[i]->ffN = glm::vec3(boneInfo[i].FinalTransformation *glm::vec4(_cMesh[i]->fN, 0));
+	//		_cMesh[i]->fc = (glm::vec3(boneInfo[i].FinalTransformation * glm::vec4(_cMesh[i]->centre, 0)) + _owner->pos);//  *_owner->scale;
+	//	}
+	//}
+	//else
+	//{
 		for (int i = 0, s = _cMesh.size(); i < s; i++)
 		{
 			glm::mat4 h = glm::translate(glm::mat4(), _owner->pos);
 			h = glm::scale(glm::mat4(), glm::vec3(0.1, 0.1, 0.1));
 			h = glm::scale(glm::mat4(), _owner->scale);
-			//_cMesh[i]->fmin = (_cMesh[i]->min * 0.1f) + _owner->pos;// *_owner->scale;
-			//_cMesh[i]->fmax = (_cMesh[i]->max * 0.1f) + _owner->pos;// *_owner->scale;
+			h *= rotMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));
+
+			_cMesh[i]->fmin = (_cMesh[i]->min * 0.1f) + _owner->pos;// *_owner->scale;
+			_cMesh[i]->fmax = (_cMesh[i]->max * 0.1f) + _owner->pos;// *_owner->scale;
 			_cMesh[i]->fuN = _cMesh[i]->uN;
 			_cMesh[i]->frN = _cMesh[i]->rN;
 			_cMesh[i]->ffN = _cMesh[i]->fN;
@@ -51,7 +77,7 @@ void ComponentCollision::updateFrame(void* boneInfoLocation, bool bones)
 			_cMesh[i]->fhwR = _cMesh[i]->hwR * 0.1f *_owner->scale.x;
 			_cMesh[i]->fc = (_cMesh[i]->centre + _owner->pos);// *_owner->scale;
 		}
-	}
+	//}
 }
 
 void ComponentCollision::setCollisionMask(const aiScene* m)
@@ -67,57 +93,76 @@ void ComponentCollision::setCollisionMask(const aiScene* m)
 			for (int boneIndex = 0; boneIndex < m->mMeshes[i]->mNumBones; boneIndex++)
 			{
 				aiBone* bone = m->mMeshes[i]->mBones[boneIndex];
-				BoneBox* bb = new BoneBox;
-				bb->name = bone->mName.C_Str();
-				bb->boneNum = boneIndex;
-
-				for (int vertexIndex = 0; vertexIndex < bone->mNumWeights; vertexIndex++)
+				bool skip = !(bone->mNumWeights > 0);
+				for (int skipIter = 0, s = _cMesh.size(); skipIter < s && !skip; skipIter++)
 				{
-					if (bone->mWeights[vertexIndex].mWeight > 0.75)
-					{
-						aiVector3D aiV = m->mMeshes[i]->mVertices[bone->mWeights[vertexIndex].mVertexId];
-						//check vs max
-						aiV.x > bb->max.x ? bb->max.x = aiV.x : (aiV.x < bb->min.x ? bb->min.x = aiV.x : aiV.x);
-						aiV.y > bb->max.y ? bb->max.y = aiV.y : (aiV.y < bb->min.y ? bb->min.y = aiV.y : aiV.y);
-						aiV.z > bb->max.z ? bb->max.z = aiV.z : (aiV.z < bb->min.z ? bb->min.z = aiV.z : aiV.z);
-					}
+					//if (_cMesh[skipIter]->name.find(std::string(bone->mName.C_Str())) != std::string::npos) 
+					if (strstr(bone->mName.C_Str(), _cMesh[skipIter]->name.c_str()))
+						skip = true;
 				}
-				//compute normals
-				glm::vec3 a, b, c;
-				//up = normal(MxMyMz, mx,My,mz, Mx,My,mz)
-				a = glm::vec3(bb->max.x, bb->max.y, bb->max.z);
-				b = glm::vec3(bb->min.x, bb->max.y, bb->min.z);
-				c = glm::vec3(bb->max.x, bb->max.y, bb->min.z);
-				bb->uN = glm::normalize(glm::cross(b - a, c - a));
 
-				//right = normal(Mx,my,mz, Mx,my,Mz, Mx,My,Mz)
-				a = glm::vec3(bb->max.x, bb->min.y, bb->min.z);
-				b = glm::vec3(bb->max.x, bb->min.y, bb->max.z);
-				c = glm::vec3(bb->max.x, bb->max.y, bb->max.z);
-				bb->rN = glm::normalize(glm::cross(b - a, c - a));
+				if (!skip)
+				{
+					BoneBox* bb = new BoneBox;
+					bb->name = bone->mName.C_Str();
+					bb->boneNum = boneIndex;
 
-				//forward = normal(mx,my,mz, Mx,my,mz, Mx,My,mz
-				a = glm::vec3(bb->min.x, bb->min.y, bb->min.z);
-				b = glm::vec3(bb->max.x, bb->min.y, bb->min.z);
-				c = glm::vec3(bb->max.x, bb->max.y, bb->min.z);
-				bb->fN = glm::normalize(glm::cross(b - a, c - a));
+					bool minmaxInit = false;
 
-				//compute centre
-				bb->hwR = abs((bb->max.x - bb->min.x) / 2);
-				bb->hwU = abs((bb->max.y - bb->min.y) / 2);
-				bb->hwF = abs((bb->max.z - bb->min.z) / 2);
-				
-				bb->centre.x = bb->min.x + bb->hwR;
-				bb->centre.y = bb->min.y + bb->hwU;
-				bb->centre.z = bb->min.z + bb->hwF;
-				
-				_cMesh.push_back(bb);
+					for (int vertexIndex = 0; vertexIndex < bone->mNumWeights; vertexIndex++)
+					{
+						if (bone->mWeights[vertexIndex].mWeight > 0.75)
+						{
+							aiVector3D aiV = m->mMeshes[i]->mVertices[bone->mWeights[vertexIndex].mVertexId];
+							if (!minmaxInit)
+							{
+								bb->min = bb->max = glm::vec3(aiV.x, aiV.y, aiV.z);
+								minmaxInit = true;
+							}
+							//check vs max
+							aiV.x > bb->max.x ? bb->max.x = aiV.x : (aiV.x < bb->min.x ? bb->min.x = aiV.x : aiV.x);
+							aiV.y > bb->max.y ? bb->max.y = aiV.y : (aiV.y < bb->min.y ? bb->min.y = aiV.y : aiV.y);
+							aiV.z > bb->max.z ? bb->max.z = aiV.z : (aiV.z < bb->min.z ? bb->min.z = aiV.z : aiV.z);
+						}
+					}
+					//compute normals
+					glm::vec3 a, b, c;
+					//up = normal(MxMyMz, mx,My,mz, Mx,My,mz)
+					a = glm::vec3(bb->max.x, bb->max.y, bb->max.z);
+					b = glm::vec3(bb->min.x, bb->max.y, bb->min.z);
+					c = glm::vec3(bb->max.x, bb->max.y, bb->min.z);
+					bb->uN = glm::normalize(glm::cross(b - a, c - a));
+
+					//right = normal(Mx,my,mz, Mx,my,Mz, Mx,My,Mz)
+					a = glm::vec3(bb->max.x, bb->min.y, bb->min.z);
+					b = glm::vec3(bb->max.x, bb->min.y, bb->max.z);
+					c = glm::vec3(bb->max.x, bb->max.y, bb->max.z);
+					bb->rN = glm::normalize(glm::cross(b - a, c - a));
+
+					//forward = normal(mx,my,mz, Mx,my,mz, Mx,My,mz
+					a = glm::vec3(bb->min.x, bb->min.y, bb->min.z);
+					b = glm::vec3(bb->max.x, bb->min.y, bb->min.z);
+					c = glm::vec3(bb->max.x, bb->max.y, bb->min.z);
+					bb->fN = glm::normalize(glm::cross(b - a, c - a));
+
+					//compute centre
+					bb->hwR = abs((bb->max.x - bb->min.x) / 2);
+					bb->hwU = abs((bb->max.y - bb->min.y) / 2);
+					bb->hwF = abs((bb->max.z - bb->min.z) / 2);
+
+					bb->centre.x = bb->min.x + bb->hwR;
+					bb->centre.y = bb->min.y + bb->hwU;
+					bb->centre.z = bb->min.z + bb->hwF;
+
+					_cMesh.push_back(bb);
+				}
 			}
 		}
 		else
 		{
 			BoneBox* bb = new BoneBox;
-			bb->name = "Boneless Object";
+			bb->name = "Mesh";
+			bb->name += (char)('0' + i);
 			bb->boneNum = -1;
 			for (int vertexIndex = 0; vertexIndex < m->mMeshes[i]->mNumVertices; vertexIndex++)
 			{
@@ -420,8 +465,23 @@ bool ComponentCollision::checkVs(ComponentCollision* c)
 				{
 					//this is where the hit would be done
 					if (strcmp(_owner->GetName(), "Target") == 0)
-						_owner->scale = glm::vec3(0, 0, 0);
-					ObjectManager::instance().pMap[c->_owner->handle]->alive = false;
+					{
+						_owner->health -= c->_owner->dmg;
+						_owner->force = c->_owner->dir * 30.f;
+						//_owner->scale = glm::vec3(0, 0, 0);
+					}
+					if (strcmp(c->_owner->GetName(), "PlayerProjectile") == 0)
+						ObjectManager::instance().pMap[c->_owner->handle]->alive = false;
+					else if (strcmp(c->_owner->GetName(), "EnemyProjectile") == 0)
+					{
+						if (c->_owner->handle >= ObjectManager::instance().enemyPMap.size())
+						{
+							int handlol = c->_owner->handle;
+							int epmapSize = ObjectManager::instance().enemyPMap.size();
+							std::cout << "Thar be a problem here";
+						}
+						ObjectManager::instance().enemyPMap[c->_owner->handle]->alive = false;
+					}
 				}
 				printf("NOTICE: %s.%s and %s.%s\n", _owner->GetName(), _cMesh[i]->name.c_str(), c->_owner->GetName(), c->_cMesh[j]->name.c_str());
 				return true;
@@ -452,15 +512,18 @@ void CollisionManager::checkAll()
 					ComponentCollision* thatCC = static_cast<ComponentCollision*>(thatGO->GetComponent(PHYSICS));
 
 					thatCC->updateFrame(thatGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thatCC->_cMesh[0]->boneNum == -1 ? false : true));
-
+					if (thatCC->getOwner()->GetName() == "Target" && thatCC->getOwner()->dir.x != thatCC->getOwner()->dir.x)
+					{
+						thatCC->getOwner()->dir = glm::vec3(1.f, 0.f, 0.f);
+					}
 					if (thatCC->type == STATIC)
 						thisCC->checkVs(thatCC);
 				}
 			}
-		}
+		}   
 	}
 	
-	//STAGE 2 ALL VS PROJECTILES
+	//STAGE 2.1 ALL VS PROJECTILES
 
 	for (int i = 0, s = ObjectManager::instance().pMap.size(); i < s; i++)
 	{
@@ -477,23 +540,77 @@ void CollisionManager::checkAll()
 	
 				if (thatCC->type == STATIC)
 					thatCC->checkVs(ObjectManager::instance().pMap[i]->cc);
+				
 			}
 		}
-	
+	}
+
+	//STAGE 2.2 ALL VS ENEMEY PROJECTILES
+	for (int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+	{
+		ObjectManager::instance().enemyPMap[i]->cc->updateFrame(NULL, false);
+		ObjectManager::instance().enemyPMap[i]->cc->getOwner()->handle = i;
+		for (int j = 0, ss = ObjectManager::instance().colMap.size(); j < ss; j++)
+		{
+			if (j != i)
+			{
+				GameObject* thatGO = static_cast<GameObject*>(ObjectManager::instance().gMap[ObjectManager::instance().colMap[j]]);
+				ComponentCollision* thatCC = static_cast<ComponentCollision*>(thatGO->GetComponent(PHYSICS));
+
+				thatCC->updateFrame(thatGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (thatCC->_cMesh[0]->boneNum == -1 ? false : true));
+
+				if (thatCC->type == STATIC && thatGO->GetName() != "Target")
+					thatCC->checkVs(ObjectManager::instance().enemyPMap[i]->cc);
+
+			}
+		}
+	}
+
+	// STAGE 3 PlAYER VS ENEMY PROJECTILES
+	{
+		if (!playerIsHit)
+		{
+			for (int i = 0, s = ObjectManager::instance().enemyPMap.size(); i < s; i++)
+			{
+				ObjectManager::instance().enemyPMap[i]->cc->updateFrame(NULL, FALSE);
+
+				GameObject* playerGO = static_cast<GameObject*>(ObjectManager::instance().gMap[0]);
+				ComponentCollision* playerCC = static_cast<ComponentCollision*>(playerGO->GetComponent(PHYSICS));
+
+				playerCC->updateFrame(playerGO->GetComponent(GRAPHICS)->getBoneInfoRef(), (playerCC->_cMesh[0]->boneNum == -1 ? false : true));
+
+				if (ObjectManager::instance().enemyPMap[i]->go->health > 0)
+				{
+					ObjectManager::instance().enemyPMap[i]->cc->getOwner()->handle = i;
+					if (playerCC->checkVs(ObjectManager::instance().enemyPMap[i]->cc))
+					{
+						shieldHealth -= ObjectManager::instance().enemyPMap[i]->dmg;
+						playerIsHit = true;
+						hitInvulnTimer = maxInvulnTime;
+						shieldRechargeTimer = shieldMaxTimer;
+						if (shieldHealth < 0)
+							playerGO->health -= ObjectManager::instance().enemyPMap[i]->dmg;
+						playerGO->force = ObjectManager::instance().enemyPMap[i]->go->dir * 0.105f;
+
+					}
+				}
+			}
+		}
 	}
 }
 void ComponentCollision::createHitboxRender()
 {
 	unsigned int s = _cMesh.size();
 
-	glGenVertexArrays(1, &_vao);
-	glBindVertexArray(_vao);
+	_vao = new GLuint[s];
+	glGenVertexArrays(s, _vao);
 
 	_vbo = new GLuint[s];
-	glGenBuffers(s, _vbo);
 
 	for (int i = 0; i < s; i++)
 	{
+		glBindVertexArray(_vao[i]);
+		glGenBuffers(1, &_vbo[i]);
 		gHitbox hb;
 		float sx = 0.1f;// * _owner->scale.x;
 		float sy = 0.1f;// * _owner->scale.y;
@@ -555,13 +672,13 @@ void ComponentCollision::renderHitbox()
 	{
 		//update shader vars
 		Program::getInstance().use("hitbox");
-		glBindVertexArray(_vao);
 		for (int i = 0, s = gHitboxes.size(); i < s; i++)
 		{
-			glm::mat4 m = glm::translate(glm::mat4(), _owner->pos) * glm::scale(glm::mat4(), _owner->scale);
-			Program::getInstance().setUniform("hitbox", "model", m);
-			Program::getInstance().setUniform("hitbox", "camera", Camera::getInstance().matrix());
-			Program::getInstance().setUniform("hitbox", "colour", glm::normalize(_owner->pos));
+			glBindVertexArray(_vao[i]);
+			glm::mat4 m = glm::translate(glm::mat4(), _owner->pos) * glm::scale(glm::mat4(), _owner->scale) * rotMatrix(_owner->dir, glm::vec3(-1, 0, 0), glm::vec3(0, 0, 1));;
+			Program::getInstance().setUniform("model", m);
+			Program::getInstance().setUniform("camera", Camera::getInstance().matrix());
+			Program::getInstance().setUniform("colour", glm::normalize(_owner->pos));
 
 			//glBindBuffer(GL_ARRAY_BUFFER, _vbo[i]);
 			glDrawArrays(GL_LINE_STRIP, 0, 108);

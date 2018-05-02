@@ -1,0 +1,20 @@
+MechTheme2.wav Background one 0 1
+drumloop.wav Background two 1 1 0.5 10
+rwalk.wav Target Moving 1 1 0.5 10
+swish.wav Target Hit 1 0 0.5 50
+MovementMech.wav Target Moving2 1 1 0.5 3
+shielddepleted.wav Player ShieldWarning 0 0
+mechHitShield.wav Player ShieldHit 0 0
+mechHitNoShield2.wav Player NoShield 0 0
+laser6.wav Player Projectile 0 0 0.5 5.0
+rpg.wav Player rpg 0 0 0.5 5.0
+reload.wav Player sreload 1 0 0.5 5.0
+mReload.wav Player mreload 1 0 0.5 5.0
+mechHitNoShield2.wav Player NoShield 0 0
+dash.wav Tutorial dash 0 0
+enemy.wav Tutorial enemy 0 0
+shield.wav Tutorial shield 0 0
+slowtime.wav Tutorial slowtime 0 0
+wasd.wav Tutorial wasd 0 0
+pwalk.wav Player Walk 1 1 0 3
+load.mp3 Load one 0 1

@@ -13,6 +13,27 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Inline Files">
+      <UniqueIdentifier>{4ace166a-08bb-45fd-85ab-8ef045814f1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Bloom">
+      <UniqueIdentifier>{70e291eb-8fe7-47a7-a70e-bfe70d4fce38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\AA">
+      <UniqueIdentifier>{a4abeb81-8d0a-42d2-86af-0a2fe3ba8e63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\AA\FXAA">
+      <UniqueIdentifier>{501df8f7-4115-47df-84ec-dab8869b8451}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Toon">
+      <UniqueIdentifier>{205663ca-43dd-4275-9610-d1393eb09891}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Godrays">
+      <UniqueIdentifier>{05d82bea-0c86-4393-9db8-ab8815ad5882}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shadow">
+      <UniqueIdentifier>{54d3ac61-f1b9-4f83-91db-aed559db7151}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -61,6 +82,60 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TextRendering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RayVsTriangle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Framebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FramebufferEffects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleMagic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ReverbNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\Manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\PresetManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\RNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\RNodeManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\Sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\SoundList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\SoundManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\SoundSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\SlimManager\SoundNetwork.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,6 +191,93 @@
     <ClInclude Include="TextRendering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ComponentPhysics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComponentForce.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LightComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RayVsTriangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Framebuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AIBehaviour.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NavMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FramebufferEffects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShieldVariables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleMagic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReverbNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AISpawner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\Manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\Network.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\PresetManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\RNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\RNodeManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\Sound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\SoundList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\SoundManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\SoundSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SlimManager\SoundNetwork.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuSelectionVariables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragment-shader.frag">
@@ -148,6 +310,72 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="skinningA.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="terrain.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="terrain.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="skybox.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="skybox.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="AIBehaviour.inl">
+      <Filter>Inline Files</Filter>
+    </None>
+    <None Include="NavMesh.inl">
+      <Filter>Inline Files</Filter>
+    </None>
+    <None Include="pass.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="pass.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="tonemap.frag">
+      <Filter>Resource Files\Bloom</Filter>
+    </None>
+    <None Include="combine.frag">
+      <Filter>Resource Files\Bloom</Filter>
+    </None>
+    <None Include="gblurH.frag">
+      <Filter>Resource Files\Bloom</Filter>
+    </None>
+    <None Include="gblurV.frag">
+      <Filter>Resource Files\Bloom</Filter>
+    </None>
+    <None Include="fxaa.frag">
+      <Filter>Resource Files\AA\FXAA</Filter>
+    </None>
+    <None Include="toon.frag">
+      <Filter>Resource Files\Toon</Filter>
+    </None>
+    <None Include="toon.vert">
+      <Filter>Resource Files\Toon</Filter>
+    </None>
+    <None Include="godrays.frag">
+      <Filter>Resource Files\Godrays</Filter>
+    </None>
+    <None Include="skybox2.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shadow.frag">
+      <Filter>Resource Files\Shadow</Filter>
+    </None>
+    <None Include="shadow.vert">
+      <Filter>Resource Files\Shadow</Filter>
+    </None>
+    <None Include="terrainshadow.vert">
+      <Filter>Resource Files\Shadow</Filter>
+    </None>
+    <None Include="AISpawner.inl">
+      <Filter>Inline Files</Filter>
+    </None>
+    <None Include="AddTwoTextures.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

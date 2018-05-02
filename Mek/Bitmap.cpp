@@ -165,7 +165,7 @@ Bitmap::~Bitmap() {
 	if (_image) ilDeleteImage(_image);
 }
 
-bool Bitmap::bitmapFromFile(std::string filePath) {
+bool Bitmap::bitmapFromFile(std::string filePath, int *format) {
 	bool ret = true;
 
 	if (!_image)
@@ -182,7 +182,10 @@ bool Bitmap::bitmapFromFile(std::string filePath) {
 		height = ilGetInteger(IL_IMAGE_HEIGHT);
 		channels = ilGetInteger(IL_IMAGE_CHANNELS);
 
-		ILubyte * pixels = ilGetData();
+		if (format != nullptr)
+			*format = channels;
+		
+		ILubyte* pixels = ilGetData();
 
 		_set(width, height, (Format)channels, pixels);
 
